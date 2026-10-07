@@ -1,0 +1,45 @@
+name: 问题反馈
+description: 官网或文档站的功能/显示异常
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！本模板用于**官网与文档站本身**的问题（样式异常、构建失败、链接失效、搜索异常等）。
+        文档**内容**问题请到对应项目仓库提 Issue（文档源在各项目仓库的 `docs/` 目录）。
+  - type: input
+    id: url
+    attributes:
+      label: 页面地址
+      description: 出现问题的页面 URL
+      placeholder: https://continew.top/docs/starter/xxx
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 清晰描述遇到的问题
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 如何重现该问题
+      placeholder: |
+        1. 打开 ...
+        2. 点击 ...
+        3. 出现 ...
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: 截图
+      description: 如方便，请附问题截图
+  - type: input
+    id: environment
+    attributes:
+      label: 环境
+      description: 浏览器及版本、操作系统、设备
+      placeholder: Chrome 120 / Windows 11

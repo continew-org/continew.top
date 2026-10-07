@@ -1,0 +1,14 @@
+# 依赖版本目录：可被 catalog: 引用的依赖版本在此统一管理。
+# fumadocs-ui 经 npm:@fumadocs/base-ui 提供（见 package.json），与 fumadocs-core 版本号必须保持一致；
+# fumadocs-mdx 为独立发布线（15.x），其 peer 约束要求 fumadocs-core ^16.15.3，升级时同步核对。
+catalog:
+  next: 16.3.8
+  react: 19.3.0
+  react-dom: 19.3.0
+  fumadocs-core: 16.16.2
+  fumadocs-mdx: 15.4.6
+  eslint-config-next: 16.3.8
+  typescript: 5.9.2
+  '@types/node': 26.6.4
+  '@types/react': 19.3.0
+  '@types/react-dom': 19.3.0

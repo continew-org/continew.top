@@ -1,0 +1,22 @@
+name: 功能建议
+description: 对官网或文档站的功能/体验建议
+title: "[Feat] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 使用场景
+      description: 描述你希望解决的问题或使用场景
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望方案
+      description: 描述你期望的实现方式或效果
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案
+      description: 是否考虑过其他替代方案

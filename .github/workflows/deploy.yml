@@ -1,0 +1,79 @@
+name: Deploy
+
+# 构建并部署 ContiNew 官网与文档站（静态导出，self-hosted runner 本机 rsync 到 Nginx 站点目录）。
+# 与 continew-admin-ui 同一套部署模式：runner 与部署机同机，无跨机 SSH、无密码/密钥。
+# 流程：拉取各项目仓库 docs/ -> 组装 content/docs -> 容器内静态导出 -> 本机 rsync 到站点目录。
+#
+# 唯一 secret：SERVER_PATH = Nginx 站点根目录（如 /root/continew/nginx/html）。
+# 容错约定：某项目尚无 docs/ 目录时仅跳过该分区（保留官网自带分区骨架），不使整条部署失败。
+
+on:
+  push:
+    branches: [main]
+  # 各项目仓库文档更新后可触发 repository_dispatch（type: docs-updated）重建官网
+  repository_dispatch:
+    types: [docs-updated]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: false
+
+jobs:
+  deploy-web:
+    runs-on: self-hosted
+    timeout-minutes: 20
+    steps:
+      # 1、检出官网源码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2、拉取并组装各项目文档（docs/ 为文档唯一权威源；公开仓库浅克隆，缺失则跳过）
+      - name: 拉取并组装各项目文档
+        run: |
+          set -e
+          # 分区名 -> 源仓库
+          declare -A REPOS=(
+            [admin]=continew-admin
+            [starter]=continew-starter
+            [app]=continew-app
+          )
+          for proj in "${!REPOS[@]}"; do
+            repo="${REPOS[$proj]}"
+            tmp="$(mktemp -d)"
+            # 浅克隆默认分支；仓库不可达或无 docs/ 时视为「暂无文档」，跳过而非失败
+            if git clone --depth 1 --filter=blob:none --sparse \
+                 "https://github.com/continew-org/${repo}.git" "$tmp" 2>/dev/null \
+               && git -C "$tmp" sparse-checkout set docs 2>/dev/null \
+               && [ -d "$tmp/docs" ]; then
+              dest="content/docs/${proj}"
+              rm -rf "$dest"
+              mkdir -p "$dest"
+              cp -r "$tmp/docs/." "$dest/"
+              echo "✅ 已同步 ${proj} 文档（来自 continew-org/${repo}）"
+            else
+              echo "⚠️  ${proj} 仓库暂无 docs/ 目录（或不可达），使用官网分区骨架"
+            fi
+            rm -rf "$tmp"
+          done
+
+      # 3、容器内静态导出（pnpm install 会运行依赖与仓库生命周期脚本，容器隔离其触达范围——
+      #    不挂 docker.sock、不注入 job secrets；pnpm 版本由 packageManager 经 corepack 解析）
+      - name: Build
+        run: >
+          docker run --rm
+          --memory=4g --cpus=4
+          -v "$PWD":/ws -w /ws
+          -v /root/.local/share/pnpm:/root/.local/share/pnpm
+          -v /root/.cache:/root/.cache
+          node:22
+          bash -c "corepack enable && pnpm i --frozen-lockfile && pnpm build"
+
+      # 4、同步部署文件到 Nginx 站点目录（--delete 保证与构建产物一致，清理已下线页面）
+      - name: Copy
+        run: |
+          rsync -a --delete out/ ${{ secrets.SERVER_PATH }}/
+          chmod -R 777 ${{ secrets.SERVER_PATH }}

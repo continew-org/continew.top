@@ -1,0 +1,7 @@
+{
+  "title": "ContiNew App",
+  "description": "多端工程脚手架",
+  "icon": "Smartphone",
+  "root": true,
+  "pages": ["index"]
+}
