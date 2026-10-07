@@ -39,6 +39,25 @@ export function getEditOnGithubUrl(page: { slugs: string[]; path: string }): str
   return `https://github.com/${gitConfig.user}/${source.repo}/blob/${source.branch}/docs/${pathInRepo}`;
 }
 
+// 文档页在各代码托管平台的「打开/编辑」链接。host 为平台前缀（组织路径不同平台可能不同）。
+// 各平台组织路径：GitHub 为 continew-org，AtomGit 与 Gitee 为 continew。
+export function getEditOnHostUrl(
+  page: { slugs: string[]; path: string },
+  host: 'github' | 'atomgit' | 'gitee',
+): string | undefined {
+  const section = page.slugs[0];
+  const source = section ? docSourceRepos[section] : undefined;
+  if (!source) return undefined;
+  const pathInRepo = page.path.slice(section.length + 1);
+  if (host === 'github') {
+    return `https://github.com/${gitConfig.user}/${source.repo}/blob/${source.branch}/docs/${pathInRepo}`;
+  }
+  if (host === 'atomgit') {
+    return `https://atomgit.com/continew/${source.repo}/blob/${source.branch}/docs/${pathInRepo}`;
+  }
+  return `https://gitee.com/continew/${source.repo}/blob/${source.branch}/docs/${pathInRepo}`;
+}
+
 const getContentUrl = createGetUrl(docsContentRoute);
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {

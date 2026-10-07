@@ -1,6 +1,7 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from 'next/image';
 import { appName, gitConfig } from './shared';
+import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 
 export function baseOptions(): BaseLayoutProps {
   return {
@@ -12,13 +13,32 @@ export function baseOptions(): BaseLayoutProps {
         </>
       ),
     },
-    githubUrl: `https://github.com/${gitConfig.user}`,
-    // 文档内各项目（starter/admin/app）已由侧边栏顶部的 Root Folder 切换器承载，
-    // 顶部导航指向默认项目文档，进入后即可用左上角切换器切换项目。
+    // 右上角代码托管平台图标链接（GitHub / AtomGit / Gitee）。
+    // icon 类型渲染为图标按钮；不放文字链接（会在侧边栏渲染为多余项）。
     links: [
       {
-        text: '文档',
-        url: '/docs/admin',
+        type: 'icon',
+        url: `https://github.com/${gitConfig.user}`,
+        label: 'GitHub',
+        text: 'GitHub',
+        icon: <GitHubIcon className="size-5" />,
+        external: true,
+      },
+      {
+        type: 'icon',
+        url: 'https://atomgit.com/continew',
+        label: 'AtomGit',
+        text: 'AtomGit',
+        icon: <AtomGitIcon className="size-5" />,
+        external: true,
+      },
+      {
+        type: 'icon',
+        url: 'https://gitee.com/continew',
+        label: 'Gitee',
+        text: 'Gitee',
+        icon: <GiteeIcon className="size-5" />,
+        external: true,
       },
     ],
   };

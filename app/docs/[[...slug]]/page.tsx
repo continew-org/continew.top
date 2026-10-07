@@ -5,23 +5,35 @@ import {
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
-  ViewOptionsPopover,
-} from 'fumadocs-ui/layouts/docs/page';
+} from 'fumadocs-ui/layouts/spacious/page';
+import { ViewOptionsPopover } from '@/components/view-options-popover';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getPageImageUrl, getPageMarkdownUrl, getEditOnGithubUrl } from '@/lib/shared';
+import { getPageImageUrl, getPageMarkdownUrl, siteUrl } from '@/lib/shared';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
+  // /docs 根路径（slug 为空）：静态导出无法用服务端 redirect，
+  // 用 <meta refresh> 客户端重定向到默认项目（Admin 为首要项目）。
+  // 不 return <html> 骨架（由根 layout 提供），只注入 meta 与降级文案，避免非法嵌套 HTML。
+  if (!params.slug || params.slug.length === 0) {
+    return (
+      <>
+        <meta httpEquiv="refresh" content="0; url=/docs/admin" />
+        <p>
+          正在跳转到 <Link href="/docs/admin">ContiNew Admin 文档</Link>…
+        </p>
+      </>
+    );
+  }
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
   const MDX = page.data.body;
   const markdownUrl = getPageMarkdownUrl(page).url;
-  // 「在 GitHub 编辑」指向文档源项目仓库；总入口等无映射的页面为 undefined，隐藏该入口
-  const editUrl = getEditOnGithubUrl(page);
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -29,7 +41,11 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pb-6">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
-        {editUrl && <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={editUrl} />}
+        <ViewOptionsPopover
+          markdownUrl={markdownUrl}
+          page={{ slugs: page.slugs, path: page.path }}
+          siteUrl={siteUrl}
+        />
       </div>
       <DocsBody>
         <MDX
@@ -44,7 +60,8 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 }
 
 export async function generateStaticParams() {
-  return source.generateParams();
+  // 空 slug 对应 /docs 根路径（重定向到默认项目），静态导出需显式包含
+  return [{ slug: [] }, ...source.generateParams()];
 }
 
 export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): Promise<Metadata> {
