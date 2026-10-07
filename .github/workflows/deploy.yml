@@ -81,7 +81,7 @@ jobs:
         run: pnpm build
 
       - name: 部署到自有服务器（rsync over SSH）
-        uses: burnett01/rsync-deployments@7.0.1
+        uses: burnett01/rsync-deployments@9.0.1
         with:
           # --delete 保证远端与构建产物一致，清理已下线页面
           switches: -avzr --delete
