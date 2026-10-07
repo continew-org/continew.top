@@ -27,6 +27,7 @@ yarn-error.log*
 
 # 工具本地记忆/缓存目录（不入库）
 .workbuddy/
+.zcode/
 
 # others
 .env*.local
@@ -34,7 +35,9 @@ yarn-error.log*
 next-env.d.ts
 
 # 文档汇聚产物：content/docs/<project>/ 在构建期由 CI 从各项目仓库 docs/ 拉取渲染。
-# 各分区的骨架（index.mdx / meta.json）纳入版本控制，
-# 真实文档页为构建期汇聚产物，不提交，避免与各项目仓库的权威源重复。
-# 现阶段各项目 docs/ 尚未建立，分区内容以骨架为准；
-# 待 docs/ 建立后，可在此为汇聚生成的子路径追加忽略规则。
+# 各分区的骨架（index.mdx / meta.json）纳入版本控制；
+# 真实文档页（guide/ modules/ reference/ 等子目录）为构建期汇聚产物，不提交，
+# 避免与各项目仓库 docs/ 的权威源重复。
+content/docs/starter/guide/
+content/docs/starter/modules/
+content/docs/starter/reference/

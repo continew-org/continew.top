@@ -1,23 +1,33 @@
 ---
 title: ContiNew Starter
-description: 基于 Spring Boot 3.x 的企业级 Starter 库，开箱即用。
+description: 基于「约定优于配置」的 Spring Boot 3.x 企业级 Starter 库，封装经过企业实践验证的常用能力，开箱即用。
 ---
 
-> 本分区文档由 [`continew-starter`](https://github.com/continew-org/continew-starter) 仓库的 `docs/` 目录同步而来。文档尚在重写中，以下为占位内容。
+ContiNew Starter（Continue New Starter）基于「约定优于配置」理念，进一步精简常规配置，提供完整的配置解决方案，帮助开发人员更快速地将常用第三方库或工具集成到 Spring Boot Web 应用程序中。
 
-## 什么是 ContiNew Starter
+它封装了一系列经过企业实践验证的依赖包（如 MyBatis-Plus、Sa-Token、Redisson、JetCache 等），可轻松集成到应用中，减少手动引入依赖及配置的工作量，为 Spring Boot Web 项目的灵活快速构建提供支持。
 
-ContiNew Starter（Continue New Starter）是一套以「约定优于配置」为核心理念的企业级 Starter 库。它将一系列经过企业实践验证的第三方库（MyBatis-Plus、Sa-Token、Redisson、JetCache 等）封装为开箱即用的 Starter，让 Spring Boot Web 应用的集成更简单、更优雅。
+<Callout type="info">
+当前文档对应 **2.x** 版本（基于 Spring Boot 3.x，要求 JDK 17+）。
+</Callout>
 
-## 模块导航
+## 从这里开始
 
 <Cards>
-  <Card title="快速开始" href="/docs/starter/guide/getting-started" />
-  <Card title="核心模块" href="/docs/starter/modules/core" />
-  <Card title="缓存" href="/docs/starter/modules/cache" />
-  <Card title="认证" href="/docs/starter/modules/auth" />
+  <Card title="简介" description="了解 ContiNew Starter 是什么、解决什么问题" href="/docs/starter/guide/introduction" />
+  <Card title="快速开始" description="三步集成到你的 Spring Boot 项目" href="/docs/starter/guide/quick-start" />
+  <Card title="功能模块" description="按需选择缓存、认证、加密等模块" href="/docs/starter/modules/core" />
+  <Card title="配置参考" description="全部配置项一览" href="/docs/starter/reference/properties" />
 </Cards>
 
-## 版本
+## 项目起源
 
-当前稳定版基于 Spring Boot 3.x，要求 JDK 17+。历史大版本文档将随版本锁定机制提供。
+ContiNew Starter 源自 [ContiNew Admin](https://github.com/continew-org/continew-admin) 后台管理框架项目。随着 ContiNew Admin 的发展，作者发现初学者需要关注过多的脚手架通用基础能力，且在新项目中复用这些能力时存在迁移困难。于是在 ContiNew Admin 2.x 版本时，将这些通用基础能力抽离并深度优化，形成独立的 Starter 库——无论是在 ContiNew Admin 中使用，还是单独使用这些基础能力，都更加轻松。
+
+## 项目源码
+
+| 平台 | 地址 |
+|:-----|:-----|
+| GitHub | https://github.com/continew-org/continew-starter |
+| AtomGit | https://atomgit.com/continew/continew-starter |
+| Gitee | https://gitee.com/continew/continew-starter |
