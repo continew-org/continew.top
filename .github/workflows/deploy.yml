@@ -1,0 +1,93 @@
+name: Deploy
+
+# 构建并部署 ContiNew 官网与文档站。
+# 流程：拉取各项目仓库的 docs/ -> 组装 content/docs -> 静态导出 -> rsync 推送至自有服务器。
+# 所有服务器凭据均通过 GitHub Secrets 注入，仓库内不存放任何敏感信息。
+#
+# 容错约定：各项目文档以「是否存在 docs/ 目录」决定是否同步——
+# 某项目尚无 docs/ 时仅跳过该分区（保留官网自带分区骨架），不使整条部署失败。
+
+on:
+  push:
+    branches: [main]
+  # 各项目仓库文档更新后可触发 repository_dispatch（type: docs-updated）重建官网
+  repository_dispatch:
+    types: [docs-updated]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 官网仓库
+        uses: actions/checkout@v4
+        with:
+          path: site
+
+      # 各项目仓库的 docs/ 是文档唯一权威源。公开仓库，浅克隆后仅取 docs/，缺失则跳过。
+      - name: 拉取并组装各项目文档
+        working-directory: site
+        run: |
+          set -e
+          # 分区名 -> 源仓库
+          declare -A REPOS=(
+            [starter]=continew-starter
+            [admin]=continew-admin
+            [app]=continew-app
+          )
+          for proj in "${!REPOS[@]}"; do
+            repo="${REPOS[$proj]}"
+            tmp="$(mktemp -d)"
+            # 浅克隆默认分支；仓库不可达或克隆失败时视为「暂无文档」，跳过而非失败
+            if git clone --depth 1 --filter=blob:none --sparse \
+                 "https://github.com/continew-org/${repo}.git" "$tmp" 2>/dev/null \
+               && git -C "$tmp" sparse-checkout set docs 2>/dev/null \
+               && [ -d "$tmp/docs" ]; then
+              dest="content/docs/${proj}"
+              # 保留官网自带分区骨架中以源为准之外的内容：整体替换为项目仓库 docs/
+              rm -rf "$dest"
+              mkdir -p "$dest"
+              cp -r "$tmp/docs/." "$dest/"
+              echo "✅ 已同步 ${proj} 文档（来自 continew-org/${repo}）"
+            else
+              echo "⚠️  ${proj} 仓库暂无 docs/ 目录（或不可达），使用官网分区骨架"
+            fi
+            rm -rf "$tmp"
+          done
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - name: 安装依赖
+        working-directory: site
+        run: pnpm install --frozen-lockfile
+
+      - name: 静态导出构建
+        working-directory: site
+        run: pnpm build
+
+      - name: 部署到自有服务器（rsync over SSH）
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          # --delete 保证远端与构建产物一致，清理已下线页面
+          switches: -avzr --delete
+          path: site/out/
+          remote_path: ${{ secrets.DEPLOY_DIR }}
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_KEY }}
