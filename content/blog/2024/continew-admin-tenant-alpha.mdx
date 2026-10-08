@@ -1,0 +1,55 @@
+---
+title: ContiNew Admin | 多租户分支 alpha 版本
+author: Charles7c
+originalLink: https://mp.weixin.qq.com/s/JWmYfbGn-Uv81CAn5Y2qDg
+datetime: 2024-12-02 22:14
+category: 项目动态
+---
+
+目前已由熊佬（小熊@xtanyu）推出了多租户分支的 alpha 版本，诚邀各位大佬试用并反馈宝贵意见。注意：alpha 版本为抢先预览版，不代表最终品质，期待试用大佬们提出更多改进建议。
+
+---
+
+![cover-20241202](/images/blog/continew-admin-tenant-alpha/cover-20241202.webp)
+
+## 多租户分支 alpha 版本
+
+随着 SaaS（软件即服务）概念的盛行，多租户架构在该领域变得尤为普遍。自 ContiNew Admin 项目开源以来，关于多租户的需求便络绎不绝。
+
+多租户（Multi-Tenant）是一种软件架构技术，这种架构允许多个租户（即使用系统或服务的客户）共享同一个系统实例，同时确保每个租户的数据和行为互相独立、互不干扰。
+
+自多租户需求被列入 ContiNew 开发计划以来，我们维护团队便反复讨论并规划在哪个版本中，以何种模式推出该功能。长期关注的童鞋可能已注意到，该功能已多次推迟发布。我们认为，多租户具有一定的“颠覆性”，若实施多租户，整个系统从架构到功能均需重新梳理与设计，以确保兼容性。同时，对于无需使用多租户的广大用户，我们也在思考如何更好地提供项目服务。
+
+**经过多次讨论及调研，目前暂时敲定的策略是：**
+
+1. continew-starter 新增 continew-starter-extension-tenant 组件，支持行级和数据源级数据隔离级别。（✅已初步完成）
+2. continew-admin 新增多租户分支 feat/tenant，用于多租户版本开发，定期同步 dev 分支更新（dev 分支继续非多租户版本功能更新）。（✅已创建）
+3. continew-admin 集成 continew-starter-extension-tenant 组件，采用行级数据隔离级别，即增加 tenant_id 字段进行隔离。（💦已推出 alpha 版本）
+4. 待到多租户分支（feat/tenant）、非多租户版本（dev）均开发完善，合并 feat/tenant 到 dev 分支，项目整体升级为多租户系统（预计为 v4.0.0）。当然，我们计划中的多租户将以插件的形式提供服务，对于不需要的人群，也可以轻易剥离该功能。（⌛️未开始）
+
+目前已由熊佬（小熊@xtanyu）推出了多租户分支的 alpha 版本，诚邀各位大佬试用并反馈宝贵意见。注意：alpha 版本为抢先预览版，不代表最终品质，期待试用大佬们提出更多改进建议。
+
+```
+前端多租户分支：https://github.com/continew-org/continew-admin-ui/tree/feat%2Ftenant
+后端多租户分支：https://github.com/continew-org/continew-admin/tree/feat%2Ftenant
+```
+
+## 维护团队新成员
+
+维护团队又扩列啦！热烈欢迎熊佬（小熊@xtanyu）加入 ContiNew 维护团队。
+
+熊佬（小熊@xtanyu）是一位后端开发工程师，IP：湖南，座右铭：不想上班。在 GitHub 开源有多个高 star 微信小程序，技术强悍且低调！
+
+近期，熊佬将会更专注于多租户分支（feat/tenant）的更新与维护工作，欢迎多租户试用大佬们与熊佬多多沟通交流。
+
+```text
+个人主页：https://github.com/xtanyu
+```
+
+![20241202-1-1](/images/blog/continew-admin-tenant-alpha/20241202-1-1.webp)
+
+## 近期更新说明
+
+上周家里添了小号，昨日刚出院，今天忙里抽闲回复了一些 Issue、接受了一些 PR，近期会逐渐恢复更新，但请不要催促，ContiNew 项目立项就是一个持续迭代优化的开源项目，我们不急在一时，也不是只为一时。
+
+感谢 @莫愁 大佬、@Jasmine（熊猫佬）等维护团队大佬及热心群佬近期在群内的积极支持，期待大家在群内踊跃交流。🌹

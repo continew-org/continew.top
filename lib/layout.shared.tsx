@@ -17,6 +17,10 @@ export function baseOptions(): BaseLayoutProps {
     // icon 类型渲染为图标按钮；不放文字链接（会在侧边栏渲染为多余项）。
     links: [
       {
+        text: '博客',
+        url: '/blog',
+      },
+      {
         type: 'icon',
         url: `https://github.com/${gitConfig.user}`,
         label: 'GitHub',

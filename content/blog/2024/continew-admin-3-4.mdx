@@ -1,0 +1,81 @@
+---
+title: ContiNew Admin v3.4.0 | 重构工作台分析页
+author: Charles7c
+originalLink: https://mp.weixin.qq.com/s/jgO8kytl1wEJbQu2jQ-MTg
+datetime: 2024-11-19 08:15
+category: 版本更新
+---
+
+ContiNew Admin v3.4.0 已发布！
+
+---
+
+![cover-20241119](/images/blog/continew-admin-3-4/cover-20241119.webp)
+
+## 项目简介
+
+ContiNew Admin（Continue New Admin）持续迭代优化的前后端分离中后台管理系统框架。开箱即用，重视每一处代码规范，重视每一种解决方案细节，持续提供舒适的前、后端开发体验。
+
+当前采用的技术栈：Spring Boot3（Java17）、Vue3 & Arco Design & TS & Vite、Sa-Token、MyBatis Plus、Redisson、JetCache、JustAuth、Crane4j、EasyExcel、Liquibase、Hutool 等。
+
+| 开源平台    | 后端                                                         | 前端                                                         |
+|:--------| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| AtomGit | [continew/continew-admin](https://atomgit.com/continew/continew-admin) | [continew/continew-admin-ui](https://atomgit.com/continew/continew-admin-ui) |
+| Gitee   | [continew/continew-admin](https://gitee.com/continew/continew-admin) | [continew/continew-admin-ui](https://gitee.com/continew/continew-admin-ui) |
+| GitHub  | [continew-org/continew-admin](https://github.com/continew-org/continew-admin) | [continew-org/continew-admin-ui](https://github.com/continew-org/continew-admin-ui) |
+
+## 重构工作台、分析页
+
+在当前版本，我们拆分原仪表盘（首页）为工作台、分析页两个模块，并大幅度重构了原仪表盘的内容布局及风格样式。
+
+![20241119-2-1](/images/blog/continew-admin-3-4/20241119-2-1.webp)
+
+![20241119-2-2](/images/blog/continew-admin-3-4/20241119-2-2.webp)
+
+## 公告支持设置通知范围
+
+我们为公告增加了通知范围设置，支持指定公告通知到所有人或指定用户。并且此处的用户选择器被我们封装为了独立前端组件，如果有其他类似需求，则可以直接复用（例如：角色管理/分配角色）。
+
+![20241119-3-1](/images/blog/continew-admin-3-4/20241119-3-1.webp)
+
+## Cron表达式生成
+
+考虑到复杂 Cron 表达式生成需求，我们在新增任务时，提供了 Cron 表达式可视化生成工具，不需要你再单独打开在线 Cron 表达式生成网址。如果你的业务中有涉及 Cron 表达式的使用，此组件也可以被直接复用。
+
+![20241119-4-1](/images/blog/continew-admin-3-4/20241119-4-1.webp)
+
+## 代码生成兼容 PgSQL
+
+在这一版本，我们对 PostgreSQL 数据库做了更完善的兼容，不仅完善了数据类型映射，更是为后续扩展其他数据库重构了代码生成的部分设计。这次我们还支持了菜单 SQL 的生成，相信能为你带来效率的提升。
+
+![20241119-5-1](/images/blog/continew-admin-3-4/20241119-5-1.webp)
+
+## 全局水印
+
+我们增加了全局水印配置，开启后默认显示当前登录用户的昵称和用户名，也支持指定水印文本。
+
+![20241119-6-1](/images/blog/continew-admin-3-4/20241119-6-1.webp)
+
+## 文字头像
+
+原来系统中用户在没有设置头像时，系统会根据性别显示默认头像，但考虑到中后台系统中普遍的设计风格，我们也调整默认头像为基于昵称展示（背景颜色基于昵称计算随机）。
+
+1. 英文开头：取传入字符串的前面两个字符，例如：Charles => Ch
+2. 超过 4 位：取字符串第一个字符，例如：系统管理员 => 系
+3. 其他：取传入字符串的最后两个字符，例如：张三 => 张三；王多鱼：多鱼
+
+![20241119-7-1](/images/blog/continew-admin-3-4/20241119-7-1.webp)
+
+## 版本前瞻
+
+下一版本，我们将对 ContiNew 系统进行更为深度的方案设计闭环，为后续多租户版本升级做最后冲刺准备。
+
+1. 支持多客户端认证鉴权控制 
+2. 重构存储及文件管理设计，支持文件夹上传，文件分片、批量上传
+3. 增加发送通知前端入口
+4. 重构角色管理设计，功能权限扁平化显示。
+5. 其他优化及修复...
+
+---
+
+如需查看 v3.4.0 中优化和特性的完整列表，请参阅 [更新日志](https://continew.top/docs/admin/changelog/3.x.x.html#v3-4-0-2024-11-18)。

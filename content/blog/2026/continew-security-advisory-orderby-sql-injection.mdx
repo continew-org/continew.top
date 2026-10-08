@@ -1,0 +1,96 @@
+---
+title: 排序参数 ORDER BY SQL 注入漏洞处置通告（GHSA-g8qc-r85v-gqpp）
+author: Charles7c
+datetime: 2026-09-29 21:00
+category: 安全通告
+description: ContiNew Admin / ContiNew Starter 排序参数 ORDER BY SQL 注入漏洞（GHSA-g8qc-r85v-gqpp）处置通告：影响范围、修复版本、升级指引、披露时间线与安全承诺。
+---
+
+> 本着负责任披露的原则，我们现将近期收到并已完成修复的一个 SQL 注入漏洞向全体用户通报。请受影响用户尽快升级。
+
+## 事件概述
+
+2026 年 9 月 25 日，安全研究者 tonghuaroot 通过 GitHub 私有漏洞报告向我们提交了一个排序参数 SQL 注入漏洞（GHSA-g8qc-r85v-gqpp）。该漏洞存在于 ContiNew Starter 的 CRUD 套件中，ContiNew Admin 作为下游项目同受影响。
+
+**我们已于 2026 年 9 月 27 日随 ContiNew Starter v2.16.1 发布修复**，ContiNew Admin 的修复已合入 dev 分支，将随 v4.2.0 版本发布（**尚未发布**）。**建议所有在影响范围内的用户尽快升级**；暂时无法升级的，可先按文末的临时缓解方案处置。
+
+## 时间线
+
+| 时间 | 事件 |
+| --- | --- |
+| 2026-09-25 | 报告者通过 GitHub 私有漏洞报告提交漏洞详情 |
+| 2026-09-27 | 根因修复随 ContiNew Starter [v2.16.1](https://github.com/continew-org/continew-starter/releases/tag/v2.16.1) 发布，同步至 Maven Central |
+| 2026-09-27 | ContiNew Admin 完成依赖升级（Starter 2.16.0 → 2.16.1），修复合入 dev 分支 |
+| 2026-09-29 | [GitHub 安全通告 GHSA-g8qc-r85v-gqpp](https://github.com/continew-org/continew-admin/security/advisories/GHSA-g8qc-r85v-gqpp) 正式发布（暂未申请 CVE 编号） |
+| 待定 | ContiNew Admin [v4.2.0](https://github.com/continew-org/continew-admin/releases) 发布 |
+
+## 漏洞说明
+
+ContiNew Starter 的 CRUD 套件为所有列表、树型、导出类接口提供了统一的 `sort` 排序参数支持。排序字段会被拼接进 SQL 的 `ORDER BY` 子句，此前框架对该参数设有两道防线：
+
+1. `SqlInjectionUtils` 关键字黑名单校验；
+2. `CrudServiceImpl#sort` 的实体字段名比对校验。
+
+经报告者演示，这两道防线存在被**同时绕过**的可能：黑名单属于“封禁已知特征”的防御方式，天然无法穷举所有攻击形态；而字段名校验只校验了表别名后的字段片段，实际拼接时却使用了完整字段值，攻击者可借助注释符截断拼接内容，构造出布尔盲注，进而探测接口本未返回的数据列（如密码散列字段）。
+
+这是一次典型的标识符位置注入（CWE-89）。**利用该漏洞需要有效登录凭证**，不涉及未认证场景。
+
+## 影响范围
+
+| 项目 | 受影响版本 |
+| --- | --- |
+| ContiNew Starter（`top.continew.starter:continew-starter`） | ≤ 2.16.0 |
+| ContiNew Admin | ≤ 4.1.0（各发布版本内置的 Starter 均 < 2.16.1，如 4.1.0 内置 2.14.0） |
+
+**是否受影响以项目中实际生效的 ContiNew Starter 版本为准**：Admin 以源码形式分发使用，版本号仅作参考——自行管理过 Starter 依赖的项目，请以依赖树中的实际版本判断（`mvn dependency:tree -Dincludes=top.continew.starter` 或 IDE 依赖面板可查），≥ 2.16.1 即已修复；直接跟进 dev 分支最新源码的用户同样已包含修复。
+
+涉及模块：Starter 的 data-mp、data-mf、extension-crud-mp、extension-crud-mf（CRUD 套件的排序处理链路）。基于 ContiNew Starter 二次开发且使用了 CRUD 套件的项目，同样建议按下方方式自查与升级。
+
+## 修复方案
+
+修复的核心思路是：**对拼接进 `ORDER BY` 的排序字段按标识符白名单做整体校验**，而不是依赖黑名单去“封禁”攻击特征。
+
+新增 `SortUtils#validateProperty`：仅允许字母、数字、下划线，以及 `.` 分隔的表别名前缀（如 `u.create_time`），不满足即拒绝请求；并在全部 `ORDER BY` 拼接点完成接入：
+
+- `SortQuery#getOrder`（入口统一校验）
+- `CrudServiceImpl#sort`（MyBatis-Plus / MyBatis-Flex 双实现）
+- `QueryWrapperHelper#sort` 与 `#build`（MyBatis-Plus / MyBatis-Flex 双实现）
+
+升级后，非法排序字段将被直接拒绝并返回参数错误提示。
+
+## 升级指引
+
+**ContiNew Admin 用户**：v4.2.0 发布后升级至 [v4.2.0](https://github.com/continew-org/continew-admin/releases) 或更高版本（内置 Starter 依赖随版升至 2.16.1），按[升级指南](/docs/admin/guide/upgrade)执行即可；自行管理过 Starter 依赖的项目不必等待 Admin 发版，现在直接将 Starter 升至 2.16.1+ 即可，v4.2.0 发布前可先按下方临时缓解方案处置。
+
+**ContiNew Starter 用户**：将 Maven 依赖升级至 2.16.1 或更高版本：
+
+```xml
+<dependency>
+    <groupId>top.continew.starter</groupId>
+    <artifactId>continew-starter</artifactId>
+    <version>2.16.1</version>
+</dependency>
+```
+
+**暂时无法升级的用户**：可在自己的项目中添加排序参数校验过滤器（无需升级依赖，代码见[安全通告页](/docs/admin/security)），或在网关 / WAF 层对 `sort` 参数做标识符白名单过滤，作为临时缓解措施，并尽快安排升级。
+
+**升级后的额外建议**：由于该漏洞可被用于读取接口未返回的数据列（如密码散列），如果你曾将服务暴露给不受信任的用户群体，建议排查历史访问日志中的异常排序请求，并视情况轮换管理员密码等敏感凭证。
+
+## 我们的安全承诺
+
+开源项目的安全需要社区共同守护。这里也同步说明我们的处理原则：
+
+- **请勿公开披露**：如你发现安全漏洞，请勿在任何代码托管平台通过公开 Issue、PR 或讨论区披露，请通过 [GitHub 私有漏洞报告](https://github.com/continew-org/continew-admin/security/advisories/new) 提交，在通告发布前只有维护者与报告者可以查看；
+- **快速响应**：我们承诺在 7 个工作日内确认受理、14 个工作日内给出评估（详见[安全策略](https://github.com/continew-org/continew-admin/blob/dev/SECURITY.md)），严重问题加急发版；
+- **透明披露**：修复随版本发布后，我们会在[安全通告页](/docs/admin/security)集中公示所有已披露漏洞的编号、影响范围与修复版本，方便跟进。
+
+最后，衷心感谢 tonghuaroot 的负责任披露，让我们有机会在漏洞被广泛利用前完成修复。🙏
+
+---
+
+相关链接：
+
+- ContiNew Admin 安全通告页：[https://continew.top/docs/admin/security](https://continew.top/docs/admin/security)
+- ContiNew Starter 安全通告页：[https://continew.top/docs/starter/security](https://continew.top/docs/starter/security)
+- Starter 修复版本：[https://github.com/continew-org/continew-starter/releases/tag/v2.16.1](https://github.com/continew-org/continew-starter/releases/tag/v2.16.1)
+- GitHub 安全通告：[https://github.com/continew-org/continew-admin/security/advisories/GHSA-g8qc-r85v-gqpp](https://github.com/continew-org/continew-admin/security/advisories/GHSA-g8qc-r85v-gqpp)

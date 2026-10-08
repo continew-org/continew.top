@@ -1,0 +1,62 @@
+---
+title: ContiNew Admin v3.4.1 | 新增登录验证码开关
+author: Charles7c
+originalLink: https://mp.weixin.qq.com/s/QwU_5W1suVK3yoI5-i57sQ
+datetime: 2024-12-08 20:52
+category: 版本更新
+---
+
+ContiNew Admin v3.4.1 已发布！
+
+---
+
+![cover-20241208](/images/blog/continew-admin-3-4-1/cover-20241208.webp)
+
+## 新增登录验证码开关
+
+感谢大佬 Gyq灬明@aiming317 于 Gitee 提交的 PR。
+
+此版本，我们在 [系统管理/系统配置] 中新增了 [登录配置]，将用于配置全局登录选项。目前仅支持登录图形验证码启用和关闭。
+
+![20241208-1-1](/images/blog/continew-admin-3-4-1/20241208-1-1.webp)
+
+在关闭登录验证码之后，登录时将不再需要输入图形验证码进行验证，便于开发及测试场景。
+
+![20241208-1-2](/images/blog/continew-admin-3-4-1/20241208-1-2.webp)
+
+后续 [登录配置] 将会围绕登录相关选项进行完善，目前已收集的需求有：
+
+1. 启用/禁用手机号、邮箱登录。
+2. 配置及启用第三方登录。
+3. 登录白名单。
+
+其他相关需求可在公众号评论区留言，将会根据逻辑是否闭环、是否通用等调研收录到需求墙。
+
+## 增加内联页面
+
+在此版本中，我们从初始 SQL 数据脚本中移除了 [关于项目] 菜单数据，将其调整到了前端静态路由中，并且我们将部分文档页面调整为了内联页面，方便不同角色在项目内快捷查阅相关文档。
+
+![20241208-2-1](/images/blog/continew-admin-3-4-1/20241208-2-1.webp)
+
+## BaseController 更灵活可控
+
+此版本之前，BaseController 是被封装于 continew-starter 中的，其中关于权限校验 checkPermission 方法我们在之前的版本做过几次优化，但均不太理想。所以，这次我们干脆将 continew-starter 中的 BaseController 改为 AbstractBaseController，而在 continew-admin 中单独创建了一个新的 BaseController 来继承它（目前放在 common 模块的 base 包中）。
+
+这样改造后，你可以根据自己需要进行全局 Controller 细节的重写，增加新方法，编写你的 checkPermission 方法细节（现在我们已经改名叫 preHandle 方法，它会在每个 CRUD API 方法执行前处理）。
+
+当然了，原来重写对应 CRUD API 方法来增强的方式依然有效，只不过现在你还可以这么写了。
+
+![20241208-3-1](/images/blog/continew-admin-3-4-1/20241208-3-1.webp)
+
+## 其他修复及优化
+
+此版本我们还优化修复了一些前端页面细节，例如搜索输入框的交互、角色功能权限初步扁平化处理、顶部进度条由接口请求时调整为路由切换时加载，路由跳转面包屑动画，重复接口请求问题等。
+
+后端方面，除了一些简单修复及优化之外，对应用管理的签名验证也进行了较大幅度的优化，近段时间我们会推出应用管理的使用说明，敬请期待。
+
+Tips：我们近期也在更新完善在线文档，如果你有急需更新上线的文档，请在公众号评论区留言。
+
+---
+
+如需查看 v3.4.1 中优化和特性的完整列表，请参阅 [更新日志](https://continew.top/docs/admin/changelog/3.x.x.html#v3-4-1-2024-12-08)。
+
