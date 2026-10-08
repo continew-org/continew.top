@@ -1,0 +1,189 @@
+[
+  {
+    "name": "Charles",
+    "avatarPic": "https://avatars.githubusercontent.com/u/25446948?v=4",
+    "title": "Creator",
+    "featured": true,
+    "motto": "东隅已逝，桑榆非晚。",
+    "projects": [
+      {
+        "label": "continew/*",
+        "url": "https://www.github.com/continew-org"
+      }
+    ],
+    "location": "天津",
+    "website": {
+      "label": "charles7c.top",
+      "url": "https://charles7c.top"
+    },
+    "socials": {
+      "gitee": "Charles7c",
+      "atomgit": "Charles_7c",
+      "github": "Charles7c"
+    },
+    "sponsor": true,
+    "sponsorText": "点杯咖啡",
+    "sponsorTitle": "来自网络知己的支持 + 1 ☕",
+    "sponsorPics": ["/images/sponsor/qrcode_wxpay.webp", "/images/sponsor/qrcode_zfbpay.webp"]
+  },
+  {
+    "name": "Jasmine",
+    "avatarPic": "https://foruda.gitee.com/avatar/1676944798050487271/1102982_httpsjt_1578940327.png!avatar200",
+    "title": "后端开发工程师",
+    "motto": "干就完事了！",
+    "projects": [
+      {
+        "label": "continew-starter",
+        "url": "https://github.com/continew-org/continew-starter"
+      }
+    ],
+    "location": "江苏 · 南京",
+    "socials": {
+      "github": "wangjiangtao2",
+      "gitee": "httpsjt"
+    },
+    "sponsor": false
+  },
+  {
+    "name": "秋帆",
+    "avatarPic": "https://avatars.githubusercontent.com/u/52527278?v=4",
+    "title": "前端开发工程师",
+    "motto": "只有追求完美，才能创造奇迹。",
+    "projects": [
+      {
+        "label": "continew-admin-ui",
+        "url": "https://github.com/continew-org/continew-admin-ui"
+      }
+    ],
+    "location": "江西 · 南昌",
+    "socials": {
+      "github": "han201379873",
+      "gitee": "AutumnSail"
+    },
+    "sponsor": false
+  },
+  {
+    "name": "Kils",
+    "avatarPic": "https://avatars.githubusercontent.com/u/33717618?v=4",
+    "title": "全栈开发工程师",
+    "motto": "可以摆烂，但不能真的菜。",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "四川 · 成都",
+    "socials": {
+      "gitee": "gkils",
+      "github": "jskils"
+    }
+  },
+  {
+    "name": "莫愁",
+    "avatarPic": "https://avatars.githubusercontent.com/u/129857206?v=4",
+    "title": "后端开发工程师",
+    "motto": "万事莫愁，皆得所愿。",
+    "projects": [
+      {
+        "label": "continew/*",
+        "url": "https://www.github.com/continew-org"
+      }
+    ],
+    "location": "江西 · 南昌",
+    "socials": {
+      "gitee": "zk020106",
+      "atomgit": "kiki1373639299",
+      "github": "zk020106"
+    },
+    "sponsor": false
+  },
+  {
+    "name": "梓陌",
+    "avatarPic": "https://foruda.gitee.com/avatar/1712037917547786884/8010824_dom-w_1712037917.png!avatar200",
+    "title": "后端开发工程师",
+    "motto": "胜利是奖赏，挫折是常态。",
+    "projects": [
+      {
+        "label": "continew-starter",
+        "url": "https://github.com/continew-org/continew-starter"
+      }
+    ],
+    "location": "浙江 · 杭州",
+    "socials": {
+      "github": "Time-w",
+      "gitee": "dom-w"
+    },
+    "sponsor": false
+  },
+  {
+    "name": "小熊",
+    "avatarPic": "https://avatars.githubusercontent.com/u/50282105?v=4",
+    "title": "后端开发工程师",
+    "motto": "不想上班。",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "湖南 · 长沙",
+    "socials": {
+      "github": "xtanyu"
+    },
+    "sponsor": false
+  },
+  {
+    "name": "ppxb",
+    "avatarPic": "https://avatars.githubusercontent.com/u/17081240?v=4",
+    "title": "全栈开发工程师",
+    "motto": "one day smile one day cry.",
+    "projects": [
+      {
+        "label": "continew-admin-ui",
+        "url": "https://github.com/continew-org/continew-admin-ui"
+      }
+    ],
+    "location": "四川 · 成都",
+    "socials": {
+      "gitee": "bigtomato1",
+      "github": "ppxb"
+    }
+  },
+  {
+    "name": "老罗",
+    "avatarPic": "https://avatars.githubusercontent.com/u/22161059?v=4",
+    "title": "全栈开发工程师",
+    "motto": "行者无疆，丈量四方。",
+    "projects": [
+      {
+        "label": "continew/*",
+        "url": "https://www.github.com/continew-org"
+      }
+    ],
+    "location": "北京",
+    "socials": {
+      "gitee": "luoqiz",
+      "github": "luoqiz"
+    },
+    "sponsor": false
+  },
+  {
+    "name": "颜如玉",
+    "avatarPic": "https://foruda.gitee.com/avatar/1669360361069609244/2058678_lishuyanla_1669360360.png!avatar200",
+    "title": "全栈开发工程师",
+    "motto": "书中自有颜如玉，世间多是李莫愁。",
+    "projects": [
+      {
+        "label": "continew/*",
+        "url": "https://www.github.com/continew-org"
+      }
+    ],
+    "location": "广西 · 南宁",
+    "socials": {
+      "gitee": "lishuyanla",
+      "github": "lishuyanla"
+    },
+    "sponsor": false
+  }
+]

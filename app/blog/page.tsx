@@ -1,7 +1,13 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getBlogPostsGrouped, type BlogPost } from '@/lib/blog-source';
-import { PageContainer, PageHeader, PageNextLinks, Section } from '@/components/site-primitives';
+import {
+  cardHover,
+  PageContainer,
+  PageHeader,
+  PageNextLinks,
+  Section,
+} from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
 
 export const metadata: Metadata = {
@@ -23,9 +29,10 @@ function PostCard({ post }: { post: BlogPost }) {
         href={post.url}
         /*
          * hover 反馈此前是三重叠加：整卡 bg-fd-accent 变色 + 边框转主色 + 标题转主色，
-         * 一动全动，显得闹。这里收敛为「极淡底色 + 半强度边框」的一次性反馈。
+         * 一动全动，显得闹。这里收敛为「极淡底色 + 半强度边框」的一次性反馈，
+         * 并与全站卡片共用 cardHover（见 components/site-primitives.tsx）。
          */
-        className="block rounded-xl border border-fd-border p-5 transition-colors hover:border-fd-primary/50 hover:bg-fd-accent/30"
+        className={cn('block rounded-xl border border-fd-border p-5', cardHover)}
       >
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="flex flex-wrap items-center gap-2">

@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Yoofff",
+    "avatarPic": "https://avatars.githubusercontent.com/u/129245231?v=4",
+    "title": "后端开发工程师",
+    "motto": "弱小和无知不是生存的障碍，傲慢才是。",
+    "projects": [
+      {
+        "label": "continew/*",
+        "url": "https://www.github.com/continew-org"
+      }
+    ],
+    "location": "北京",
+    "socials": {
+      "github": "Yoofff",
+      "gitee": "Yoofff"
+    },
+    "sponsor": false
+  },
+  {
+    "name": "MS-Jing",
+    "avatarPic": "https://avatars.githubusercontent.com/u/57135878?v=4",
+    "title": "后端开发工程师",
+    "motto": "路虽远，行则将至。",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "四川 · 成都",
+    "socials": {
+      "github": "sdras",
+      "gitee": "MS-Jin"
+    }
+  }
+]

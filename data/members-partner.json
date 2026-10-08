@@ -1,0 +1,139 @@
+[
+  {
+    "name": "未然",
+    "avatarPic": "https://avatars.githubusercontent.com/u/32252943?v=4",
+    "title": "后端开发工程师",
+    "motto": "我想坐在一个地方，只剩下我和我的风。",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      },
+      {
+        "label": "continew-starter",
+        "url": "https://github.com/continew-org/continew-starter"
+      }
+    ],
+    "location": "北京",
+    "website": {
+      "label": "weiran.work",
+      "url": "https://weiran.work"
+    },
+    "socials": {
+      "github": "weirantongxue"
+    }
+  },
+  {
+    "name": "見える",
+    "avatarPic": "https://foruda.gitee.com/avatar/1706365872049584887/99260_hellokaton_1706365871.png!avatar200",
+    "title": "全栈开发工程师",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      },
+      {
+        "label": "continew-starter",
+        "url": "https://github.com/continew-org/continew-starter"
+      }
+    ],
+    "location": "保密",
+    "socials": {
+      "github": "hellokaton",
+      "gitee": "hellokaton"
+    }
+  },
+  {
+    "name": "Rust",
+    "avatarPic": "https://avatars.githubusercontent.com/u/38515237?v=4",
+    "title": "全栈开发工程师",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "上海",
+    "website": {
+      "label": "limbotian.fun",
+      "url": "https://limbotian.fun"
+    },
+    "socials": {
+      "github": "limbotian",
+      "gitee": "limbotian"
+    }
+  },
+  {
+    "name": "Damon小智",
+    "avatarPic": "https://avatars.githubusercontent.com/u/54273685?v=4",
+    "title": "全栈开发工程师",
+    "motto": "每天进步一点点。",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "江苏 · 南京",
+    "website": {
+      "label": "damon-liu.cn",
+      "url": "https://www.damon-liu.cn"
+    },
+    "socials": {
+      "github": "Damon-Liu-code",
+      "gitee": "damon_liu_code"
+    }
+  },
+  {
+    "name": "摔倒的红烧肉",
+    "avatarPic": "https://foruda.gitee.com/avatar/1684408800566571342/10938595_qq927919732_1684408800.png!avatar200",
+    "title": "全栈开发工程师 | 摸鱼小能手",
+    "motto": "不会写代码的咸鱼。",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "上海 · 青浦",
+    "socials": {
+      "github": "LinLiang66",
+      "gitee": "QQ927919732"
+    }
+  },
+  {
+    "name": "浩哥",
+    "avatarPic": "https://foruda.gitee.com/avatar/1744859136400739534/8773027_imyuhao_1744859136.png!avatar200",
+    "title": "产品经理",
+    "motto": "古来圣贤皆寂寞。",
+    "company": "湖北孝软网络科技有限公司",
+    "companyLink": "https://work.weixin.qq.com/ca/cawcde1e1e4bc1a0dc",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "湖北 · 武汉",
+    "socials": {
+      "wechat": "cawcde1e1e4bc1a0dc",
+      "gitee": "imyuhao"
+    }
+  },
+  {
+    "name": "樱花大叔",
+    "avatarPic": "https://avatars.githubusercontent.com/u/39650584?v=4",
+    "title": "后端开发工程师",
+    "motto": "雨中等雨停",
+    "projects": [
+      {
+        "label": "continew-admin",
+        "url": "https://github.com/continew-org/continew-admin"
+      }
+    ],
+    "location": "浙江 · 杭州",
+    "socials": {
+      "github": "Gods-good"
+    }
+  }
+]

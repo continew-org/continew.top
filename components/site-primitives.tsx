@@ -11,6 +11,15 @@ import { cn } from '@/lib/cn';
  * 视觉节奏对不齐。统一收敛到本文件的原语后，各页只关心内容结构。
  */
 
+/**
+ * 卡片 hover 反馈的统一写法：极淡底色 + 半强度边框，一次性过渡。
+ *
+ * 此前各页各写一套（有的只把边框拉到 100% 主色、背景不动），观感一硬一软，
+ * 读者能明显感觉到「这个卡片 hover 起来有点毛边」。这里收敛成一份，新增卡片直接用它。
+ */
+export const cardHover =
+  'transition-colors hover:border-fd-primary/50 hover:bg-fd-accent/30';
+
 /** 统一页面容器：单一最大宽度 + 单一左右留白 + 单一纵向节奏。 */
 export function PageContainer({
   children,
@@ -84,7 +93,12 @@ export function PageHeader({
         <dl
           className={cn(
             'mt-10 grid grid-cols-2 gap-3',
-            stats.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-4',
+            // 列数跟随实际项数，否则项数不足时会靠左排布、右侧留一大块空白
+            stats.length === 2
+              ? 'sm:grid-cols-2'
+              : stats.length === 3
+                ? 'sm:grid-cols-3'
+                : 'sm:grid-cols-4',
           )}
         >
           {stats.map((stat) => (
