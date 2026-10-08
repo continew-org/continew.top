@@ -1,0 +1,184 @@
+[
+  {
+    "date": "2025-12-31",
+    "logo": "/images/about/timeline/gitcode.webp",
+    "title": "AtomGit - 2025 年度 G-Star 开源组织",
+    "desc": "ContiNew 获 2025 年度 G-Star 开源组织第 35 名",
+    "type": "honor",
+    "attaches": ["/images/about/timeline/2025/2025_gitcode-g-star-org-35.webp", "/images/about/timeline/2025/2025_gitcode-g-star-org-35_1.webp"]
+  },
+  {
+    "date": "2025-10-11",
+    "logo": "/images/about/timeline/gitcode.webp",
+    "title": "GitCode - 2025 年百大开源项目",
+    "desc": "ContiNew 三个项目均上榜百大开源项目奖，continew-admin（并列23名）、continew-admin-ui（并列68名）、continew-starter（并列100名）",
+    "type": "honor",
+    "attaches": ["/images/about/timeline/2025/20251011_gitcode-g-star-top100.webp"]
+  },
+  {
+    "date": "2025-07-29",
+    "logo": "/images/about/timeline/gitee.ico",
+    "title": "Gitee - ContiNew Admin 达成 1k Star",
+    "desc": "Gitee 开源平台 ContiNew Admin 项目收获第 1000 个 Star",
+    "type": "star",
+    "attaches": ["/images/about/timeline/2025/20250729_gitee-star-1000.webp"]
+  },
+  {
+    "date": "2025-07-28",
+    "logo": "/images/about/timeline/gitcode.webp",
+    "title": "GitCode - ContiNew Admin 达成 100+ Star",
+    "desc": "GitCode 开源平台 ContiNew Admin 项目收获第 120 个 Star",
+    "type": "star",
+    "attaches": ["/images/about/timeline/2025/20250728_gitcode-star-100+.webp"]
+  },
+  {
+    "date": "2025-07-27",
+    "title": "ContiNew Admin v4.0.0 发布",
+    "desc": "多租户架构正式上线，一键开启企业级 SaaS 体验",
+    "type": "great",
+    "attaches": ["/images/about/timeline/2025/20250727_continew-admin-4.0.0-1.webp", "/images/about/timeline/2025/20250727_continew-admin-4.0.0-2.webp"]
+  },
+  {
+    "date": "2025-04-15",
+    "logo": "/logo.svg",
+    "title": "ContiNew 总站点 PV（近 30 天） 首次破 11w +",
+    "desc": "ContiNew 官网、ContiNew Admin 演示站点，总站点近 30 天 PV 首次破 11w +",
+    "attaches": ["/images/about/timeline/2025/20250415_pv_10w.webp", "/images/about/timeline/2025/20250415_pv_10w_1.webp"]
+  },
+  {
+    "date": "2025-04-08",
+    "title": "ContiNew Admin 迎来了第 1000 次提交",
+    "desc": "维护团队成员 - 梓陌（Q）在 ContiNew Admin 主仓库提交了第 1000 个提交",
+    "attaches": ["/images/about/timeline/2025/20250408_git-commit-1000.webp"]
+  },
+  {
+    "date": "2025-03-27",
+    "logo": "/images/about/timeline/github.webp",
+    "title": "GitHub - ContiNew Admin 达成 1k Star",
+    "desc": "历时 840 天（≈ 两年零三个月），GitHub 开源平台 ContiNew Admin 项目收获第 1000 个 Star",
+    "type": "star",
+    "attaches": ["/images/about/timeline/2025/20250327_github-star-1000.webp", "/images/about/timeline/2025/20250327_github-star-1000_1.webp"]
+  },
+  {
+    "date": "2025-01-16",
+    "logo": "/logo.svg",
+    "title": "ContiNew 核心维护团队迎来了第十位成员",
+    "desc": "ContiNew 核心维护团队迎来了第十位新成员 - 大番茄（ppxb）",
+    "attaches": ["/images/about/timeline/2025/20250116_continew_10_member.webp"]
+  },
+  {
+    "date": "2024-11-04",
+    "logo": "/images/about/timeline/gitee.ico",
+    "title": "Gitee - ContiNew Admin 达成 500 Star",
+    "desc": "Gitee 开源平台 ContiNew Admin 项目收获第 500 个 Star",
+    "type": "star",
+    "attaches": ["/images/about/timeline/2024/20241104_gitee-star-500.webp"]
+  },
+  {
+    "date": "2024-10-25",
+    "logo": "/images/about/timeline/gitcode.webp",
+    "title": "2024 GitCode开源共创大会暨G-Star嘉年华",
+    "desc": "维护团队成员 - 莫愁（KAI），代表 ContiNew Admin 项目，前往长沙 · 智谷参加线下交流会",
+    "attaches": ["/images/about/timeline/2024/20241025_gitcode-gstar.webp"]
+  },
+  {
+    "date": "2024-10-24",
+    "logo": "/images/about/timeline/github.webp",
+    "title": "GitHub - ContiNew Admin 达成 500 Star",
+    "desc": "历时 686 天（≈ 一年零十一个月），GitHub 开源平台 ContiNew Admin 项目收获第 500 个 Star",
+    "type": "star",
+    "attaches": ["/images/about/timeline/2024/20241024_github-star-500.webp"]
+  },
+  {
+    "date": "2024-07-25",
+    "logo": "/images/about/timeline/gitcode.webp",
+    "title": "GitCode - ContiNew Admin G-Star 项目毕业",
+    "desc": "ContiNew Admin 申请 GitCode 开源平台开源摘星计划（G-Star 计划），审批通过",
+    "type": "honor",
+    "attaches": ["/images/about/timeline/2024/20240725_gitcode-g-star.webp"]
+  },
+  {
+    "date": "2024-04-27",
+    "title": "ContiNew Admin v3.0.0 发布",
+    "desc": "前端重做，不仅有颜更要加“料”，让开发更甜的前端代码(Arco Design Pro Vue => Gi Demo)",
+    "type": "great",
+    "attaches": ["/images/about/timeline/2024/20240427_continew-admin-3.0.0.webp"]
+  },
+  {
+    "date": "2024-04-21",
+    "title": "ContiNew 网站迁移",
+    "desc": "将所有网站及服务从 charles7c.top 迁移至 continew.top 域名",
+    "attaches": ["/images/about/timeline/2024/20240421_site-migration.webp"]
+  },
+  {
+    "date": "2024-04-17",
+    "title": "ContiNew Starter v2.0.0 发布",
+    "desc": "项目 GroupId 及包名调整: top.charles7c.continew => top.continew",
+    "attaches": ["/images/about/timeline/2024/20240417_continew-starter-2.0.0.webp"]
+  },
+  {
+    "date": "2024-02-28",
+    "logo": "/logo.svg",
+    "title": "ContiNew 组织成立",
+    "desc": "迁移项目至 ContiNew 组织"
+  },
+  {
+    "date": "2024-01-21",
+    "title": "ContiNew Admin v2.3.0 发布",
+    "desc": "根据发展需要，拆分前端项目 continew-admin-ui 到独立仓库"
+  },
+  {
+    "date": "2023-12-07",
+    "logo": "/images/about/timeline/gitee.ico",
+    "title": "Gitee - ContiNew Admin 达成 100 Star",
+    "desc": "Gitee 开源平台 ContiNew Admin 项目收获第 100 个 Star",
+    "type": "star",
+    "attaches": ["/images/about/timeline/2023/20231207_gitee-star-100.webp"]
+  },
+  {
+    "date": "2023-12-03",
+    "title": "ContiNew Admin v2.1.0 发布",
+    "desc": "适配 ContiNew Starter"
+  },
+  {
+    "date": "2023-12-02",
+    "title": "ContiNew Starter v1.0.0 发布",
+    "desc": "抽离并封装后端基础组件及各框架集成配置，发布至 Maven 中央仓库",
+    "type": "great",
+    "attaches": ["/images/about/timeline/2023/20231202_continew-starter-1.0.0.webp"]
+  },
+  {
+    "date": "2023-11-16",
+    "logo": "/images/about/timeline/github.webp",
+    "title": "GitHub - ContiNew Admin 达成 100 Star",
+    "desc": "历时 343 天（≈ 十一个月又十天），GitHub 开源平台 ContiNew Admin 项目收获第 100 个 Star",
+    "type": "star",
+    "attaches": ["/images/about/timeline/2023/20231116_github-star-100.webp"]
+  },
+  {
+    "date": "2023-11-15",
+    "title": "ContiNew Admin v2.0.0 发布",
+    "desc": "Spring Boot 2.7.x => 3.1.x (JDK 8 => JDK 17)",
+    "type": "great"
+  },
+  {
+    "date": "2023-11-04",
+    "title": "ContiNew Admin v1.3.0 发布",
+    "desc": "重构登录页面 UI 以适配多维度认证、第三方登录等场景",
+    "attaches": [
+      "/images/about/timeline/2023/20231104_continew-admin-1.3.0-1.webp",
+      "/images/about/timeline/2023/20231104_continew-admin-1.3.0-2.webp"
+    ]
+  },
+  {
+    "date": "2023-03-26",
+    "title": "ContiNew Admin v1.0.0 发布",
+    "type": "great",
+    "attaches": ["/images/about/timeline/2023/20230326_continew-admin-1.0.0.webp"]
+  },
+  {
+    "date": "2022-12-08",
+    "title": "ContiNew Admin 项目初始化",
+    "attaches": ["/images/about/timeline/20221208_first-commit.webp"]
+  }
+]
