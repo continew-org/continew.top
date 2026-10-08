@@ -36,19 +36,19 @@ interface AiTarget {
 
 const AI_TARGETS: AiTarget[] = [
   {
-    label: 'Open in DeepSeek',
+    label: '在 DeepSeek 中打开',
     icon: <DeepSeekIcon />,
     mode: 'url',
     url: (prompt) => `https://chat.deepseek.com/?q=${encodeURIComponent(prompt)}`,
   },
   {
-    label: 'Open in Cursor',
+    label: '在 Cursor 中打开',
     icon: <CursorIcon />,
     mode: 'copy',
     home: 'https://cursor.com/',
   },
   {
-    label: 'Open in ChatGPT',
+    label: '在 ChatGPT 中打开',
     icon: <ChatGptIcon />,
     mode: 'copy',
     home: 'https://chatgpt.com/',
@@ -64,7 +64,7 @@ interface ViewOptionsPopoverProps {
   siteUrl?: string;
   /** 触发按钮的额外 class。 */
   className?: string;
-  /** 触发按钮文案（默认 Open）。 */
+  /** 触发按钮文案（默认「打开」）。 */
   children?: React.ReactNode;
 }
 
@@ -107,10 +107,10 @@ export function ViewOptionsPopover({
 
   const linkItems = useMemo(() => {
     const items: { label: string; href: string; icon?: React.ReactNode }[] = [];
-    if (markdownUrl) items.push({ label: 'View as Markdown', href: markdownUrl, icon: <TextIcon /> });
-    if (githubUrl) items.push({ label: 'Open in GitHub', href: githubUrl, icon: <GitHubIcon /> });
-    if (atomgitUrl) items.push({ label: 'Open in AtomGit', href: atomgitUrl, icon: <AtomGitIcon /> });
-    if (giteeUrl) items.push({ label: 'Open in Gitee', href: giteeUrl, icon: <GiteeIcon /> });
+    if (markdownUrl) items.push({ label: '以 Markdown 查看', href: markdownUrl, icon: <TextIcon /> });
+    if (githubUrl) items.push({ label: '在 GitHub 中打开', href: githubUrl, icon: <GitHubIcon /> });
+    if (atomgitUrl) items.push({ label: '在 AtomGit 中打开', href: atomgitUrl, icon: <AtomGitIcon /> });
+    if (giteeUrl) items.push({ label: '在 Gitee 中打开', href: giteeUrl, icon: <GiteeIcon /> });
     return items;
   }, [markdownUrl, githubUrl, atomgitUrl, giteeUrl]);
 
@@ -123,7 +123,7 @@ export function ViewOptionsPopover({
           className,
         )}
       >
-        {children ?? 'Open'}
+        {children ?? '打开'}
         <ChevronDown className="size-3.5 text-fd-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">
