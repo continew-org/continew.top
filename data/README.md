@@ -10,7 +10,8 @@
 | `users.json` | `/users` 登记用户 | `lib/users.ts` |
 | `members-core.json` / `members-partner.json` / `members-emeriti.json` | `/team` 社区团队 | `lib/team.ts` |
 | `sponsors.json` | `/sponsor` 赞助 | `lib/sponsors.ts` |
-| `messages.json` | 首页「用户留言」区块 | `lib/messages.ts` |
+| `demo-environments.json` | `/sponsor` 历史资源支持 | `lib/demo-env.ts` |
+| `messages.json` | 首页「社区声音」区块 | `lib/messages.ts` |
 
 ---
 
@@ -129,7 +130,48 @@
 **这个文件的条目必须逐条人工审核后再录入。** 留言会出现在官网首页，等同于对外背书——
 自动抓取会混入提问、灌水与无意义回复，宁可少更，不可失控。
 
-来源建议：官方交流群、Gitee 登记帖（I8NIGW）、各项目 Issue 中的正向反馈。
+来源建议：官方交流群、Gitee 登记帖（I8NIGW）、各项目 Issue 中的正向反馈，
+以及官网仓库的征集帖（continew-org/continew.top#6，帖内已写明展示授权与撤回方式）。
 摘录时保留原意，可压缩字数，但**不要改写语气、不要替用户加工评价**。
 
-当前库里的 3 条是版式示例，上线前需替换为真实留言。留言少于 8 条时跑马灯会显得空，建议先攒够再上。
+**当前文件为空数组**，首页该区块不渲染。此前库里放过 3 条版式示例，
+因并非真实征集到的留言已清空——宁可不展示，也不用编造的好评撑场面。
+留言少于 8 条时跑马灯会显得空，建议攒够再上。
+
+---
+
+## demo-environments.json：历史资源支持
+
+一条记录 = 某位提供者在某段时间里提供的一套环境。
+
+```json
+{
+  "env": "演示环境前后端、MySQL、Redis、MinIO、任务调度中心、文档站点、Charles API 服务",
+  "spec": "8C16G + 10M + 30/200GB",
+  "provider": "风铃云信息科技",
+  "url": "https://www.aeoliancloud.com/cart/goods.htm?id=14",
+  "period": "2025.8 至今",
+  "current": true
+}
+```
+
+### 字段说明
+
+| 字段 | 必填 | 说明 |
+|:-----|:--:|:-----|
+| `env` | 是 | 这套环境承载了什么，可同时写多个服务 |
+| `spec` | 是 | 配置规格；早期记录不全时写 `-` |
+| `provider` | 是 | 提供者名称（个人或公司），页面上做成外链 |
+| `url` | 是 | 提供者主页；服务器赞助商可带商品链接 |
+| `period` | 是 | 起止时间文本，如 `2024.10 ~ 2025.8`、`~ 2025.8` |
+| `current` | 否 | 是否为当前在用环境（应只有一条），用于行底色与「在用」标记 |
+
+### 维护约定
+
+- **顺序手工维护**：当前环境在前，其余按时间倒序。`period` 是自由文本，
+  代码不做排序（`lib/demo-env.ts` 直接按文件顺序返回）。
+- 新增一条环境时，同时把上一条的 `period` 补成闭区间（如 `2024.10 ~ 2025.8`），
+  并把 `current` 移交给新的那条。
+- 提供者是个人时，`url` 建议用对方公开主页（Gitee / GitHub）；
+  填上等于公开致谢，若对方希望匿名请先征询。
+- 数据来源：旧站（VitePress）`docs/admin/guide/demo.md` 的「环境来源」一节。

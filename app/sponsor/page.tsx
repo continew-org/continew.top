@@ -20,6 +20,8 @@ import {
   type Supporter,
 } from '@/lib/sponsors';
 import { assertSponsorAssetsExist } from '@/lib/sponsors-assets';
+import { getDemoEnvironments } from '@/lib/demo-env';
+import { demoUrl } from '@/lib/shared';
 import {
   cardHover,
   PageContainer,
@@ -677,6 +679,7 @@ export default function SponsorPage() {
   const strategic = getSponsors('strategic');
   const infrastructure = getSponsors('infrastructure');
   const supporters = getSponsors('supporter');
+  const environments = getDemoEnvironments();
   const tiers = buildTiers(Math.max(getStrategicSeats() - strategic.length, 0));
 
   return (
@@ -925,6 +928,104 @@ export default function SponsorPage() {
                   <SponsorCard key={sponsor.name} sponsor={sponsor} />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/*
+            历史资源支持（迁移自旧站「在线演示」页的「环境来源」一节）。
+
+            【为什么放在这里而不是文档里】
+            这张表记的是「谁在什么时间提供了什么配置的服务器」，本质是**致谢**，
+            不是使用说明——归官网而不是归文档。放文档里只有想体验演示环境的人会翻到，
+            而它真正要被看见的对象是提供过/可能提供服务器的伙伴。
+
+            【为什么挂在资源合作伙伴这组下面】
+            两者是同一件事的两面：上面那张卡是「现在的资源伙伴是谁」，
+            这张表是「这份支持是怎么一路过来的」。潜在的资源支持者看到它，
+            就知道自己提供服务器之后会被怎样记录——对招募下一台服务器，
+            这比写一句「欢迎提供云资源」有用得多。
+
+            【为什么用表格而不是卡片】
+            七条记录、每条四个字段，卡片会把一次扫读变成七次；
+            而且这一区的信息密度本来就高，表格是最省的容器。
+          */}
+          {environments.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-teal-600 dark:text-teal-400">
+                  <Server className="size-4" aria-hidden />
+                </span>
+                <h3 className="text-sm font-semibold">历史资源支持</h3>
+                {/* 副标题点明「含当前在用」：表首条是风铃云在用的环境，
+                    只写「历史」会让人误以为这些都已成为过去 */}
+                <span className="text-xs text-fd-muted-foreground">
+                  在线演示环境的服务器提供者（含当前在用）
+                </span>
+              </div>
+              {/*
+                table-layout: fixed + 表头显式列宽：自动布局在窄容器里会把宽度让给
+                短内容列，「环境」这种长文本列反而被挤成竖条（390px 视口实测）。
+                fixed 下各列比例恒定，min-width 之外的宽度交给横向滚动。
+              */}
+              <div className="overflow-x-auto rounded-lg border border-fd-border">
+                <table className="w-full min-w-[40rem] table-fixed border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-fd-border text-left text-xs text-fd-muted-foreground">
+                      <th scope="col" className="w-[46%] px-4 py-2.5 font-medium">环境</th>
+                      <th scope="col" className="w-[24%] px-4 py-2.5 font-medium">配置</th>
+                      <th scope="col" className="w-[15%] px-4 py-2.5 font-medium">提供者</th>
+                      <th scope="col" className="w-[15%] px-4 py-2.5 font-medium">时间</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {environments.map((item) => (
+                      <tr
+                        key={`${item.provider}-${item.period}-${item.env}`}
+                        className={cn(
+                          'border-b border-fd-border last:border-b-0',
+                          // 当前环境给一层极淡底色：不是高亮，只是把「在用」和「曾经」分开
+                          item.current && 'bg-fd-muted/40',
+                        )}
+                      >
+                        <td className="px-4 py-2.5 text-fd-foreground">{item.env}</td>
+                        <td className="whitespace-nowrap px-4 py-2.5 tabular-nums text-fd-muted-foreground">
+                          {item.spec}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-2.5">
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-[var(--cn-brand)] hover:underline"
+                          >
+                            {item.provider}
+                          </a>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-2.5 tabular-nums text-fd-muted-foreground">
+                          {item.period}
+                          {item.current && (
+                            <span className="ml-2 rounded bg-teal-600/10 px-1.5 py-0.5 text-xs font-medium text-teal-700 dark:text-teal-400">
+                              在用
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-fd-muted-foreground">
+                演示环境由这些服务器一路支撑，才得以长期在线。完整体验请到{' '}
+                <a
+                  href={demoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-[var(--cn-brand)] hover:underline"
+                >
+                  在线演示
+                </a>
+                ，请勿在其中存放重要数据。
+              </p>
             </div>
           )}
 
