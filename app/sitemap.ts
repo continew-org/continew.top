@@ -24,6 +24,7 @@ const STATIC_PAGES: StaticPage[] = [
   { path: '/timeline', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/users', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/sponsor', changeFrequency: 'monthly', priority: 0.7 },
+  { path: '/demo', changeFrequency: 'monthly', priority: 0.7 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

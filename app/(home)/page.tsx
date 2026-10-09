@@ -27,7 +27,6 @@ import { getMessages } from '@/lib/messages';
 import {
   appDescription,
   appName,
-  demoUrl,
   gitConfig,
   messageUrl,
   registerUrl,
@@ -274,10 +273,14 @@ export default async function HomePage() {
             >
               快速上手
             </Link>
+            {/*
+              「在线演示」先到官网的 /demo 说明页，再进演示环境。
+              演示环境有数据重置、操作受限、部署期短暂不可用等限制，
+              直接跳过去的人多半不知道，容易在里面存重要数据或对改不了数据感到困惑；
+              先看一页说明再进，对使用者和演示环境都省事。
+            */}
             <Link
-              href={demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/demo"
               className="rounded-lg border border-fd-border px-6 py-3 text-sm font-medium transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-fd-accent hover:shadow-sm"
             >
               在线演示
@@ -655,10 +658,9 @@ export default async function HomePage() {
             >
               快速上手
             </Link>
+            {/* 同上：先到 /demo 说明页，再进演示环境 */}
             <Link
-              href={demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/demo"
               className="rounded-lg border border-fd-border bg-fd-card px-6 py-3 text-sm font-medium transition-colors hover:bg-fd-accent"
             >
               在线演示

@@ -21,7 +21,6 @@ import {
 } from '@/lib/sponsors';
 import { assertSponsorAssetsExist } from '@/lib/sponsors-assets';
 import { getDemoEnvironments } from '@/lib/demo-env';
-import { demoUrl } from '@/lib/shared';
 import {
   cardHover,
   PageContainer,
@@ -1015,15 +1014,17 @@ export default function SponsorPage() {
                 </table>
               </div>
               <p className="text-xs text-fd-muted-foreground">
-                演示环境由这些服务器一路支撑，才得以长期在线。完整体验请到{' '}
-                <a
-                  href={demoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                演示环境由这些服务器一路支撑，才得以长期在线。想体验请看{' '}
+                {/*
+                  与首页保持一致：所有演示环境入口都先到 /demo 说明页，
+                  由说明页再进真实环境，避免直接跳过去的人不了解使用限制。
+                */}
+                <Link
+                  href="/demo"
                   className="font-medium text-[var(--cn-brand)] hover:underline"
                 >
-                  在线演示
-                </a>
+                  在线演示说明
+                </Link>
                 ，请勿在其中存放重要数据。
               </p>
             </div>
