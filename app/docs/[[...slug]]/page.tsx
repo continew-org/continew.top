@@ -7,6 +7,7 @@ import {
   MarkdownCopyButton,
 } from 'fumadocs-ui/layouts/spacious/page';
 import { ViewOptionsPopover } from '@/components/view-options-popover';
+import { DocsSponsorSlot } from '@/components/docs-sponsor-slot';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getMDXComponents } from '@/components/mdx';
@@ -36,7 +37,17 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const markdownUrl = getPageMarkdownUrl(page).url;
 
   return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
+    <DocsPage
+      toc={page.data.toc}
+      full={page.data.full}
+      /*
+       * 赞助展示位挂在右侧目录底部：不在阅读流里、不滚动、不弹窗，
+       * 是文档页里对读者打扰最小、对赞助商又真实可见的位置。
+       * 没有战略合作伙伴时组件返回 null，不留空位。
+       * 要撤掉这处展示，删掉这个 prop 即可。
+       */
+      tableOfContent={{ footer: <DocsSponsorSlot /> }}
+    >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
       <div className="flex flex-row gap-2 items-center border-b pb-6">

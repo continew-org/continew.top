@@ -28,9 +28,16 @@ export function NavSponsorLink() {
     <Link
       href="/sponsor"
       aria-current={active ? 'page' : undefined}
+      /*
+       * 挂 data-active 而不是在 className 里写三元：
+       * 高亮样式（品牌色 + 底部指示条）统一由 global.css 的 #nd-nav 规则负责，
+       * 这样自建导航项与 fumadocs 内置的「文档 / 博客」长得一模一样，
+       * 不会出现两种当前页样式。
+       */
+      data-active={active}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-        active ? 'text-fd-primary' : 'text-fd-muted-foreground hover:text-fd-foreground',
+        'text-fd-muted-foreground hover:text-fd-foreground',
       )}
     >
       <Crown className="size-4" aria-hidden />

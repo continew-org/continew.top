@@ -36,7 +36,8 @@ interface PlatformSource {
 }
 
 /**
- * 平台清单。各平台组织路径不同：GitHub 为 continew-org，Gitee / AtomGit 为 continew。
+ * 平台清单。**数组顺序即全站的展示顺序**：GitHub → AtomGit → Gitee（社区的推荐顺序）。
+ * 各平台组织路径不同：GitHub 为 continew-org，Gitee / AtomGit 为 continew。
  * 与 lib/shared.ts 的 getEditOnHostUrl 保持同一口径。
  */
 const PLATFORMS: PlatformSource[] = [
@@ -51,15 +52,6 @@ const PLATFORMS: PlatformSource[] = [
     profile: (login) => `https://github.com/${login}`,
   },
   {
-    key: 'gitee',
-    name: 'Gitee',
-    org: 'continew',
-    url: 'https://gitee.com/continew',
-    api: (org) => `https://gitee.com/api/v5/orgs/${org}/repos?per_page=100`,
-    contributorsApi: (org, repo) => `https://gitee.com/api/v5/repos/${org}/${repo}/contributors`,
-    profile: (login) => `https://gitee.com/${login}`,
-  },
-  {
     key: 'atomgit',
     name: 'AtomGit',
     org: 'continew',
@@ -68,6 +60,15 @@ const PLATFORMS: PlatformSource[] = [
     contributorsApi: (org, repo) =>
       `https://api.atomgit.com/api/v5/repos/${org}/${repo}/contributors`,
     profile: (login) => `https://atomgit.com/${login}`,
+  },
+  {
+    key: 'gitee',
+    name: 'Gitee',
+    org: 'continew',
+    url: 'https://gitee.com/continew',
+    api: (org) => `https://gitee.com/api/v5/orgs/${org}/repos?per_page=100`,
+    contributorsApi: (org, repo) => `https://gitee.com/api/v5/repos/${org}/${repo}/contributors`,
+    profile: (login) => `https://gitee.com/${login}`,
   },
 ];
 
@@ -84,8 +85,23 @@ const SNAPSHOT: Record<PlatformStar['key'], number> = {
 /**
  * 统一的构建期 JSON 请求：10 秒超时 + 24 小时缓存，失败返回 null 由调用方回落快照。
  * GitHub 未认证限流 60 次/小时，配置 GITHUB_TOKEN 可提高到 5000 次/小时。
+ *
+ * 同 URL 在**一次构建内只发一次**：组织仓库列表就是个典型例子——统计 Star 要用、
+ * 统计贡献者也要用，两个入口互不感知就会把同一个 URL 请求两遍。
+ * 缓存的是 Promise 而不是结果，并发调用共享同一次请求，不会有人拿到「还没回来」的 null。
  */
-async function fetchJson(url: string): Promise<unknown | null> {
+const inflight = new Map<string, Promise<unknown | null>>();
+
+export async function fetchJson(url: string): Promise<unknown | null> {
+  let pending = inflight.get(url);
+  if (!pending) {
+    pending = requestJson(url);
+    inflight.set(url, pending);
+  }
+  return pending;
+}
+
+async function requestJson(url: string): Promise<unknown | null> {
   try {
     const headers: Record<string, string> = {
       Accept: 'application/json',
@@ -107,11 +123,36 @@ async function fetchJson(url: string): Promise<unknown | null> {
   }
 }
 
-export async function getStarSummary(): Promise<StarSummary> {
+/**
+ * 组织下的公开仓库列表。
+ *
+ * 「统计 Star」和「统计贡献者」都要先拿到它，是两个入口、同一份数据；
+ * 同 URL 的去重统一由 fetchJson 处理，这里只做类型收敛。
+ */
+async function fetchOrgRepos(platform: PlatformSource): Promise<unknown[] | null> {
+  const data = await fetchJson(platform.api(platform.org));
+  return Array.isArray(data) ? data : null;
+}
+
+/**
+ * Star 汇总结果缓存。
+ *
+ * 导航栏的星数要在**每个 layout** 里拿到（首页 / 文档 / 博客 / 团队 / 登记用户 …），
+ * 不缓存就会把同一套聚合跑上七八遍。fetchJson 已保证同 URL 只请求一次，
+ * 这里省掉的是重复的 reduce 与对象构造。
+ */
+let starSummaryCache: Promise<StarSummary> | null = null;
+
+export function getStarSummary(): Promise<StarSummary> {
+  starSummaryCache ??= computeStarSummary();
+  return starSummaryCache;
+}
+
+async function computeStarSummary(): Promise<StarSummary> {
   const results = await Promise.all(
     PLATFORMS.map(async (platform) => {
-      const repos = await fetchJson(platform.api(platform.org));
-      const live = Array.isArray(repos)
+      const repos = await fetchOrgRepos(platform);
+      const live = repos
         ? (repos as Array<{ stargazers_count?: number }>).reduce(
             (sum, repo) => sum + (repo.stargazers_count ?? 0),
             0,
@@ -194,6 +235,8 @@ interface ContributorLike {
    * 间接写进 HTML（哈希可被彩虹表反查），绝不可取。没有头像就退化显示首字母。
    */
   email?: string;
+  /** 该仓库内的贡献数（GitHub 口径 = 提交数）。接口可能不返回，缺省按 0 处理。 */
+  contributions?: number;
 }
 
 /** 单个贡献者（页面展示用）。 */
@@ -205,6 +248,13 @@ export interface Contributor {
   /** 该平台的个人主页。 */
   url: string;
   platform: PlatformStar['key'];
+  /**
+   * 该平台组织下的贡献总数（跨仓库累加）。
+   *
+   * 累加是必要的：同一个人会在 continew-admin / continew-starter 等多个仓库提交，
+   * 只取单个仓库会显著低估他的贡献，排序也就排不准。
+   */
+  contributions: number;
 }
 
 /**
@@ -234,8 +284,8 @@ async function mapLimit<T, R>(
  * 拉取某平台组织下所有仓库的贡献者（平台内按用户名去重，剔除机器人与镜像账号）。
  */
 async function fetchPlatformContributors(platform: PlatformSource) {
-  const repos = await fetchJson(platform.api(platform.org));
-  if (!Array.isArray(repos)) {
+  const repos = await fetchOrgRepos(platform);
+  if (!repos) {
     return { names: new Set<string>(), contributors: [] as Contributor[], ok: false, count: 0 };
   }
 
@@ -254,12 +304,25 @@ async function fetchPlatformContributors(platform: PlatformSource) {
       const login = (c?.login ?? c?.name ?? '').toString().trim();
       if (!login || isBot(login)) continue;
       const key = login.toLowerCase();
-      if (byLogin.has(key)) continue;
+      const count = c?.contributions ?? 0;
+
+      const existing = byLogin.get(key);
+      if (existing) {
+        // 同一人在多个仓库都有提交：累加，否则贡献度被严重低估、排序也就排不准
+        existing.contributions += count;
+        // 头像可能只有部分仓库的接口返回，取到就补上
+        if (!existing.avatar) {
+          existing.avatar = c?.avatar_url ?? c?.avatar ?? c?.avatarUrl ?? '';
+        }
+        continue;
+      }
+
       byLogin.set(key, {
         login,
         avatar: c?.avatar_url ?? c?.avatar ?? c?.avatarUrl ?? '',
         url: c?.html_url ?? platform.profile(login),
         platform: platform.key,
+        contributions: count,
       });
     }
   }
@@ -389,17 +452,16 @@ export async function getContributorList(): Promise<{
   }
 
   /*
-   * 排序：有头像的排在前面。
+   * 排序：按贡献度（提交数）降序，同分再按用户名。
    *
-   * 只有 GitHub 的接口返回头像，Gitee / AtomGit 只给用户名（无头像，页面退化成首字母）。
-   * 若纯按用户名排序，头像和方块会随机交错、显得零碎；把有头像的聚到前面，
-   * 整面墙看起来是「一排头像 + 一排首字母」，比交错整齐。
+   * 早期是「有头像的排前面 + 用户名排序」，理由是不让头像与首字母方块交错。
+   * 但那是用视觉整齐换掉了信息——读者真正想知道的是「谁做了多少」。
+   * 改按贡献度降序后，排在前面的天然是活跃贡献者（他们也基本都有头像），
+   * 视觉与信息两头都占住了。
    */
-  const list = [...byLogin.values()].sort((a, b) => {
-    if (a.avatar && !b.avatar) return -1;
-    if (!a.avatar && b.avatar) return 1;
-    return a.login.localeCompare(b.login);
-  });
+  const list = [...byLogin.values()].sort(
+    (a, b) => b.contributions - a.contributions || a.login.localeCompare(b.login),
+  );
 
   return {
     list,

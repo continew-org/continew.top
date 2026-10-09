@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/cn';
@@ -25,6 +26,15 @@ const aboutLinks = [
 export function NavAboutMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  /*
+   * 当前页判定：完全相等，或以该路径为前缀（/team 命中，/teamxxx 不命中）。
+   *
+   * 触发按钮也要知道「我在这一组里」——折叠状态下三个子项是不可见的，
+   * 不给按钮加高亮的话，人在 /team 页上却看不出「关于」是当前的，等于断了参照。
+   */
+  const isCurrent = (url: string) => pathname === url || pathname.startsWith(`${url}/`);
+  const groupActive = aboutLinks.some((link) => isCurrent(link.url));
 
   useEffect(() => {
     if (!open) return;
@@ -49,6 +59,8 @@ export function NavAboutMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="true"
+        // 高亮样式交给 global.css 的 #nd-nav 规则，与「文档 / 博客 / 赞助」保持同一套
+        data-active={groupActive}
         className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-fd-muted-foreground transition-colors hover:text-fd-foreground max-sm:hidden"
       >
         关于
@@ -66,18 +78,28 @@ export function NavAboutMenu() {
           'max-sm:mt-1 max-sm:block max-sm:w-full max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:shadow-none',
         )}
       >
-        {aboutLinks.map((link) => (
-          <li key={link.url}>
-            <Link
-              href={link.url}
-              // 点击后收起（不用 effect 监听 pathname：会触发 react-hooks/set-state-in-effect）
-              onClick={() => setOpen(false)}
-              className="block rounded-md px-3 py-1.5 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-foreground"
-            >
-              {link.text}
-            </Link>
-          </li>
-        ))}
+        {aboutLinks.map((link) => {
+          const current = isCurrent(link.url);
+          return (
+            <li key={link.url}>
+              <Link
+                href={link.url}
+                aria-current={current ? 'page' : undefined}
+                // 点击后收起（不用 effect 监听 pathname：会触发 react-hooks/set-state-in-effect）
+                onClick={() => setOpen(false)}
+                // 与全局导航同一套读法：只换文字色，不加图标、不加指示条
+                className={cn(
+                  'block rounded-md px-3 py-1.5 transition-colors',
+                  current
+                    ? 'text-[var(--cn-brand)]'
+                    : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-foreground',
+                )}
+              >
+                {link.text}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

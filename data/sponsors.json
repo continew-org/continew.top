@@ -1,14 +1,18 @@
 {
-  "special": [
-    {
-      "name": "风铃云信息科技",
-      "url": "https://www.aeoliancloud.com/cart/goods.htm?id=14",
-      "img": "fly-20250317.webp",
-      "description": "<b style=\"color:#ff4400;font-size:15px\">[吉林省风铃云信息科技有限公司] 独家赞助 ContiNew Admin 在线演示服务器！</b><br/>另有物理机装机，AI算力设备出租，数据中心托管等多项业务提供，欢迎老板多多咨询！"
-    }
-  ],
-  "platinum": [],
-  "gold": [],
-  "silver": [],
-  "bronze": []
+  "config": {
+    "strategicSeats": 3
+  },
+  "tiers": {
+    "strategic": [],
+    "infrastructure": [
+      {
+        "name": "风铃云信息科技",
+        "url": "https://www.aeoliancloud.com/cart/goods.htm?id=14",
+        "img": "aeoliancloud/banner.webp",
+        "logo": "aeoliancloud/logo.webp",
+        "description": "为 ContiNew Admin 在线演示环境提供服务器与带宽支持。"
+      }
+    ],
+    "supporter": []
+  }
 }
