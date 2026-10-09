@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { ArrowRight, GitPullRequestArrow, UserPlus, Users } from 'lucide-react';
+import { GitPullRequestArrow, UserPlus, Users } from 'lucide-react';
 import { getCoreMembers, getEmeritiMembers, getPartnerMembers } from '@/lib/team';
 import { ShuffledMemberGrid } from '@/components/shuffled-member-grid';
+import { ContributeDialog } from '@/components/contribute-dialog';
 import { ContributorWall } from '@/components/contributor-wall';
-import { gitConfig } from '@/lib/shared';
 import { getContributorList, getContributorSummary } from '@/lib/site-stats';
 import { PageContainer, PageHeader, PageNextLinks, Section } from '@/components/site-primitives';
 
@@ -69,14 +69,7 @@ export default async function TeamPage() {
           },
         ]}
         actions={
-          <a
-            href={`https://github.com/${gitConfig.user}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-fd-primary px-5 py-2.5 text-sm font-medium text-fd-primary-foreground transition-opacity hover:opacity-90"
-          >
-            参与贡献
-          </a>
+          <ContributeDialog className="inline-flex items-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]" />
         }
       />
 
@@ -122,22 +115,18 @@ export default async function TeamPage() {
           <ContributorWall contributors={contributorList} />
         ) : (
           /*
-           * 构建期没拉到名单（如 CI / 本地网络访问不到 GitHub API）时给一个出口，
-           * 而不是让区块空着。措辞保持中性，不把「拉取失败」暴露给访问者。
+           * 构建期没拉到名单（如 CI / 本地网络访问不到 GitHub API）时的兜底。
+           *
+           * 这里不写「拉取失败，请去 GitHub 看」——那是在向访问者暴露本站的技术故障，
+           * 而且把人赶去一个没有贡献者聚合页的组织首页。翻过来写：既然名单暂时是空的，
+           * 那就邀请访问者成为名单上的第一个人，出口同样是「参与贡献」弹层，
+           * 与全站其它位置保持同一个平台推荐顺序。
            */
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-dashed border-fd-border px-5 py-4">
             <p className="text-sm text-fd-muted-foreground">
-              贡献者名单在构建时自动从 GitHub 获取，完整名单可前往组织主页查看。
+              贡献者名单在构建时自动汇总。想让你的头像出现在这里？欢迎提交 Issue 或 PR。
             </p>
-            <a
-              href={`https://github.com/${gitConfig.user}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-primary hover:underline"
-            >
-              在 GitHub 查看
-              <ArrowRight className="size-4" aria-hidden />
-            </a>
+            <ContributeDialog className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--cn-brand)] hover:underline" />
           </div>
         )}
       </Section>
@@ -147,7 +136,7 @@ export default async function TeamPage() {
           {
             href: '/sponsor',
             title: '支持维护者',
-            description: '通过各位成员的赞赏码请他们喝杯咖啡，或了解赞助权益。',
+            description: '通过各位成员的赞赏码或爱发电主页请他们喝杯咖啡，或了解赞助权益。',
           },
           {
             href: '/timeline',

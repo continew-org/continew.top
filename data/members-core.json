@@ -24,7 +24,11 @@
     "sponsor": true,
     "sponsorText": "点杯咖啡",
     "sponsorTitle": "来自网络知己的支持 + 1 ☕",
-    "sponsorPics": ["/images/sponsor/qrcode_wxpay.webp", "/images/sponsor/qrcode_zfbpay.webp"]
+    "sponsorPics": [
+      { "src": "/images/qrcode/wxpay.webp", "label": "微信" },
+      { "src": "/images/qrcode/zfbpay.webp", "label": "支付宝" }
+    ],
+    "afdian": "https://afdian.com/a/charles7c"
   },
   {
     "name": "Jasmine",
