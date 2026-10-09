@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { getCityCount, getTopCities, getUsers } from '@/lib/users';
 import { UserDirectory } from '@/components/user-directory';
-import { gitConfig } from '@/lib/shared';
+import { registerUrl } from '@/lib/shared';
 import { PageContainer, PageHeader, PageNextLinks, Section } from '@/components/site-primitives';
 
 export const metadata: Metadata = {
@@ -11,10 +11,32 @@ export const metadata: Metadata = {
 };
 
 /**
- * 登记入口：社区统一的登记帖（ContiNew Admin 仓库 Issue），无需额外后台。
- * 指向固定 Issue 而非 issues 列表页 —— 列表页要访客自己想怎么填，固定帖里有统一格式。
+ * 登记权益。文案取自旧站的登记引导，每条压到一句话。
+ *
+ * 用对勾清单而不是卡片：赞助页「您的支持将用于」是同一套读法，
+ * 全站两处「承诺 / 用途」保持一致；而且点进这一页的人要的是扫一眼确认，
+ * 不是逐张读卡片。标题保留是为了能扫读——纯一句话清单里，四条承诺会糊成一段。
  */
-const registerUrl = `https://github.com/${gitConfig.user}/continew-admin/issues/83`;
+const registerBenefits: Array<{ title: string; description: string }> = [
+  {
+    title: '无偿登记',
+    description:
+      '登记完全免费。我们郑重承诺不会在任何阶段收取使用费用，也不会将您的信息用于商业盈利或其他非公开目的。',
+  },
+  {
+    title: '优先支持',
+    description: '登记后您将被视为优质用户，维护团队会优先响应您在实际使用过程中遇到的问题。',
+  },
+  {
+    title: '官方认可',
+    description: '您有机会在官方网站上获得展示，让更多人了解您的项目或公司。',
+  },
+  {
+    title: '社区贡献',
+    description:
+      '您的登记会成为后来调研者的可信指标之一，也是我们制定后续版本计划时的重要参考。',
+  },
+];
 
 export default function UsersPage() {
   const users = getUsers();
@@ -29,7 +51,7 @@ export default function UsersPage() {
          * 首屏统计卡片已移除：21 家企业 / 13 个城市这种量级做成三张大卡，
          * 反而把「规模还不大」摆到台面上（对比 /timeline 那种 5000+ Star 撑得住的数字）。数字降级为描述里的一句话，目录中也有城市计数可查。
          */
-        description={`目前已有 ${users.length} 家公司与团队登记，覆盖 ${getCityCount()} 个城市。如果你的公司或团队也在用，欢迎登记入驻——这是对我们最直接的认可。`}
+        description={`目前已有 ${users.length} 家公司/团队登记，覆盖 ${getCityCount()} 个城市。如果你们也在用 ContiNew 项目，诚邀登记——这是对我们最直接的认可。`}
         actions={
           <a
             href={registerUrl}
@@ -41,6 +63,26 @@ export default function UsersPage() {
           </a>
         }
       />
+
+      {/* 权益排在目录之前：先看「登记能得到什么」，再决定要不要填 */}
+      <Section
+        title="登记后你能得到什么"
+        description="以下四条是我们对每一位登记用户的承诺。"
+      >
+        <ul className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
+          {registerBenefits.map((benefit) => (
+            <li key={benefit.title} className="flex gap-2.5">
+              <Check className="mt-0.5 size-4 shrink-0 text-[var(--cn-brand)]" aria-hidden />
+              <div className="min-w-0">
+                <span className="block text-base font-medium">{benefit.title}</span>
+                <span className="mt-1 block text-sm leading-relaxed text-fd-muted-foreground">
+                  {benefit.description}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
 
       <Section
         title="用户目录"
