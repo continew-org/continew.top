@@ -11,3 +11,240 @@ html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
 }
+
+/*
+ * 品牌强调色：取自 logo 主色 #0057FE。
+ *
+ * 站点用的是 Fumadocs neutral 预设，--color-fd-primary 实际是近黑（暗色模式下近白），
+ * 也就是说整站**没有任何品牌色**——所有「主色」元素渲染出来都是黑白灰。
+ * 这组令牌补上这个缺口。
+ *
+ * 早期版本取的是 logo 的青绿 #12D2AC，但整站铺开后偏医疗/环保观感，与「企业开发框架」
+ * 的定位不吻合；改回 logo 的主蓝后与品牌识别一致。
+ *
+ * 分三个变量是因为同一个色值在深浅底上都用会顾此失彼：
+ *   - --cn-brand：浅底上的文字与图形色
+ *   - --cn-brand-strong：hover / 需要再重一档的地方
+ *   - --cn-brand-soft：区块底衬 / 图标底色的极淡填充
+ *
+ * 另有 --cn-brand-on：**铺在品牌色底上的前景色**（按钮文字）。
+ * 它必须单独成一个变量，不能想当然写成白色——暗色模式下 --cn-brand 被提亮成
+ * #6d9dff，白字压在亮蓝上对比度实测只有 2.65:1，远低于 WCAG AA 要求的 4.5:1，
+ * 按钮文案会糊成一片。暗色下换成近黑的 #0b1220，对比度约 7.1:1（浅色模式
+ * 蓝底白字为 5.5:1，本就达标，故 on 令牌只在暗色下切换到深色）。
+ * 凡是「品牌色底 + 文字」的按钮（首页 CTA、团队页贡献按钮）都要用这个变量。
+ */
+:root {
+  --cn-brand: #0057fe;
+  --cn-brand-strong: #0044c9;
+  --cn-brand-soft: #eef4ff;
+  --cn-brand-on: #ffffff;
+  /*
+   * hover 时用的半强度品牌边框色。
+   *
+   * 直接用 --cn-brand 画 1px 边框，圆角处会留下一圈硬边，抗锯齿重绘后看着发毛——
+   * 博客卡片用的就是半透明的 fd-primary/50（边缘柔和、与背景融合），没有这个问题。
+   * 这里让品牌色也走同一条路：同一套「半强度边框」语言，全站不再有两种 hover 边框。
+   *
+   * 用 var(--cn-brand) 而不是写死色值：CSS 变量惰性求值，暗色模式下 --cn-brand
+   * 被覆盖成亮蓝后，这一条会自动跟着变，不必在 .dark 里再写一遍。
+   */
+  --cn-brand-line: color-mix(in oklab, var(--cn-brand) 45%, transparent);
+}
+
+.dark {
+  --cn-brand: #6d9dff;
+  --cn-brand-strong: #8fb4ff;
+  --cn-brand-soft: #14203a;
+  /* 亮蓝底上用近黑字：白字在这里只有 2.4:1，读不清 */
+  --cn-brand-on: #0b1220;
+}
+
+/*
+ * 贡献者头像 hover 的礼花：8 片彩纸从头像中心炸开、边飞边转、落下淡出。
+ *
+ * 【为什么是 8 个真实元素而不是伪元素】
+ * 伪元素只有 before / after 两个，做不出「一圈」的迸发。一片彩纸对应一个 <span>，
+ * 方向与颜色通过 CSS 变量从组件传进来（数据见 components/contributor-wall.tsx）。
+ *
+ * 【为什么周期里有一大半是静止的】
+ * hover 是持续状态。若只炸一次，停留久了就没反馈；若一直炸，又太吵。
+ * 所以让彩纸在 55% 处就淡出，剩下的时间静止——观感是「每 1.4s 撒一次」。
+ *
+ * 【重力怎么来的】
+ * 中段与末段在 y 上额外加了 +4px / +10px 的下坠偏移，末段还缩小到 0.9。
+ * 没有这两笔，彩纸是直线飞出去的，像放射线而不像撒花。
+ */
+@keyframes cn-confetti-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.4);
+  }
+  12% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--cn-dx) * 0.75),
+        calc(-50% + var(--cn-dy) * 0.75 + 4px)
+      )
+      rotate(calc(var(--cn-rot) * 0.6)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--cn-dx)), calc(-50% + var(--cn-dy) + 10px))
+      rotate(var(--cn-rot)) scale(0.9);
+  }
+}
+
+.cn-confetti {
+  position: relative;
+}
+
+.cn-confetti-piece {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 3px;
+  border-radius: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cn-confetti:hover .cn-confetti-piece {
+  animation: cn-confetti-burst 1.4s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * 直接不渲染。撒花是纯装饰，静态摊在头像周围只会像脏点，
+   * 不像亮片那样静止摆着也说得通。
+   */
+  .cn-confetti-piece {
+    display: none;
+  }
+}
+
+/*
+ * 滚动入场：区块滚进视口时柔和淡入 + 轻微上移。
+ *
+ * 【为什么用 CSS scroll-driven animations，而不是 IntersectionObserver】
+ * IO 方案的套路是：先把元素设成 opacity:0，等 JS 观察到它进入视口再点亮。
+ * 代价是**一旦 JS 没跑起来**（禁用脚本、水合失败、脚本报错），内容就永久隐身——
+ * 为了一个装饰效果赌上内容可见性，不划算。
+ * `animation-timeline: view()` 是纯 CSS：动画不存在时，元素就是正常的静态状态。
+ *
+ * 【为什么整条规则包在 @supports 里】
+ * scroll-driven animations 各浏览器支持进度不一致（此处不列举具体版本，避免注释过时）。
+ * 不检测能力的话，不支持的浏览器会认得 `animation` 但认不得 `animation-timeline`，
+ * 于是 `animation-fill-mode: both` 把**起始帧**（opacity:0）永久保留——又是内容隐身。
+ * 包进 @supports 后，不支持的浏览器整段规则都不生效，直接以最终状态呈现。
+ *
+ * 【幅度为什么只有 14px】
+ * 这是「柔和」，不是「酷炫」。位移一大就成了刻意表演，而 ContiNew 是企业级开发框架，
+ * 首屏语言应该稳。同理也没有视差、没有鼠标跟随光晕、没有 3D 倾斜。
+ */
+@keyframes cn-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .cn-reveal {
+    animation: cn-reveal linear both;
+    animation-timeline: view();
+    /* 元素刚露头时起跑，滚进视口约四分之一处收尾——正好在读者开始读它之前结束 */
+    animation-range: entry 5% cover 25%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cn-reveal {
+    animation: none;
+  }
+}
+
+/*
+ * 导航栏「当前页」指示：只换文字色。
+ *
+ * fumadocs 给命中的导航项只加了一条 `data-[active=true]:text-fd-primary`，
+ * 但本站用的是 neutral 预设，--color-fd-primary 本身就是近黑（暗色下近白），
+ * 与相邻项的 text-fd-muted-foreground 差别极小——扫一眼分不出自己在哪一页。
+ * 换成品牌蓝后对比度够了，也就不需要下划线这类额外装饰去补。
+ *
+ * 作用域锁在 #nd-nav（导航栏那个 <header id>），不会波及侧边栏、目录等同样
+ * 使用 data-active 属性但语义不同的地方。
+ *
+ * 自建的导航项（赞助 / 关于）只要在元素上挂 `data-active` 就能吃到同一套样式，
+ * 不必各写一份高亮逻辑。
+ */
+#nd-nav [data-active='true'] {
+  color: var(--cn-brand);
+}
+
+/*
+ * 跑马灯：登记用户与用户留言两处共用。
+ *
+ * 内容在 DOM 里渲染两份，动画平移 -50%，视觉上就是无缝循环——不需要 JS 测量宽度，
+ * 也就不需要客户端组件，静态导出下照样能跑。
+ */
+@keyframes cn-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes cn-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/*
+ * 跑马灯容器必须裁掉溢出。
+ *
+ * 内层是 w-max（宽度 = 两份内容），必然远宽于视口；容器不裁剪就会把整个页面撑出
+ * 横向滚动条。两端淡出的 mask 只改可见度、不裁盒子，所以这一条不能省。
+ */
+.cn-marquee-host {
+  overflow: hidden;
+}
+
+.cn-marquee {
+  animation: cn-marquee-left var(--cn-marquee-duration, 56s) linear infinite;
+}
+
+.cn-marquee-reverse {
+  animation-name: cn-marquee-right;
+}
+
+/* 鼠标悬停时停住，方便看清某一条；键盘聚焦同样暂停，避免读屏时内容一直跑 */
+.cn-marquee-host:hover .cn-marquee,
+.cn-marquee-host:focus-within .cn-marquee {
+  animation-play-state: paused;
+}
+
+/* 两端淡出，暗示「这是一条会滚动的长列表」而不是一排卡片 */
+.cn-marquee-fade {
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cn-marquee {
+    animation: none;
+  }
+}

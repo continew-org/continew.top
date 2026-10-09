@@ -16,6 +16,68 @@ export const gitConfig = {
 
 export const siteUrl = 'https://continew.top';
 
+/**
+ * 用户登记入口：ContiNew Admin 仓库的登记 Issue（固定帖里有统一格式，比 issues 列表页更好填）。
+ *
+ * 此前首页与 /users 页各写一份，而且指向了**不同平台**（首页 Gitee、/users GitHub）——
+ * 同一个「登记」动作有两个落点。统一到这里后，换地址只改一处。
+ */
+export const registerUrl = `https://github.com/${gitConfig.user}/continew-admin/issues/83`;
+
+/**
+ * 留言征集入口：官网仓库的固定征集帖。
+ *
+ * 与 registerUrl 是同一类东西——把用户领到一个有格式说明的固定帖上填，
+ * 而不是丢给 issues 列表页让人自己猜。区别只在于去处：
+ * 登记帖的条目进 data/users.json，留言帖的进 data/messages.json。
+ *
+ * 首页「社区声音」区块的引导入口指向这里。写成常量而不是在页面里散写链接，
+ * 是因为这个地址会随仓库迁移而变，页面里散写就会漏改。
+ */
+export const messageUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}/issues/6`;
+
+/**
+ * 在线演示环境地址。
+ *
+ * 旧站把「在线演示」指向文档里的 demo 说明页（注意事项 + 账号密码），
+ * 但新站文档目前只有各分区的 index，没有 demo 页，那个链接是 404。
+ * 而点「在线演示」的人要的是**看产品**，不是读说明——直接给演示地址。
+ * 演示环境的注意事项属于文档，等文档补齐后再从文档侧挂过去。
+ */
+export const demoUrl = 'https://admin.continew.top';
+
+/**
+ * 推荐参与贡献的平台顺序：GitHub → AtomGit → Gitee。
+ *
+ * 与 lib/site-stats.ts 的 PLATFORMS **同序**，保证导航星数下拉与参与贡献弹层
+ * 两处列出的平台顺序一致——同一个社区，推荐顺序不该在两处打架。
+ *
+ * desc 是**平台本身的一句话介绍**，不是「本站在这个平台的状态」。
+ * 早先写的是「同步镜像，同样接受反馈与提交」，问题有两个：一是「镜像」这个
+ * 词把两个平台降级成了附属品，而它们的定位其实是各自独立的服务；二是读者
+ * 真正想知道的是「这是个什么平台」，不是「我们在这里同步得勤不勤」。
+ */
+export const contributePlatforms = [
+  {
+    key: 'github',
+    name: 'GitHub',
+    desc: '全球最大的开发者社区',
+    url: `https://github.com/${gitConfig.user}`,
+  },
+  {
+    key: 'atomgit',
+    name: 'AtomGit',
+    desc: '开放原子开源基金会运营的代码托管平台',
+    url: 'https://atomgit.com/continew',
+  },
+  {
+    key: 'gitee',
+    name: 'Gitee',
+    desc: '国内主流代码托管平台，企业开发者聚集',
+    url: 'https://gitee.com/continew',
+  },
+] as const;
+
 // 文档唯一权威源：各文档分区 -> 其内容所在的项目仓库。
 // 文档页「在 GitHub 编辑」链接按分区映射到对应项目仓库的 docs/ 目录，
 // 而非本仓库（content/docs/ 为构建期汇聚产物，不提交）。

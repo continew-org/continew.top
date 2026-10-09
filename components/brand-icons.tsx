@@ -60,3 +60,18 @@ export function AtomGitIcon({ className }: IconProps) {
     <Image src="/atomgit.svg" alt="AtomGit" width={16} height={16} className={className} aria-hidden />
   );
 }
+
+/**
+ * 爱发电图标：一枚实心闪电（品牌标识的基础造型）。
+ *
+ * 用实心而不是描边，是为了在小尺寸（按钮里 14px）下还能认出来——
+ * 描边闪电缩到那么小就只剩几根线。颜色继承 currentColor，由按钮自己的配色决定。
+ */
+export function AfdianIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" role="img" className={className} aria-hidden>
+      <title>爱发电</title>
+      <path d="M11.983 1.907a.75.75 0 0 0-1.292-.657l-8.5 9.5A.75.75 0 0 0 2.75 12h6.572l-1.305 6.093a.75.75 0 0 0 1.292.657l8.5-9.5A.75.75 0 0 0 17.25 8h-6.572l1.305-6.093Z" />
+    </svg>
+  );
+}
