@@ -285,6 +285,12 @@ export default async function HomePage() {
             >
               在线演示
             </Link>
+            {/*
+              交流群入口同样放首屏：Issue 模板、greeting 机器人、各仓库 CONTRIBUTING
+              都把「入群方式」指向官网首页，若入口只埋在底部收尾区，读者滚不到就找不到。
+              边框样式与「在线演示」同级，不稀释实心主按钮「快速上手」。
+            */}
+            <JoinGroupDialog className="inline-flex items-center gap-2 rounded-lg border border-fd-border px-6 py-3 text-sm font-medium transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-fd-accent hover:shadow-sm" />
           </div>
           <p className="mt-6 text-xs text-fd-muted-foreground">
             Apache-2.0 / LGPL-3.0 开源协议 · 已有 {users.length} 家企业登记使用
@@ -544,7 +550,7 @@ export default async function HomePage() {
                 ? `${partnerCount} 位合作伙伴，撑起 ContiNew 的日常运转`
                 : '席位开放中，等第一位伙伴'
             }
-            description="提交记录里看不到他们，但项目能一直跑下去，靠的就是这些人。"
+            description="提交记录里看不到他们，但项目能一直跑下去，靠的就是他们。"
           />
 
           <div className="mt-9 flex flex-col gap-7 sm:mt-10">
