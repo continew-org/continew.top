@@ -35,6 +35,5 @@ yarn-error.log*
 next-env.d.ts
 
 # 文档汇聚产物：content/docs/<project>/ 在构建期由 CI 从各项目仓库 docs/ 拉取渲染。
-# starter 分区已有真实文档源（continew-starter 仓库 docs/），整个分区为汇聚产物，不提交；
-# admin / app 分区尚无真实文档源，保留官网占位骨架（index.mdx / meta.json）入库。
 content/docs/starter/
+content/docs/admin/
