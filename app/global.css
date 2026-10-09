@@ -173,6 +173,84 @@ html > body[data-scroll-locked] {
 }
 
 /*
+ * 首屏入场：Hero 的元素在页面打开时依次淡入上移（stagger）。
+ *
+ * 【为什么不用 cn-reveal 的 scroll-driven 方案】
+ * Hero 在首屏，加载瞬间就在视口内——scroll-driven 动画的进度锚定在滚动位置上，
+ * 「没滚动就永远停在起始帧」。首屏元素的入场只能用普通 time-driven 动画。
+ * 好处是 time-driven `@keyframes` 所有浏览器都支持，不必包 @supports。
+ *
+ * 【为什么 stagger 挂在子元素而不是逐个写类】
+ * Hero 要入场的是一列元素（logo / 徽章 / 标题 / 描述 / 按钮 / 脚注），
+ * 逐个挂类会让延迟散落在 JSX 里；容器一个类 + nth-child 排延迟，
+ * 以后增删 Hero 元素不用同步改延迟表。延迟梯度 90ms：能看出先后，又不拖沓。
+ */
+@keyframes cn-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cn-stagger > * {
+  animation: cn-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cn-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.cn-stagger > *:nth-child(2) { animation-delay: 0.14s; }
+.cn-stagger > *:nth-child(3) { animation-delay: 0.23s; }
+.cn-stagger > *:nth-child(4) { animation-delay: 0.32s; }
+.cn-stagger > *:nth-child(5) { animation-delay: 0.41s; }
+.cn-stagger > *:nth-child(6) { animation-delay: 0.5s; }
+.cn-stagger > *:nth-child(n + 7) { animation-delay: 0.59s; }
+
+/* 主视觉图更大更靠下，入场晚半拍、幅度稍大，收住整段节奏 */
+.cn-stagger-hero-visual {
+  animation: cn-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cn-stagger > *,
+  .cn-stagger-hero-visual {
+    animation: none;
+  }
+}
+
+/*
+ * Hero 光晕呼吸：8s 一轮的透明度 / 缩放起伏。
+ *
+ * 【幅度为什么这么小】
+ * 呼吸动效的目标是「页面活着」，而不是「被看见」——scale 4% + 透明度 0.75→1
+ * 在余光里刚好是「有什么在轻微起伏」的程度，盯住看又几乎察觉不到。
+ * 幅度再大就会从氛围变成表演，和滚动入场抢注意力。
+ */
+@keyframes cn-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.cn-glow {
+  animation: cn-breathe 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cn-glow {
+    animation: none;
+  }
+}
+
+/*
  * 导航栏「当前页」指示：只换文字色。
  *
  * fumadocs 给命中的导航项只加了一条 `data-[active=true]:text-fd-primary`，

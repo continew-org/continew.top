@@ -16,6 +16,7 @@ import type { ReactNode } from 'react';
 
 import { ContributeDialog } from '@/components/contribute-dialog';
 import { ContributorWall } from '@/components/contributor-wall';
+import { AnimatedNumber } from '@/components/home/animated-number';
 import { GitHubIcon } from '@/components/brand-icons';
 import { Faq, type FaqItem } from '@/components/home/faq';
 import { JoinGroupDialog } from '@/components/home/join-group-dialog';
@@ -229,11 +230,12 @@ export default async function HomePage() {
   const hasPartners = strategicPartners.length > 0 || resourcePartners.length > 0;
   const partnerCount = strategicPartners.length + resourcePartners.length;
 
+  // 数值保持数字类型，交给 AnimatedNumber 做「滚进视口从 0 计数」；格式化在组件内做
   const stats = [
-    { value: stars.total.toLocaleString('en-US'), label: '全平台 Star' },
-    { value: String(contributorSummary.total), label: '位贡献者' },
-    { value: String(users.length), label: '家企业登记使用' },
-    { value: String(projects.length), label: '个开源项目' },
+    { value: stars.total, label: '全平台 Star' },
+    { value: contributorSummary.total, label: '位贡献者' },
+    { value: users.length, label: '家企业登记使用' },
+    { value: projects.length, label: '个开源项目' },
   ];
 
   return (
@@ -246,12 +248,14 @@ export default async function HomePage() {
        * 尤其在手机上一屏只有几百像素高的时候。
        */}
       <section className="relative overflow-hidden px-6 pt-14 pb-12 sm:pt-24 sm:pb-16">
-        {/* 顶部极淡品牌色光晕，与二级页面的 PageContainer 共用同一视觉语言 */}
+        {/* 顶部极淡品牌色光晕，与二级页面的 PageContainer 共用同一视觉语言；
+            cn-glow 让它以极小幅度缓慢呼吸（详见 global.css，幅度刻意压到几乎不可见） */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(60%_100%_at_50%_0%,color-mix(in_oklab,var(--cn-brand)_8%,transparent),transparent_70%)]"
+          className="cn-glow pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(60%_100%_at_50%_0%,color-mix(in_oklab,var(--cn-brand)_8%,transparent),transparent_70%)]"
         />
-        <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center">
+        {/* cn-stagger：打开页面时子元素依次淡入上移（首屏动画只能用时间驱动，见 global.css） */}
+        <div className="cn-stagger relative mx-auto flex max-w-3xl flex-col items-center text-center">
           <Image src="/logo.svg" alt={appName} width={64} height={64} priority />
           <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-4 py-1.5 text-xs font-medium text-[var(--cn-brand)]">
             <span aria-hidden className="size-1.5 rounded-full bg-[var(--cn-brand)]" />
@@ -266,7 +270,7 @@ export default async function HomePage() {
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/docs/admin"
-              className="rounded-lg bg-[var(--cn-brand)] px-6 py-3 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]"
+              className="rounded-lg bg-[var(--cn-brand)] px-6 py-3 text-sm font-medium text-[var(--cn-brand-on)] shadow-sm transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-[var(--cn-brand-strong)] hover:shadow-md"
             >
               快速上手
             </Link>
@@ -274,7 +278,7 @@ export default async function HomePage() {
               href={demoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-fd-border px-6 py-3 text-sm font-medium transition-colors hover:bg-fd-accent"
+              className="rounded-lg border border-fd-border px-6 py-3 text-sm font-medium transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-fd-accent hover:shadow-sm"
             >
               在线演示
             </Link>
@@ -283,8 +287,8 @@ export default async function HomePage() {
             Apache-2.0 / LGPL-3.0 开源协议 · 已有 {users.length} 家企业登记使用
           </p>
         </div>
-        {/* 主视觉：独立的图容器，不与文字叠放 */}
-        <div className="relative mx-auto mt-16 max-w-5xl">
+        {/* 主视觉：独立的图容器，不与文字叠放；入场晚半拍收住整段节奏 */}
+        <div className="cn-stagger-hero-visual relative mx-auto mt-16 max-w-5xl">
           <Image
             src="/images/home/hero-dashboard.webp"
             alt="ContiNew Admin 数据分析页"
@@ -318,7 +322,7 @@ export default async function HomePage() {
             >
               <dt className="text-sm text-fd-muted-foreground">{stat.label}</dt>
               <dd className="text-2xl font-bold tracking-tight text-[var(--cn-brand)] tabular-nums sm:text-3xl">
-                {stat.value}
+                <AnimatedNumber value={stat.value} />
               </dd>
             </div>
           ))}
@@ -338,8 +342,9 @@ export default async function HomePage() {
               <Link
                 key={project.name}
                 href={project.href}
-                // 半强度品牌边框（--cn-brand-line）：实色边框在圆角上会显毛边
-                className="cn-reveal group flex flex-col rounded-xl border border-fd-border bg-fd-card p-6 transition-colors hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30"
+                // 半强度品牌边框（--cn-brand-line）：实色边框在圆角上会显毛边；
+                // 抬升 + 阴影给「卡片浮起来」的空间反馈，与边框变色同时发生
+                className="cn-reveal group flex flex-col rounded-xl border border-fd-border bg-fd-card p-6 transition-[border-color,background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30 hover:shadow-lg hover:shadow-fd-border/40"
               >
                 {/*
                  * 图标与项目名同行、标签退到右上角。
@@ -384,7 +389,7 @@ export default async function HomePage() {
             {capabilities.map((capability) => (
               <div
                 key={capability.title}
-                className="cn-reveal rounded-xl border border-fd-border bg-fd-card p-7 transition-colors hover:border-fd-primary/50"
+                className="cn-reveal rounded-xl border border-fd-border bg-fd-card p-7 transition-[border-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-fd-primary/50 hover:shadow-lg hover:shadow-fd-border/40"
               >
                 <span className="flex size-10 items-center justify-center rounded-lg bg-[var(--cn-brand-soft)] text-[var(--cn-brand)]">
                   {capability.icon}
