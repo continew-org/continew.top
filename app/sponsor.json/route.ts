@@ -1,4 +1,5 @@
-import { getDisplayedSponsors, getSponsors } from '@/lib/sponsors';
+import { getDisplayedSponsors, getSponsors, sponsorImageUrl, sponsorLogoUrl } from '@/lib/sponsors';
+import { siteUrl } from '@/lib/shared';
 
 export const revalidate = false;
 
@@ -28,13 +29,26 @@ export async function GET() {
    */
   const displayed = getDisplayedSponsors();
 
+  /*
+   * img / logo 在数据里存的是相对 partners 目录的路径（如 "aeoliancloud/banner.webp"），
+   * 这里统一转成完整 URL 再输出。演示站 4.x 轮播用 isHttp 判断 img 是否含 http，
+   * 是相对路径就拼旧前缀 /images/sponsor/ads/——给它完整 URL 才会直接使用、不拼前缀，
+   * 演示站轮播代码一行都不用改。
+   */
+  const withFullUrl = <T extends { img?: string; logo?: string }>(list: T[]) =>
+    list.map((s) => ({
+      ...s,
+      img: s.img ? `${siteUrl}${sponsorImageUrl(s.img)}` : s.img,
+      logo: s.logo ? `${siteUrl}${sponsorLogoUrl(s.logo)}` : s.logo,
+    }));
+
   return Response.json({
     // 新结构：本站当前的档位
-    strategic: getSponsors('strategic'),
-    infrastructure: getSponsors('infrastructure'),
+    strategic: withFullUrl(getSponsors('strategic')),
+    infrastructure: withFullUrl(getSponsors('infrastructure')),
     supporter: getSponsors('supporter'),
     // 兼容键：仅供演示站 4.x 轮播消费，5.x 重做后移除
-    special: displayed,
+    special: withFullUrl(displayed),
     platinum: [],
     gold: [],
     silver: [],
