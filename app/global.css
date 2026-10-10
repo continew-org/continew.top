@@ -3,6 +3,18 @@
 @import 'fumadocs-ui/css/generated/spacious.css';
 @import 'fumadocs-ui/css/preset.css';
 
+@theme {
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-mono);
+}
+
 html {
   scrollbar-gutter: stable;
 }
