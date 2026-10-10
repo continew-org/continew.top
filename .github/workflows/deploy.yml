@@ -5,7 +5,9 @@ name: Deploy
 # 流程：拉取各项目仓库 docs/ -> 组装 content/docs -> 容器内静态导出 -> 本机 rsync 到站点目录。
 #
 # 唯一 secret：SERVER_PATH = Nginx 站点根目录（如 /root/continew/nginx/html）。
-# 容错约定：某项目尚无 docs/ 目录时仅跳过该分区（保留官网自带分区骨架），不使整条部署失败。
+# 容错约定：克隆成功而源仓库确无 docs/ 时才降级为分区骨架；克隆失败沿用 runner 本机
+# 上次成功同步的文档（::warning 标注可能过期），从未同步过则判定部署失败——
+# 绝不让某个分区的内容凭空消失（2026-10-10 曾因此把线上 admin 文档整区换成骨架）。
 
 on:
   push:
@@ -31,7 +33,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2、拉取并组装各项目文档（docs/ 为文档唯一权威源；公开仓库浅克隆，缺失则跳过）
+      # 2、拉取并组装各项目文档（docs/ 为文档唯一权威源；公开仓库浅克隆）
       - name: 拉取并组装各项目文档
         run: |
           set -e
@@ -41,21 +43,38 @@ jobs:
             [starter]=continew-starter
             [app]=continew-app
           )
+          # 上次成功同步的文档在 runner 本机的留存（跨次部署持久）。拉取失败时沿用
+          # 它继续部署，而不是把分区静默降级成骨架——克隆失败是基础设施抖动，不是
+          # 「没有文档」，二者的后果不该一样。
+          cache_root="$HOME/.cache/continew-docs"
+          mkdir -p "$cache_root"
           for proj in "${!REPOS[@]}"; do
             repo="${REPOS[$proj]}"
             tmp="$(mktemp -d)"
-            # 浅克隆默认分支；仓库不可达或无 docs/ 时视为「暂无文档」，跳过而非失败
+            dest="content/docs/${proj}"
+            cache="$cache_root/$proj"
             if git clone --depth 1 --filter=blob:none --sparse \
-                 "https://github.com/continew-org/${repo}.git" "$tmp" 2>/dev/null \
-               && git -C "$tmp" sparse-checkout set docs 2>/dev/null \
-               && [ -d "$tmp/docs" ]; then
-              dest="content/docs/${proj}"
+                 "https://github.com/continew-org/${repo}.git" "$tmp"; then
+              if git -C "$tmp" sparse-checkout set docs 2>/dev/null \
+                 && [ -d "$tmp/docs" ]; then
+                rm -rf "$dest" "$cache"
+                mkdir -p "$dest" "$cache"
+                cp -r "$tmp/docs/." "$dest/"
+                cp -r "$tmp/docs/." "$cache/"
+                echo "✅ 已同步 ${proj} 文档（来自 continew-org/${repo}）"
+              else
+                # 克隆成功而源仓库确实没有 docs/：保留官网分区骨架，并清掉过期缓存
+                rm -rf "$cache"
+                echo "ℹ️  ${proj} 仓库无 docs/ 目录，使用官网分区骨架"
+              fi
+            elif [ -n "$(ls -A "$cache" 2>/dev/null)" ]; then
               rm -rf "$dest"
               mkdir -p "$dest"
-              cp -r "$tmp/docs/." "$dest/"
-              echo "✅ 已同步 ${proj} 文档（来自 continew-org/${repo}）"
+              cp -r "$cache/." "$dest/"
+              echo "::warning::${proj} 文档拉取失败，已沿用上次成功同步的文档（内容可能落后于源仓库）"
             else
-              echo "⚠️  ${proj} 仓库暂无 docs/ 目录（或不可达），使用官网分区骨架"
+              echo "❌ ${proj} 文档拉取失败，且本机没有可沿用的历史文档；为避免分区内容凭空消失，判定部署失败" >&2
+              exit 1
             fi
             rm -rf "$tmp"
           done
