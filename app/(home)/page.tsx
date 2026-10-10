@@ -426,12 +426,19 @@ export default async function HomePage() {
           <UsersMarquee users={users} />
         </div>
         <div className="mx-auto mt-10 flex max-w-6xl flex-wrap items-center justify-center gap-3 px-6">
-          <Link
+          {/*
+           * 这是外链（GitHub 登记帖），用原生 <a> 而非 next/link：
+           * Link 默认同标签跳转，会把访客整个带离本站；登记要填表，
+           * 同标签走掉等于放弃当前浏览。与 /users 页的登记按钮保持一致。
+           */}
+          <a
             href={registerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]"
           >
             我也是使用者，立即登记
-          </Link>
+          </a>
           <Link
             href="/users"
             className="inline-flex items-center gap-1.5 rounded-lg border border-fd-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent"
