@@ -83,4 +83,12 @@ pnpm types:check  # TypeScript 类型检查
 
 ## 许可
 
-本仓库以 [Apache-2.0](LICENSE) 许可证开源。各项目仓库的文档内容遵循其自身许可证。
+本仓库采用**双重许可**，详见 [LICENSE-CONTENT](LICENSE-CONTENT)：
+
+| 内容 | 许可 |
+|:-----|:-----|
+| 源代码（`app/`、`components/`、`lib/` 等） | [Apache-2.0](LICENSE) |
+| 原创内容（官方博客、官网文案与视觉设计、`public/` 原创图片、`data/` 原创数据等） | [CC BY-NC-SA 4.0](LICENSE-CONTENT) |
+| 文档内容（`content/docs/`，构建时从各项目仓库汇聚） | 遵循各项目仓库自身许可证 |
+
+第三方素材（字体、图标、开源组件等）遵循其各自的许可证。

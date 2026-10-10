@@ -72,4 +72,9 @@ CI 会对每个 PR 执行同样的检查（见 [.github/workflows/ci.yml](.githu
 
 ## 许可
 
-向本仓库贡献即表示您同意您的贡献以 [Apache-2.0](LICENSE) 许可证进行许可。
+本仓库采用双重许可（详见 [LICENSE-CONTENT](LICENSE-CONTENT)）：
+
+- **代码贡献**：向本仓库提交的代码即以 [Apache-2.0](LICENSE) 许可证进行许可；
+- **内容贡献**（官方博客文章、官网文案、原创图片等）：即以 [CC BY-NC-SA 4.0](LICENSE-CONTENT) 许可证进行许可。
+
+提交贡献即表示您同意上述许可条款，并确认您有权就此作出授权。

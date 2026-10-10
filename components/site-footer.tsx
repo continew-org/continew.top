@@ -29,9 +29,28 @@ export function SiteFooter() {
             {publicSecurityRecordCode}
           </a>
         </div>
-        <p>
-          CC BY-NC-SA 4.0 | Copyright © 2022-{currentYear} ContiNew
+        <p className="text-center">
+          本站内容采用{' '}
+          <a
+            href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans"
+            target="_blank"
+            rel="license noopener noreferrer"
+            className="hover:text-fd-foreground hover:underline"
+          >
+            CC BY-NC-SA 4.0
+          </a>{' '}
+          许可，代码采用{' '}
+          <a
+            href="https://github.com/continew-org/continew.top/blob/main/LICENSE"
+            target="_blank"
+            rel="license noopener noreferrer"
+            className="hover:text-fd-foreground hover:underline"
+          >
+            Apache-2.0
+          </a>{' '}
+          许可
         </p>
+        <p>Copyright © 2022-{currentYear} ContiNew</p>
       </div>
     </footer>
   );

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "ContiNew 官网与文档站（Next.js + Fumadocs）",
+  "license": "Apache-2.0",
   "packageManager": "pnpm@12.9.1",
   "engines": {
     "node": ">=22.0.0",
