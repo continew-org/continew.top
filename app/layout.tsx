@@ -1,6 +1,6 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import './global.css';
-import { Inter } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { appName, appDescription, siteUrl } from '@/lib/shared';
@@ -21,6 +21,12 @@ const BAIDU_TONGJI_ID = 'ac0c6ebdc48b8f9e479a33b477e39447';
 
 const inter = Inter({
   subsets: ['latin'],
+  variable: '--font-sans',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
 });
 
 export const metadata: Metadata = {
@@ -34,7 +40,11 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="zh-CN" className={inter.className} suppressHydrationWarning>
+    <html
+      lang="zh-CN"
+      className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}
+      suppressHydrationWarning
+    >
       <body className="flex flex-col min-h-screen">
         <RootProvider
           // 全站 UI 文案走中文（详见 lib/i18n.ts），否则目录、搜索、翻页等位置是英文。

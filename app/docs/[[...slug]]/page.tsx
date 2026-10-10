@@ -46,7 +46,13 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
        * 没有战略合作伙伴时组件返回 null，不留空位。
        * 要撤掉这处展示，删掉这个 prop 即可。
        */
-      tableOfContent={{ footer: <DocsSponsorSlot /> }}
+      tableOfContent={{
+        style: 'clerk',
+        footer: <DocsSponsorSlot />,
+      }}
+      tableOfContentPopover={{
+        style: 'clerk',
+      }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
