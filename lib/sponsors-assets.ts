@@ -26,14 +26,16 @@ export function assertSponsorAssetsExist(): void {
   const root = path.join(process.cwd(), 'public', SPONSOR_ASSET_BASE.replace(/^\/+/, ''));
   const missing: string[] = [];
 
-  // 只查商业档：个人支持者按类型就没有素材字段（name + url 之外什么都没有）。
-  for (const tier of ['strategic', 'infrastructure'] as const) {
-    for (const sponsor of getSponsors(tier)) {
-      for (const file of [sponsor.img, sponsor.logo]) {
-        if (!file) continue;
-        if (!fs.existsSync(path.join(root, file))) {
-          missing.push(`  - ${tier} / ${sponsor.name}: ${SPONSOR_ASSET_BASE}/${file}`);
-        }
+  // 只查有素材字段的两档，先各自取出（避免 getSponsors 对联合入参的重载解析问题）。
+  const entries = [
+    ...getSponsors('strategic').map((sponsor) => ({ tier: 'strategic' as const, sponsor })),
+    ...getSponsors('infrastructure').map((sponsor) => ({ tier: 'infrastructure' as const, sponsor })),
+  ];
+  for (const { tier, sponsor } of entries) {
+    for (const file of [sponsor.img, sponsor.logo]) {
+      if (!file) continue;
+      if (!fs.existsSync(path.join(root, file))) {
+        missing.push(`  - ${tier} / ${sponsor.name}: ${SPONSOR_ASSET_BASE}/${file}`);
       }
     }
   }

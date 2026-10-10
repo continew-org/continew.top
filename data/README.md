@@ -9,8 +9,7 @@
 | `timeline.json` | `/timeline` 发展历程 | `lib/timeline.ts` |
 | `users.json` | `/users` 登记用户 | `lib/users.ts` |
 | `members-core.json` / `members-partner.json` / `members-emeriti.json` | `/team` 社区团队 | `lib/team.ts` |
-| `sponsors.json` | `/sponsor` 赞助 | `lib/sponsors.ts` |
-| `demo-environments.json` | `/sponsor` 历史资源支持 | `lib/demo-env.ts` |
+| `sponsors.json` | `/sponsor` 赞助；`/demo` 页的当前服务器；`sponsor.json` 接口 | `lib/sponsors.ts` |
 | `messages.json` | 首页「社区声音」区块 | `lib/messages.ts` |
 
 ---
@@ -137,38 +136,95 @@
 当前收录的均为征集帖下的真实留言（署名取 GitHub 登录名或昵称）。
 ---
 
-## demo-environments.json：历史资源支持
+## sponsors.json：赞助与致谢
 
-一条记录 = 某位提供者在某段时间里提供的一套环境。
+`/sponsor` 页的数据源。顶层有三块：`config`（席位上限）、`resourceNeeds`（资源需求清单）、`tiers`（按**关系类型**分三档——是三种关系，不是按金额排的三个等级）：
+
+| 档位 | 含义 | 页面上 |
+|:-----|:-----|:-------|
+| `strategic` | 开源合作伙伴，**按月**付费，占席位 | 紧凑卡片：Logo + 名称 |
+| `infrastructure` | 资源合作伙伴，以**资源**支持（服务器、云资源、额度等），拆成一条条**需求项** | 一行一项：资源 + 数量 + 提供者小标识 + 时间段 |
+| `supporter` | 个人支持者 | 小胶囊：小头像 + 名称，**不写任何说明** |
+
+席位只由 `strategic` 占（`config.strategicSeats` 减在支持数 = 页面上的「剩 N 席」），`infrastructure` 与 `supporter` 都不占席。
+
+三种关系各用一种紧凑形态（`components/sponsor/`），不再共用大卡片：
+
+| 组件 | 用途 | 视觉 |
+|:-----|:-----|:-----|
+| `company-card.tsx`（`CompanyCard`） | 开源合作伙伴 | `size-8` Logo + 名称一行 |
+| `resource-card.tsx`（`ResourceNeedCard`） | 资源合作伙伴，**按需求归组** | 一项需求一张卡，`sm:grid-cols-2` 一行两张：卡头是需求图标 + 需求名 + 数量，卡内列出满足过它的全部提供者（`size-9` 标识 + 名字 + 具体提供物 + 时间段，当前在用的置顶带「在用」标记）。同一项需求可多人接力，由 `groupResourceByNeed()` 按 `need` 归组 |
+| `supporter-chip.tsx`（`SupporterChips`） | 个人支持者 | 圆角胶囊：`size-6` 小头像 + 名称 |
+
+### resourceNeeds：资源需求与提供者绑定
+
+需求与提供者在数据里就绑定，不再两处分开维护：
 
 ```json
 {
-  "env": "演示环境前后端、MySQL、Redis、MinIO、任务调度中心、文档站点、Charles API 服务",
-  "spec": "8C16G + 10M + 30/200GB",
-  "provider": "风铃云信息科技",
-  "url": "https://www.aeoliancloud.com/cart/goods.htm?id=14",
-  "period": "2025.8 至今",
-  "current": true
+  "name": "Token Plan 或额度",
+  "qty": "不限",
+  "desc": "项目 Code Review CI 与开发提效",
+  "provider": "Boy"
 }
 ```
 
-### 字段说明
+`provider` 填 `tiers.infrastructure` 中某条的 `name`（页面据此解析出 Logo / 头像与链接，用小标识内联显示）；待支持的项填 `null`。改提供者时只动这一处，不会再出现「清单说他提供了、需求却标待支持」那种漏改。
 
-| 字段 | 必填 | 说明 |
-|:-----|:--:|:-----|
-| `env` | 是 | 这套环境承载了什么，可同时写多个服务 |
-| `spec` | 是 | 配置规格；早期记录不全时写 `-` |
-| `provider` | 是 | 提供者名称（个人或公司），页面上做成外链 |
-| `url` | 是 | 提供者主页；服务器赞助商可带商品链接 |
-| `period` | 是 | 起止时间文本，如 `2024.10 ~ 2025.8`、`~ 2025.8` |
-| `current` | 否 | 是否为当前在用环境（应只有一条），用于行底色与「在用」标记 |
+### 条目字段
+
+`strategic` / `supporter` 用通用字段；`infrastructure` 是**需求项**，一条 = 某人在某段时间提供的一项资源，同一个人可以有多条：
+
+```json
+{
+  "name": "Boy",
+  "avatar": "https://avatars.githubusercontent.com/u/40259902?s=160&v=4",
+  "url": "https://github.com/yxplus1116",
+  "need": "Token Plan 或额度",
+  "detail": "ChatGPT 额度",
+  "qty": "不限",
+  "period": "2026.10 至今",
+  "current": true,
+  "featured": true
+}
+```
+
+| 字段 | 必填 | 适用 | 说明 |
+|:-----|:--:|:--|:-----|
+| `name` | 是 | 全部 | 公司名或个人昵称 |
+| `need` | 是 | infrastructure | **需要什么**（需求词汇，主信息），如 `云服务器`、`Token Plan 或额度`、`任务调度中心`；与上方 `resourceNeeds` 的名称口径一致 |
+| `detail` | 否 | infrastructure | **实际提供的具体内容**（次级标注），如 `8C16G + 10M`、`ChatGPT 额度`。同类需求里谁给得更多，差异全在这里；只写 need 会抹平它 |
+| `qty` | 是 | infrastructure | 数量，如 `×1`、`不限` |
+| `period` | 是 | infrastructure | 支持周期文本，如 `2024.10 ~ 2025.8`、`~ 2025.8`、`2025.8 至今`。这是资源的**运转周期**，不是捐赠日期 |
+| `current` | 否 | infrastructure | 当前在用的项；当前项排在数组前面 |
+| `env` / `spec` | 否 | infrastructure | 仅当前在用的服务器项：承载的服务与配置规格，供 `/demo` 页读取 |
+| `logo` | 否 | 企业 | 品牌标识，**本地素材**相对 `public/images/sponsor/partners/` 的路径（如 `aeoliancloud/logo.webp`） |
+| `avatar` | 否 | 个人 | **外链**（GitHub / Gitee 平台头像），与 logo 二选一 |
+| `url` | 否 | 全部 | 主页；有才该项可点 |
+| `status` | 否 | strategic / supporter | `past` = 往期，缺省为在支持 |
+| `featured` | 否 | 全部 | **内部策展标记，绝不渲染成标签** |
+| `img` | 否 | 企业 | 广告横幅（建议 680×320），相对 partners 目录的路径，用于演示站轮播 |
+
+**资源合作伙伴不分过去 / 现在两组**——所有贡献项都在 `infrastructure` 一个数组里，按顺序排列（当前在用的在前），每条自带 `period`。这样一份名单就是一份完整的贡献台账，而不是把人划成「在的」和「走的」两类。
+
+#### featured：首页策展口径
+
+首页是社会证明位，按「承诺」而不是「金额」选，规则只存在于 `lib/sponsors.ts` 的 `getHomepageBackers()`：
+
+- 开源合作伙伴：在支持的**全部**上首页；
+- 资源合作伙伴：当前在用 + `featured: true`（价值过阈值）；
+- 个人支持者：优先 `featured`（长期）；一个长期都没有时取最近的几位兜底。
+
+页面不解释这些规则、也不贴「精选」标签——否则首页就退化成排行榜，没上首页的人会觉得自己被评了级。
 
 ### 维护约定
 
-- **顺序手工维护**：当前环境在前，其余按时间倒序。`period` 是自由文本，
-  代码不做排序（`lib/demo-env.ts` 直接按文件顺序返回）。
-- 新增一条环境时，同时把上一条的 `period` 补成闭区间（如 `2024.10 ~ 2025.8`），
-  并把 `current` 移交给新的那条。
-- 提供者是个人时，`url` 建议用对方公开主页（Gitee / GitHub）；
-  填上等于公开致谢，若对方希望匿名请先征询。
-- 数据来源：旧站（VitePress）`docs/admin/guide/demo.md` 的「环境来源」一节。
+- **一律不写金额。** 数额之间没有可比性，写出来读者读到的不是感谢而是排序，对给得少的人尤其不公道。
+- **个人支持者不写任何说明。** 名字本身就是全部信息；胶囊里多一句只会把名单往账单推。
+- **个人支持者不写捐赠日期。** 日期会让名单变成一张账单，让"什么时候给的"盖过"他给过"。
+- **need 写需求词汇，detail 写具体物，都不写长句。** 读者先看到的是「满足了哪项需求」，再看到「具体给了什么」；一句话散文（如「为演示环境提供服务器与带宽支持」）是噪音。`detail` 要保留——8C16G 与 2C2G 的差别就是慷慨的差别，抹平它对给得多的人不公道。
+- **资源项顺序手工维护**：当前在用的在前，其余按时间倒序；`period` 是自由文本，代码不排序。新增一项资源时，把上一条的 `period` 补成闭区间，并把 `current` 移交给新项。
+- **往期不删除、不降级。** 支持过就是支持过；且「有人支持过一阵」对后来者是真实信号——比「从未有人支持」更敢迈出第一步。个人 / 合作伙伴停止支持时把 `status` 改成 `past`，名字、头像、链接三项待遇完全不变；资源贡献则作为带 `period` 的条目永久留在 `infrastructure` 台账里。
+- **别用「一次性」这个词。** 中文里容易读成"用完即弃"，既不体面也让支持的人不舒服。
+- `strategic` / `infrastructure` 的 `img` / `logo` 路径在构建期校验存在性，写错会直接让构建失败。`avatar` 用平台头像外链，不进 partners 目录。
+- `/demo` 页不再有独立数据源（原 `data/demo-environments.json` 与 `lib/demo-env.ts` 已移除），当前演示环境直接读取 `infrastructure` 中在用的服务器项（`env` / `spec`），支持者与演示环境只有一份事实来源。

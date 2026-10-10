@@ -2,6 +2,32 @@
   "config": {
     "strategicSeats": 3
   },
+  "resourceNeeds": [
+    {
+      "name": "云服务器",
+      "qty": "×1",
+      "desc": "4 核 8G 起、带公网 IP，部署 continew-admin 相关服务及数据库",
+      "provider": "风铃云信息科技"
+    },
+    {
+      "name": "Token Plan 或额度",
+      "qty": "不限",
+      "desc": "项目 Code Review CI 与开发提效",
+      "provider": "Boy"
+    },
+    {
+      "name": "对象存储 OSS / S3 服务",
+      "qty": "×1",
+      "desc": "文件、头像与附件上传演示",
+      "provider": null
+    },
+    {
+      "name": "Redis 服务",
+      "qty": "×1",
+      "desc": "continew-admin 等服务的缓存与会话",
+      "provider": null
+    }
+  ],
   "tiers": {
     "strategic": [],
     "infrastructure": [
@@ -10,9 +36,86 @@
         "url": "https://www.aeoliancloud.com/cart/goods.htm?id=14",
         "img": "aeoliancloud/banner.webp",
         "logo": "aeoliancloud/logo.webp",
-        "description": "为 ContiNew Admin 在线演示环境提供服务器与带宽支持。"
+        "need": "云服务器",
+        "detail": "8C16G + 10M + 30/200GB",
+        "qty": "×1",
+        "period": "2025.8 至今",
+        "current": true,
+        "env": "演示环境前后端、MySQL、Redis、MinIO、任务调度中心、文档站点、Charles API 服务",
+        "spec": "8C16G + 10M + 30/200GB",
+        "featured": true
+      },
+      {
+        "name": "Boy",
+        "url": "https://github.com/yxplus1116",
+        "avatar": "https://avatars.githubusercontent.com/u/40259902?s=160&v=4",
+        "need": "Token Plan 或额度",
+        "detail": "ChatGPT 额度",
+        "qty": "不限",
+        "period": "2026.10 至今",
+        "current": true,
+        "featured": true
+      },
+      {
+        "name": "莫愁",
+        "url": "https://gitee.com/kiki1373639299",
+        "avatar": "https://foruda.gitee.com/avatar/1761026926560618595/10166803_kiki1373639299_1761026926.png",
+        "need": "云服务器",
+        "detail": "4C8G + 5M",
+        "qty": "×1",
+        "period": "2024.10 ~ 2025.8"
+      },
+      {
+        "name": "Charles7c",
+        "url": "https://gitee.com/charles7c",
+        "avatar": "https://foruda.gitee.com/avatar/1672402076723496711/1294645_charles7c_1672402076.png",
+        "need": "云服务器",
+        "detail": "2C2G + 3M",
+        "qty": "×1",
+        "period": "~ 2025.8"
+      },
+      {
+        "name": "莫愁",
+        "url": "https://gitee.com/kiki1373639299",
+        "avatar": "https://foruda.gitee.com/avatar/1761026926560618595/10166803_kiki1373639299_1761026926.png",
+        "need": "公共后端 API",
+        "qty": "×1",
+        "period": "~ 2025.8"
+      },
+      {
+        "name": "Kils",
+        "url": "https://gitee.com/jskils",
+        "avatar": "https://foruda.gitee.com/avatar/1718788214524419935/1751401_jskils_1718788214.png",
+        "need": "数据库 / 缓存环境",
+        "detail": "PostgreSQL",
+        "qty": "×1",
+        "period": "~ 2025.8"
+      },
+      {
+        "name": "Bull-BCLS",
+        "url": "https://gitee.com/Yoofff",
+        "avatar": "https://foruda.gitee.com/avatar/1703510035628602809/10061682_yoofff_1703510035.png",
+        "need": "数据库 / 缓存环境",
+        "detail": "MySQL · Redis（2C2G）",
+        "qty": "×1",
+        "period": "2023.10 ~ 2024.9"
+      },
+      {
+        "name": "Kils",
+        "url": "https://gitee.com/jskils",
+        "avatar": "https://foruda.gitee.com/avatar/1718788214524419935/1751401_jskils_1718788214.png",
+        "need": "任务调度中心",
+        "qty": "×1",
+        "period": "2024.5 ~ 2024.9"
       }
     ],
-    "supporter": []
+    "supporter": [
+      {
+        "name": "Charlie",
+        "avatar": "https://foruda.gitee.com/avatar/1676983733495045769/1695736_tecsmile_1587698621.png",
+        "url": "https://gitee.com/tecsmile",
+        "featured": true
+      }
+    ]
   }
 }

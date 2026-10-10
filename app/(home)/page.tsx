@@ -3,11 +3,9 @@ import Link from 'next/link';
 import {
   ArrowRight,
   Boxes,
-  Crown,
   Layers,
   LayoutDashboard,
   Rocket,
-  Server,
   ShieldCheck,
   Smartphone,
   Zap,
@@ -33,7 +31,10 @@ import {
 } from '@/lib/shared';
 import { getContributorList, getContributorSummary, getStarSummary } from '@/lib/site-stats';
 import { getUsers } from '@/lib/users';
-import { getSponsors, sponsorLogoUrl } from '@/lib/sponsors';
+import { getHomepageBackers, groupResourceByNeed } from '@/lib/sponsors';
+import { CompanyCard } from '@/components/sponsor/company-card';
+import { ResourceNeedCard } from '@/components/sponsor/resource-card';
+import { SupporterChips } from '@/components/sponsor/supporter-chip';
 
 /**
  * 首页文案集中在本文件。
@@ -152,50 +153,6 @@ const faqItems: FaqItem[] = [
  * 而首页这一段的任务只是让人看见「已经有人在用」。
  */
 
-/**
- * 首页合作伙伴品牌卡。
- *
- * 【为什么要分 tone】
- * 付费的「开源合作伙伴」和给服务器/云资源的「资源合作伙伴」是两种完全不同的贡献：
- * 一个是按月出钱买曝光，一个是撑起基础设施。之前两者用同一张白卡渲染，
- * 读者和赞助商自己都看不出区别，等于把两套贡献说成了一种。
- * 现在按档位给不同描边（品牌色 / teal），扫一眼就能分出是谁、以什么方式支持。
- *
- * 【为什么卡片是不透明实底而不是半透明色底】
- * 这一区块本身带 6% 品牌底色，卡片如果也是半透明色底（--cn-brand-soft 约 6.6%
- * 品牌色、teal 7%），叠上去几乎等于区块底色——卡片会整片糊进背景里，
- * 只剩一圈边框飘着。区块有底，卡片就得是实底，靠"浮起来"建立对比：
- * 实底卡片 + 描边色区分档位 + hover 上浮加阴影，三层信息各管一件事。
- */
-function PartnerCard({
-  sponsor,
-  tone,
-}: {
-  sponsor: { name: string; url: string; logo?: string };
-  tone: 'brand' | 'resource';
-}) {
-  const logo = sponsor.logo ? sponsorLogoUrl(sponsor.logo) : null;
-  const accent =
-    tone === 'brand'
-      ? 'border-[var(--cn-brand-line)] hover:border-[var(--cn-brand)]'
-      : 'border-teal-500/40 hover:border-teal-500/70';
-
-  return (
-    <a
-      href={sponsor.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`group flex items-center gap-3 rounded-xl border bg-fd-card px-5 py-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${accent}`}
-    >
-      {logo && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={logo} alt="" loading="lazy" className="h-9 w-auto object-contain" />
-      )}
-      <span className="text-sm font-medium text-fd-foreground">{sponsor.name}</span>
-    </a>
-  );
-}
-
 export default async function HomePage() {
   /*
    * 三个数据源一次性并发拉取，都在构建期执行（静态导出）。
@@ -215,19 +172,18 @@ export default async function HomePage() {
   const users = getUsers();
   const messages = getMessages();
   /*
-   * 首页按**档位分组**取数，而不是拿一个合并列表。
-   *
-   * 之前用 getDisplayedSponsors() 把付费档和资源档混成一个数组渲染，
-   * 结果两种伙伴长得一模一样——读者（和赞助商自己）看不出
-   * 「按月出钱」和「提供服务器」是两回事，而这两者恰恰是该被区分的：
-   * 前者是买曝光，后者是撑基础设施。混在一起等于把两套贡献说成一种。
-   *
-   * 个人支持者不在这里：几十个名字摊在首页会变成一片噪点，它的舞台在赞助页。
+   * 首页支持者名单：由 getHomepageBackers 统一策展（开源全上、资源按阈值、
+   * 个人优先长期）。这里只拿到结果，规则不外显——首页是社会证明位，不是排行榜。
+   * 三者各用最贴切的紧凑形态：开源合作卡、需求项式资源行、支持者胶囊，
+   * 头像 / Logo 都是小标识的量级，不再用大卡片。
    */
-  const strategicPartners = getSponsors('strategic');
-  const resourcePartners = getSponsors('infrastructure');
-  const hasPartners = strategicPartners.length > 0 || resourcePartners.length > 0;
-  const partnerCount = strategicPartners.length + resourcePartners.length;
+  const backers = getHomepageBackers();
+  // 首页资源只放当前在用的条目，按需求归组成卡片（不展开往期履历，那是赞助页的事）。
+  const resourceGroups = groupResourceByNeed(backers.resource);
+  const hasBackers =
+    backers.strategic.length > 0 ||
+    resourceGroups.length > 0 ||
+    backers.supporters.length > 0;
 
   // 数值保持数字类型，交给 AnimatedNumber 做「滚进视口从 0 计数」；格式化在组件内做
   const stats = [
@@ -523,108 +479,82 @@ export default async function HomePage() {
       </section>
 
       {/*
-        合作伙伴。紧跟在「社区贡献者」之后：一个是出力的人、一个是出钱出资源的伙伴，
+        当前支持者。紧跟在「社区贡献者」之后：一个是出力的人、一个是出钱出资源的伙伴，
         连在一起才构成完整的社会证明——「这个项目确实有人在投入」。
         再往后是 FAQ 与收尾 CTA，那两段是转化流程，不该被赞助信息打断。
 
-        【为什么标题结构和贡献者那一块一样】
-        上一版这里只有一行眉标 + 一句小字，理由是"只有一家伙伴，撑不起一屏"。
-        结果它看着不像独立区块，而像贡献者区块末尾的一句脚注——读者要滚到 FAQ 的
-        灰底才反应过来刚才那段是另一块。首页每块都是「眉标 + 主张句 + 补充说明」，
-        唯独这里矮一档，属于不一致，不是克制。现在补齐同一套 SectionHeading，
-        区块身份由标题建立，不再靠一条分割线去找边界。
+        【为什么按关系分小标签、却不分级】
+        开源合作伙伴、资源合作伙伴、个人支持者是三种**关系**，不是高低等级。
+        各处的 Logo / 头像都收在一枚小标识的量级：企业用紧凑卡片、资源用需求项式行、
+        个人用胶囊——谁上首页由维护者在数据里按「承诺」策展（featured，内部标记，不渲染），
+        页面上看不到「谁过线、谁没过」，否则这块社会证明位就退化成排行榜。
+        不写金额；首页的资源行不画时间，完整履历在赞助页。
 
         【底色为什么是极淡品牌色】
         首页底色是白 / 中性灰交替的：贡献者（白）→ 这里 → FAQ（灰）。
-        两块相邻不能同色，所以这里既不能白也不能灰——用 4% 品牌色，
+        两块相邻不能同色，所以这里既不能白也不能灰——用 6% 品牌色，
         与两侧都区分得开，又比中性灰多一层"致谢"的语义。
-        有了底色就不需要 border-t：那条线本来是给白底接白底用的，
-        留着反而把这块钉成上一区块的附庸。
-
-        【留白为什么还是比其他块小一档】
-        首页 PV 只有演示站的零头，给赞助位撑满一屏 py-20 不划算，
-        但压成一行又没有区域感。折中是标题照常、纵向留白取 py-14/sm:py-16。
-
-        【素材只用 Logo，不用广告横幅】
-        横幅是促销内容（340×160 带推广文案），首页作为品牌门面只该出现品牌标识。
       */}
       <section className="bg-[color-mix(in_oklab,var(--cn-brand)_6%,transparent)] px-6 py-14 sm:py-16">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-3xl">
           <SectionHeading
-            eyebrow="合作伙伴"
+            eyebrow="当前支持者"
             title={
-              hasPartners
-                ? `${partnerCount} 位合作伙伴，撑起 ContiNew 的日常运转`
-                : '席位开放中，等第一位伙伴'
+              hasBackers ? '他们，撑起 ContiNew 的日常运转' : '席位开放中，等第一位伙伴'
             }
-            description="提交记录里看不到他们，但项目能一直跑下去，靠的就是他们。"
+            description="提交记录里或许看不到他们，但 ContiNew 能持续下去，他们是源源不断的力量。"
           />
 
-          <div className="mt-9 flex flex-col gap-7 sm:mt-10">
-            {/*
-              付费档：皇冠 + 品牌色，副标注明"按月资金支持"。
-              和资源档用不同的图标、颜色、副标，让两种贡献方式一眼可分。
-            */}
-            {strategicPartners.length > 0 && (
-              <div>
-                <div className="flex items-center justify-center gap-1.5">
-                  <Crown className="size-3.5 shrink-0 text-[var(--cn-brand)]" aria-hidden />
-                  <span className="text-xs font-medium text-fd-muted-foreground">
-                    开源合作伙伴 · 按月资金支持
-                  </span>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-                  {strategicPartners.map((partner) => (
-                    <PartnerCard key={partner.name} sponsor={partner} tone="brand" />
+          {hasBackers ? (
+            <div className="mt-9 flex flex-col gap-6 sm:mt-10">
+              {/* 开源合作伙伴：企业有一句业务介绍，用紧凑卡片 */}
+              {backers.strategic.length > 0 && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {backers.strategic.map((sponsor) => (
+                    <CompanyCard key={sponsor.name} sponsor={sponsor} />
                   ))}
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* 资源档：服务器图标 + teal，副标注明"服务器与云资源" */}
-            {resourcePartners.length > 0 && (
-              <div>
-                <div className="flex items-center justify-center gap-1.5">
-                  <Server
-                    className="size-3.5 shrink-0 text-teal-600 dark:text-teal-400"
-                    aria-hidden
-                  />
-                  <span className="text-xs font-medium text-fd-muted-foreground">
-                    资源合作伙伴 · 服务器与云资源
-                  </span>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-                  {resourcePartners.map((partner) => (
-                    <PartnerCard key={partner.name} sponsor={partner} tone="resource" />
+              {/* 资源合作伙伴：按需求归组的卡片，一行两张，首页只看当前在用、不画时间 */}
+              {resourceGroups.length > 0 && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {resourceGroups.map((group) => (
+                    <ResourceNeedCard
+                      key={group.need}
+                      group={group}
+                      showPeriod={false}
+                      showQty={false}
+                      highlightCurrent={false}
+                    />
                   ))}
                 </div>
-              </div>
-            )}
+              )}
 
-            {/*
-              一个伙伴都没有时才显示占位。占位卡的圆角与高度和品牌卡保持一致，
-              所以从"有"到"没有"不会有塌陷感，也不像一块突兀的空牌子。
-              文案不再重复"席位开放中"——标题已经说了，这里只留动作。
-            */}
-            {!hasPartners && (
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <Link
-                  href="/sponsor"
-                  className="flex items-center gap-2.5 rounded-xl border border-dashed border-fd-border bg-fd-card px-5 py-3.5 transition-colors hover:border-[var(--cn-brand-line)]"
-                >
-                  <span className="text-sm font-medium text-[var(--cn-brand)]">
-                    成为第一位合作伙伴 →
-                  </span>
-                </Link>
-              </div>
-            )}
-          </div>
+              {/* 个人支持者：紧凑胶囊，一行排开 */}
+              {backers.supporters.length > 0 && (
+                <SupporterChips supporters={backers.supporters} />
+              )}
+            </div>
+          ) : (
+            // 一个支持者都没有时才显示占位，圆角与真实列表一致，不会有塌陷感。
+            <div className="mt-9 flex justify-center sm:mt-10">
+              <Link
+                href="/sponsor"
+                className="flex items-center gap-2.5 rounded-xl border border-dashed border-fd-border bg-fd-card px-5 py-3.5 transition-colors hover:border-[var(--cn-brand-line)]"
+              >
+                <span className="text-sm font-medium text-[var(--cn-brand)]">
+                  成为第一位支持者 →
+                </span>
+              </Link>
+            </div>
+          )}
 
           {/*
-            有伙伴时，底部这条是"我也想赞助"的入口；
+            有支持者时，底部这条是"我也想赞助"的入口；
             一个都没有时，上面的占位卡已经是同一个入口，再挂一条就是重复。
           */}
-          {hasPartners && (
+          {hasBackers && (
             <div className="mt-8 text-center">
               <Link
                 href="/sponsor"

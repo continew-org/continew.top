@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AlertTriangle, ArrowRight, ExternalLink, Server } from 'lucide-react';
-import { getDemoEnvironments } from '@/lib/demo-env';
+import { getCurrentResourcePartners } from '@/lib/sponsors';
 import { demoUrl } from '@/lib/shared';
 import {
   PageContainer,
@@ -34,8 +34,10 @@ const notices: string[] = [
 ];
 
 export default function DemoPage() {
-  // 只取当前在用环境：完整历史名录在赞助页，这里不重复铺表
-  const currentEnv = getDemoEnvironments().find((item) => item.current);
+  // 只取当前在用的服务器资源：完整贡献履历在赞助页，这里不重复铺列
+  const currentEnv = getCurrentResourcePartners().find(
+    (item) => item.name === '风铃云信息科技',
+  ) ?? getCurrentResourcePartners()[0];
 
   return (
     <PageContainer>
@@ -151,14 +153,20 @@ export default function DemoPage() {
               </span>
               <span className="text-fd-muted-foreground">
                 提供者
-                <a
-                  href={currentEnv.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-1.5 font-medium text-[var(--cn-brand)] hover:underline"
-                >
-                  {currentEnv.provider}
-                </a>
+                {currentEnv.url ? (
+                  <a
+                    href={currentEnv.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-1.5 font-medium text-[var(--cn-brand)] hover:underline"
+                  >
+                    {currentEnv.name}
+                  </a>
+                ) : (
+                  <span className="ml-1.5 font-medium text-fd-foreground">
+                    {currentEnv.name}
+                  </span>
+                )}
               </span>
             </div>
           </div>
