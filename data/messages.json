@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "content": "封装好的 CRUD 是最打动我的点。新模块不用再重复写增删改查，直接聚焦业务逻辑，开发节奏快了很多。",
+    "author": "梓陌",
+    "title": "后端开发工程师",
+    "region": "浙江 · 杭州",
+    "avatar": "https://foruda.gitee.com/avatar/1712037917547786884/8010824_dom-w_1712037917.png!avatar200",
+    "platform": "github",
+    "url": "https://github.com/continew-org/continew.top/issues/6#issuecomment-6091937106",
+    "createdAt": "2026-10-10"
+  },
+  {
+    "content": "我是 To B 产品经理，多年来一直受困于产品架构问题。不管什么项目，从 1 到 N 阶段一定会面临无休止的架构调整，十分痛苦。直到 ContiNew 的出现，如久旱逢甘霖。",
+    "author": "浩哥",
+    "title": "产品经理",
+    "region": "湖北 · 武汉",
+    "avatar": "https://foruda.gitee.com/avatar/1744859136400739534/8773027_imyuhao_1744859136.png!avatar200",
+    "platform": "github",
+    "url": "https://github.com/continew-org/continew.top/issues/6#issuecomment-6093088764",
+    "createdAt": "2026-10-10"
+  },
+  {
+    "content": "规范工整，方便快捷，适用广泛，面向专业",
+    "author": "吴*填",
+    "title": "产品经理",
+    "region": "广东 · 广州",
+    "platform": "github",
+    "url": "https://github.com/continew-org/continew.top/issues/6#issuecomment-6081377589",
+    "createdAt": "2026-10-09"
+  }
+]
