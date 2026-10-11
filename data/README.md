@@ -148,14 +148,13 @@
 
 席位只由 `strategic` 占（`config.strategicSeats` 减在支持数 = 页面上的「剩 N 席」），`infrastructure` 与 `supporter` 都不占席。
 
-支持页先由 `getCompanions()` 按名字聚合身份，再用统一的支持者卡片展示；资源支持内容和周期直接进入对应身份卡，不再另设重复的足迹区块。网格使用自动填充，支持者增多时自然换行；超过 12 位后，其余记录默认折叠在“查看全部”中。首页保持紧凑形态：
+支持页先由 `getCompanions()` 按名字聚合身份，再用统一的支持者卡片展示；资源支持内容和周期直接进入对应身份卡，不再另设重复的足迹区块。网格使用自动填充，支持者增多时自然换行；超过 12 位后，其余记录默认折叠在“查看全部”中。首页同样以支持者身份为主，但只展示当前入选的支持和当前资源内容：
 
 | 组件 | 用途 | 视觉 |
 |:-----|:-----|:-----|
 | `companion-card.tsx`（`CompanionCard`） | 支持页永久支持者名录 | 紧凑身份卡；资源伙伴直接列出资源与周期，个人只显示姓名与身份；只有真实持续中的条目显示状态 |
-| `company-card.tsx`（`CompanyCard`） | 首页开源合作伙伴 | `size-8` Logo + 名称一行 |
-| `resource-card.tsx`（`ResourceNeedCard`） | 首页资源伙伴 | 一项需求一张卡，卡内列出当前提供者 |
-| `supporter-chip.tsx`（`SupporterChips`） | 首页当前个人支持者 | 圆角胶囊：头像 + 名称 |
+| `homepage-supporter-card.tsx`（`HomepageSupporterCard`） | 首页当前支持者 | 支持者姓名与关系优先，当前资源需求作为高亮标签；保留轻量关系波纹与持续状态，不展开历史履历 |
+| `resource-card.tsx`（`MiniVisual`） | 支持页当前需求清单 | 资源提供者的小型 Logo / 头像 |
 
 ### resourceNeeds：资源需求与提供者绑定
 

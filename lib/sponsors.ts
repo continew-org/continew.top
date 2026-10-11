@@ -312,6 +312,32 @@ export function getHomepageBackers(fallbackCount = 3): HomepageBackers {
 }
 
 /**
+ * 首页当前支持者身份卡。
+ *
+ * 策展规则仍由 `getHomepageBackers()` 决定，这里只负责把三类结果按名字聚合，
+ * 保证同一位支持者即使同时提供多项资源也只出现一次。资源明细仅保留本次入选首页的
+ * 当前条目，避免把永久名录里的历史履历带进首页。
+ */
+export function getHomepageCompanions(fallbackCount = 3): Companion[] {
+  const backers = getHomepageBackers(fallbackCount);
+  const names = new Set(
+    [...backers.strategic, ...backers.resource, ...backers.supporters].map(
+      (backer) => backer.name,
+    ),
+  );
+  const selectedResourceEntries = new Set(backers.resource);
+
+  return getCompanions()
+    .filter((companion) => names.has(companion.name))
+    .map((companion) => ({
+      ...companion,
+      resourceEntries: companion.resourceEntries.filter((entry) =>
+        selectedResourceEntries.has(entry),
+      ),
+    }));
+}
+
+/**
  * 当前资源需求清单（含提供者解析）。页面把需求与提供者画在同一行。
  */
 export interface ResolvedResourceNeed extends ResourceNeed {

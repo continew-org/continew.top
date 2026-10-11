@@ -3,6 +3,7 @@ import Link from 'next/link';
 import {
   ArrowRight,
   Boxes,
+  HeartHandshake,
   Layers,
   LayoutDashboard,
   Rocket,
@@ -31,10 +32,8 @@ import {
 } from '@/lib/shared';
 import { getContributorList, getContributorSummary, getStarSummary } from '@/lib/site-stats';
 import { getUsers } from '@/lib/users';
-import { getHomepageBackers, groupResourceByNeed } from '@/lib/sponsors';
-import { CompanyCard } from '@/components/sponsor/company-card';
-import { ResourceNeedCard } from '@/components/sponsor/resource-card';
-import { SupporterChips } from '@/components/sponsor/supporter-chip';
+import { getHomepageCompanions } from '@/lib/sponsors';
+import { HomepageSupporterCard } from '@/components/sponsor/homepage-supporter-card';
 
 /**
  * 首页文案集中在本文件。
@@ -172,18 +171,12 @@ export default async function HomePage() {
   const users = getUsers();
   const messages = getMessages();
   /*
-   * 首页支持者名单：由 getHomepageBackers 统一策展（开源全上、资源按阈值、
-   * 个人优先长期）。这里只拿到结果，规则不外显——首页是社会证明位，不是排行榜。
-   * 三者各用最贴切的紧凑形态：开源合作卡、需求项式资源行、支持者胶囊，
-   * 头像 / Logo 都是小标识的量级，不再用大卡片。
+   * 首页支持者名单：策展规则仍由 getHomepageBackers 统一维护，
+   * getHomepageCompanions 再按名字聚合成稳定身份——首页是社会证明位，不是资源清单。
+   * 每人一张紧凑卡，当前资源只作为身份下的支持内容，不展开往期履历。
    */
-  const backers = getHomepageBackers();
-  // 首页资源只放当前在用的条目，按需求归组成卡片（不展开往期履历，那是赞助页的事）。
-  const resourceGroups = groupResourceByNeed(backers.resource);
-  const hasBackers =
-    backers.strategic.length > 0 ||
-    resourceGroups.length > 0 ||
-    backers.supporters.length > 0;
+  const homepageCompanions = getHomepageCompanions();
+  const hasBackers = homepageCompanions.length > 0;
 
   // 数值保持数字类型，交给 AnimatedNumber 做「滚进视口从 0 计数」；格式化在组件内做
   const stats = [
@@ -479,88 +472,51 @@ export default async function HomePage() {
       </section>
 
       {/*
-        当前支持者。紧跟在「社区贡献者」之后：一个是出力的人、一个是出钱出资源的伙伴，
-        连在一起才构成完整的社会证明——「这个项目确实有人在投入」。
-        再往后是 FAQ 与收尾 CTA，那两段是转化流程，不该被赞助信息打断。
+        当前支持者。紧跟在「社区贡献者」之后：一个是贡献代码的人，一个是提供资源或持续支持的伙伴，
+        连在一起构成完整的社会证明——「这个项目确实有人在投入」。
 
-        【为什么按关系分小标签、却不分级】
-        开源合作伙伴、资源合作伙伴、个人支持者是三种**关系**，不是高低等级。
-        各处的 Logo / 头像都收在一枚小标识的量级：企业用紧凑卡片、资源用需求项式行、
-        个人用胶囊——谁上首页由维护者在数据里按「承诺」策展（featured，内部标记，不渲染），
-        页面上看不到「谁过线、谁没过」，否则这块社会证明位就退化成排行榜。
-        不写金额；首页的资源行不画时间，完整履历在赞助页。
+        首页只展示当前入选的支持者身份，不做排行榜，也不展开永久名录的完整履历。
+        每位支持者一张紧凑身份卡；关系、资源需求和规格都退到姓名之后，避免读成资源监控面板。
+        完整支持记录与支持方式统一交给 /sponsor。
 
-        【底色为什么是极淡品牌色】
-        首页底色是白 / 中性灰交替的：贡献者（白）→ 这里 → FAQ（灰）。
-        两块相邻不能同色，所以这里既不能白也不能灰——用 6% 品牌色，
-        与两侧都区分得开，又比中性灰多一层"致谢"的语义。
+        底色使用极淡品牌色，承接前一段白底与后一段中性灰，同时给致谢区保留独立语义。
       */}
       <section className="bg-[color-mix(in_oklab,var(--cn-brand)_6%,transparent)] px-6 py-14 sm:py-16">
         <div className="mx-auto max-w-3xl">
           <SectionHeading
-            eyebrow="ContiNew 支持者"
+            eyebrow="当前支持"
             title={
-              hasBackers ? '让持续迭代继续发生的人' : '支持者名录，等第一位伙伴'
+              hasBackers ? '这些支持，让持续迭代继续发生' : '支持者名录，等第一位伙伴'
             }
-            description="有人贡献代码，有人提供资源，有人按月支持。方式不同，但都让 ContiNew 走得更远。"
+            description="有人提供运行资源，有人贡献工具。方式不同，但都在支撑 ContiNew 持续维护与迭代。"
           />
 
           {hasBackers ? (
-            <div className="mt-9 flex flex-col gap-6 sm:mt-10">
-              {/* 开源合作伙伴：企业有一句业务介绍，用紧凑卡片 */}
-              {backers.strategic.length > 0 && (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {backers.strategic.map((sponsor) => (
-                    <CompanyCard key={sponsor.name} sponsor={sponsor} />
-                  ))}
-                </div>
-              )}
-
-              {/* 资源合作伙伴：按需求归组的卡片，一行两张，首页只看当前在用、不画时间 */}
-              {resourceGroups.length > 0 && (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {resourceGroups.map((group) => (
-                    <ResourceNeedCard
-                      key={group.need}
-                      group={group}
-                      showPeriod={false}
-                      showQty={false}
-                      highlightCurrent={false}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* 个人支持者：紧凑胶囊，一行排开 */}
-              {backers.supporters.length > 0 && (
-                <SupporterChips supporters={backers.supporters} />
-              )}
+            <div className="mt-9 grid auto-rows-fr gap-3 sm:mt-10 sm:grid-cols-2">
+              {homepageCompanions.map((companion) => (
+                <HomepageSupporterCard key={companion.name} companion={companion} />
+              ))}
             </div>
           ) : (
-            // 一个支持者都没有时才显示占位，圆角与真实列表一致，不会有塌陷感。
             <div className="mt-9 flex justify-center sm:mt-10">
               <Link
                 href="/sponsor"
-                className="flex items-center gap-2.5 rounded-xl border border-dashed border-fd-border bg-fd-card px-5 py-3.5 transition-colors hover:border-[var(--cn-brand-line)]"
+                className="inline-flex items-center gap-2 rounded-xl border border-dashed border-fd-border bg-fd-card px-5 py-3 text-sm font-medium text-[var(--cn-brand)] transition-colors hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30"
               >
-                <span className="text-sm font-medium text-[var(--cn-brand)]">
-                  成为第一位支持者 →
-                </span>
+                <HeartHandshake className="size-4" aria-hidden />
+                成为第一位支持者
               </Link>
             </div>
           )}
 
-          {/*
-            有支持者时，底部这条是"我也想赞助"的入口；
-            一个都没有时，上面的占位卡已经是同一个入口，再挂一条就是重复。
-          */}
           {hasBackers && (
-            <div className="mt-8 text-center">
+            <div className="mt-8 flex justify-center">
               <Link
                 href="/sponsor"
-                className="text-sm font-medium text-[var(--cn-brand)] hover:underline"
+                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-card/70 px-4 py-2 text-sm font-medium text-fd-foreground transition-[border-color,background-color,transform] hover:-translate-y-px hover:border-[var(--cn-brand-line)] hover:bg-fd-card"
               >
-                了解支持方式 →
+                <HeartHandshake className="size-4 text-[var(--cn-brand)]" aria-hidden />
+                查看全部支持者与支持方式
               </Link>
             </div>
           )}
