@@ -12,7 +12,7 @@ import { MessageCircle, X } from 'lucide-react';
  *
  * 【为什么不用手写 div[role=dialog]】
  * 原生 `<dialog>` + `showModal()` 自带 Esc 关闭、焦点陷阱、背景 inert，
- * 手写这三样很容易漏，而键盘用户是真实存在的。与 components/lightbox.tsx 保持同一做法。
+ * 手写这三样很容易漏，而键盘用户是真实存在的。图片查看器也沿用同一做法。
  */
 export function JoinGroupDialog({ className }: { className?: string }) {
   const ref = useRef<HTMLDialogElement>(null);
