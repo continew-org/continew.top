@@ -382,7 +382,7 @@ export default function SponsorPage() {
         </svg>
 
         <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
-          <div>
+          <div className="cn-stagger">
             <div className="flex items-center gap-3 text-sm font-medium text-[var(--cn-brand)]">
               <Image src="/logo.svg" alt="" width={28} height={28} aria-hidden />
               <span>ContiNew 支持者</span>
