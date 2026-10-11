@@ -1,94 +1,205 @@
 import type { Metadata } from 'next';
-import { ArrowRight, Check } from 'lucide-react';
-import { getCityCount, getTopCities, getUsers } from '@/lib/users';
+import {
+  ArrowDown,
+  ArrowRight,
+  Check,
+  ClipboardCheck,
+  FileText,
+  Search,
+  ShieldCheck,
+  UsersRound,
+} from 'lucide-react';
+import { Faq } from '@/components/home/faq';
+import { PageContainer, PageNextLinks, Section } from '@/components/site-primitives';
 import { UserDirectory } from '@/components/user-directory';
+import { UserRegistrationActions } from '@/components/user-registration-actions';
 import { registerUrl } from '@/lib/shared';
-import { PageContainer, PageHeader, PageNextLinks, Section } from '@/components/site-primitives';
+import { getCityCount, getTopCities, getUsers } from '@/lib/users';
 
 export const metadata: Metadata = {
-  title: '登记用户',
-  description: '正在使用 ContiNew 系列项目的公司与团队。',
+  title: '谁在使用',
+  description: '查看正在使用 ContiNew 系列项目的组织、团队与项目，或提交公开登记。',
 };
 
-/**
- * 登记权益。文案取自旧站的登记引导，每条压到一句话。
- *
- * 用对勾清单而不是卡片：赞助页「您的支持将用于」是同一套读法，
- * 全站两处「承诺 / 用途」保持一致；而且点进这一页的人要的是扫一眼确认，
- * 不是逐张读卡片。标题保留是为了能扫读——纯一句话清单里，四条承诺会糊成一段。
- */
-const registerBenefits: Array<{ title: string; description: string }> = [
+const registrationSteps = [
   {
-    title: '无偿登记',
-    description:
-      '登记完全免费。我们郑重承诺不会在任何阶段收取使用费用，也不会将您的信息用于商业盈利或其他非公开目的。',
+    title: '准备公开资料',
+    description: '确认展示名称、使用项目与使用场景，可选提供地区、官网和 Logo。',
+    icon: FileText,
   },
   {
-    title: '优先支持',
-    description: '登记后您将被视为优质用户，维护团队会优先响应您在实际使用过程中遇到的问题。',
+    title: '提交登记信息',
+    description: '复制页面提供的模板，在 GitHub 固定登记帖中公开提交。',
+    icon: ClipboardCheck,
   },
   {
-    title: '官方认可',
-    description: '您有机会在官方网站上获得展示，让更多人了解您的项目或公司。',
+    title: '人工核验展示',
+    description: '维护者核对公开信息后更新名单；资料变化时可申请修改或撤下。',
+    icon: ShieldCheck,
+  },
+] as const;
+
+const registrationFaqs = [
+  {
+    question: '谁可以登记？',
+    answer:
+      '正在实际使用任一 ContiNew 项目的公司、团队、学校、开源项目或个人都可以登记。请只提交你有权公开的信息。',
   },
   {
-    title: '社区贡献',
-    description:
-      '您的登记会成为后来调研者的可信指标之一，也是我们制定后续版本计划时的重要参考。',
+    question: '哪些信息会公开展示？',
+    answer:
+      '官网只展示你主动提交并确认公开的字段。联系方式、测试账号、业务数据等敏感信息不应提交，也不会收录。',
+  },
+  {
+    question: '提交后多久会出现在官网？',
+    answer:
+      '登记由维护者人工核验，并在后续站点更新时发布，因此没有固定上线时限。资料完整、链接可访问会更便于核对。',
+  },
+  {
+    question: '如何修改或撤下登记？',
+    answer:
+      '在登记帖中留言说明需要修改或撤下的内容。维护者核对原登记身份与公开记录后，会在后续更新中处理。',
   },
 ];
 
 export default function UsersPage() {
   const users = getUsers();
+  const cityCount = getCityCount();
   const topCities = getTopCities();
 
   return (
     <PageContainer>
-      <PageHeader
-        eyebrow="Who's using"
-        title="登记用户"
-        /*
-         * 首屏统计卡片已移除：21 家企业 / 13 个城市这种量级做成三张大卡，
-         * 反而把「规模还不大」摆到台面上（对比 /timeline 那种 5000+ Star 撑得住的数字）。数字降级为描述里的一句话，目录中也有城市计数可查。
-         */
-        description={`目前已有 ${users.length} 家公司/团队登记，覆盖 ${getCityCount()} 个城市。如果你们也在用 ContiNew 项目，诚邀登记——这是对我们最直接的认可。`}
-        actions={
-          <a
-            href={registerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-fd-primary px-5 py-2.5 text-sm font-medium text-fd-primary-foreground transition-opacity hover:opacity-90"
-          >
-            立即登记 <ArrowRight className="size-4" aria-hidden />
-          </a>
-        }
-      />
+      <header className="relative grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14">
+        <div className="cn-stagger">
+          <p className="text-sm font-medium text-[var(--cn-brand)]">真实使用</p>
+          <h1 className="mt-5 max-w-2xl text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
+            谁在使用 ContiNew
+          </h1>
+          <p className="mt-6 max-w-2xl text-base leading-8 text-fd-muted-foreground">
+            来自公司、团队、学校与开源项目的真实公开登记。先看看谁正在使用，也欢迎公开分享你的实践。
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <a
+              href="#register"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
+            >
+              登记你的使用信息
+              <ArrowRight className="size-4" aria-hidden />
+            </a>
+            <a
+              href="#directory"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/70 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
+            >
+              查看使用者
+              <ArrowDown className="size-4" aria-hidden />
+            </a>
+          </div>
+        </div>
 
-      {/* 权益排在目录之前：先看「登记能得到什么」，再决定要不要填 */}
+        <aside className="rounded-2xl border border-fd-border bg-fd-card/90 p-6 shadow-sm sm:p-7">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-[var(--cn-brand-soft)] text-[var(--cn-brand)]">
+              <UsersRound className="size-5" aria-hidden />
+            </span>
+            <div>
+              <h2 className="font-semibold">公开使用名单</h2>
+              <p className="mt-0.5 text-xs text-fd-muted-foreground">由社区主动提交并持续维护</p>
+            </div>
+          </div>
+          <dl className="mt-6 grid grid-cols-2 divide-x divide-fd-border border-y border-fd-border/70 py-5 text-center">
+            <div className="flex flex-col-reverse">
+              <dt className="mt-1 text-xs text-fd-muted-foreground">已登记使用者</dt>
+              <dd className="text-3xl font-semibold tracking-tight tabular-nums">{users.length}</dd>
+            </div>
+            <div className="flex flex-col-reverse">
+              <dt className="mt-1 text-xs text-fd-muted-foreground">已覆盖城市</dt>
+              <dd className="text-3xl font-semibold tracking-tight tabular-nums">{cityCount}</dd>
+            </div>
+          </dl>
+          <ul className="mt-5 space-y-3 text-sm text-fd-muted-foreground">
+            {['登记内容公开提交', '维护团队人工核验', '支持申请更新或撤下'].map((item) => (
+              <li key={item} className="flex items-center gap-2.5">
+                <Check className="size-4 shrink-0 text-[var(--cn-brand)]" aria-hidden />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </header>
+
       <Section
-        title="登记后你能得到什么"
-        description="以下四条是我们对每一位登记用户的承诺。"
+        id="directory"
+        className="scroll-mt-24"
+        title="谁在使用"
+        description="按登记时间倒序展示。可按名称、地区或网址搜索，也可筛选热门城市。"
+        action={
+          <span className="rounded-full border border-fd-border bg-fd-card px-3 py-1 text-xs text-fd-muted-foreground">
+            共 {users.length} 个
+          </span>
+        }
       >
-        <ul className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
-          {registerBenefits.map((benefit) => (
-            <li key={benefit.title} className="flex gap-2.5">
-              <Check className="mt-0.5 size-4 shrink-0 text-[var(--cn-brand)]" aria-hidden />
-              <div className="min-w-0">
-                <span className="block text-base font-medium">{benefit.title}</span>
-                <span className="mt-1 block text-sm leading-relaxed text-fd-muted-foreground">
-                  {benefit.description}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <UserDirectory users={users} topCities={topCities} registerUrl={registerUrl} />
       </Section>
 
       <Section
-        title="用户目录"
-        description="支持按公司名、地区或网址搜索，也可按热门城市筛选。资料完整的登记企业会排在前面。"
+        id="register"
+        className="scroll-mt-24"
+        title="如何登记"
+        description="登记免费且公开。先确认准备展示的信息，再前往 GitHub 固定登记帖提交。"
       >
-        <UserDirectory users={users} topCities={topCities} registerUrl={registerUrl} />
+        <ol className="grid border-y border-fd-border/70 sm:grid-cols-3 sm:divide-x sm:divide-fd-border">
+          {registrationSteps.map(({ title, description, icon: Icon }, index) => (
+            <li key={title} className="flex gap-4 border-b border-fd-border/70 py-5 last:border-b-0 sm:border-b-0 sm:px-5 sm:first:pl-0 sm:last:pr-0">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--cn-brand-soft)] text-[var(--cn-brand)]">
+                <Icon className="size-4" aria-hidden />
+              </span>
+              <div>
+                <p className="text-xs font-medium text-fd-muted-foreground">第 {index + 1} 步</p>
+                <h3 className="mt-1 font-semibold">{title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground">
+                  {description}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-10 grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:gap-10">
+          <div>
+            <h3 className="text-lg font-semibold">登记模板</h3>
+            <p className="mt-2 text-sm leading-relaxed text-fd-muted-foreground">
+              复制模板并按提示填写。带“选填”的字段可以省略，未提供的信息不会被推断补齐。
+            </p>
+            <div className="mt-5">
+              <UserRegistrationActions registerUrl={registerUrl} />
+            </div>
+          </div>
+
+          <aside className="h-fit rounded-2xl border border-fd-border bg-fd-muted/35 p-6">
+            <h3 className="font-semibold">公开与维护说明</h3>
+            <ul className="mt-4 space-y-3 text-sm leading-relaxed text-fd-muted-foreground">
+              <li className="flex gap-2.5">
+                <Check className="mt-0.5 size-4 shrink-0 text-[var(--cn-brand)]" aria-hidden />
+                只展示你主动提交并确认公开的信息。
+              </li>
+              <li className="flex gap-2.5">
+                <Check className="mt-0.5 size-4 shrink-0 text-[var(--cn-brand)]" aria-hidden />
+                不要提交联系方式、账号密码或未脱敏业务数据。
+              </li>
+              <li className="flex gap-2.5">
+                <Check className="mt-0.5 size-4 shrink-0 text-[var(--cn-brand)]" aria-hidden />
+                信息变化后，可在登记帖申请修改或撤下。
+              </li>
+            </ul>
+            <p className="mt-5 border-t border-fd-border pt-5 text-xs leading-relaxed text-fd-muted-foreground">
+              公开登记只表示正在使用，不代表 ContiNew 与登记主体存在商业合作、认证或相互背书关系。
+            </p>
+          </aside>
+        </div>
+      </Section>
+
+      <Section title="登记常见问题">
+        <Faq items={registrationFaqs} className="max-w-none" />
       </Section>
 
       <PageNextLinks

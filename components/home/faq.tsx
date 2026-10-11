@@ -23,7 +23,7 @@ export function Faq({ items, className }: { items: FaqItem[]; className?: string
           key={item.question}
           className="group rounded-xl border border-fd-border bg-fd-card px-6 py-5 transition-colors hover:border-fd-primary/40"
         >
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50 [&::-webkit-details-marker]:hidden">
             {item.question}
             <ChevronDown
               aria-hidden

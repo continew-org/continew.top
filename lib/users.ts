@@ -1,4 +1,9 @@
 import usersData from '@/data/users.json';
+import type {
+  ContinewProjectId,
+  RegisteredEntityType,
+  RegistrationSourcePlatform,
+} from '@/lib/user-registration';
 
 export interface RegisteredUser {
   name: string;
@@ -6,34 +11,22 @@ export interface RegisteredUser {
   region?: string[];
   website?: { text: string; url: string };
   createTime: string;
-  createUser?: { gitee?: string };
+  createUser?: { github?: string; gitee?: string; atomgit?: string };
+  entityType?: RegisteredEntityType;
+  usedProjects?: ContinewProjectId[];
+  useCases?: string[];
+  demoUrl?: string;
+  source?: { platform: RegistrationSourcePlatform; url?: string };
 }
 
-/**
- * 信息完整度：logo(4) + 官网(2) + 有效地区(1)。
- *
- * 数据里曾有一个人工维护的 `platinum` 标记，意图是「资料完整的用户排前面」，
- * 现已废弃 —— 完整与否由代码按字段判定，不再依赖人工打标。
- */
-export function completeness(user: RegisteredUser): number {
-  let score = 0;
-  if (user.logo) score += 4;
-  if (user.website) score += 2;
-  if ((user.region ?? []).some((r) => r.trim() && r.trim() !== '未知')) score += 1;
-  return score;
-}
-
-/** 全部登记用户：资料完整的在前（同分按登记时间倒序），其余按登记时间倒序。 */
+/** 全部登记用户按登记时间倒序，顺序含义清晰且不会因资料完整度改变。 */
 export function getUsers(): RegisteredUser[] {
   return (usersData as RegisteredUser[])
     .slice()
-    .sort(
-      (a, b) =>
-        completeness(b) - completeness(a) || b.createTime.localeCompare(a.createTime),
-    );
+    .sort((a, b) => b.createTime.localeCompare(a.createTime));
 }
 
-/** 有 Logo 的登记用户（首页用户墙用），同样完整度优先。 */
+/** 有 Logo 的登记用户，供需要品牌素材的展示位按登记时间倒序读取。 */
 export function getFeaturedUsers(): RegisteredUser[] {
   return getUsers().filter((u) => Boolean(u.logo));
 }

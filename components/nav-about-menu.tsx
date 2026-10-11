@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn';
 const aboutLinks = [
   { text: '发展历程', url: '/timeline' },
   { text: '社区团队', url: '/team' },
-  { text: '登记用户', url: '/users' },
+  { text: '谁在使用', url: '/users' },
 ];
 
 /**

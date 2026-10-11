@@ -14,6 +14,69 @@
 
 ---
 
+## users.json：使用登记
+
+`users.json` 只记录登记者主动公开、且经人工核对后适合在官网展示的信息。历史记录没有收集的字段保持缺失，**不得根据主体名称、官网内容或行业印象推断补齐**。
+
+### 字段说明
+
+| 字段 | 必填 | 说明 |
+|:-----|:--:|:-----|
+| `name` | 是 | 官网展示名称，可以是公司、团队、学校、开源项目或个人 |
+| `logo` | 否 | 本地文件名或公开图片 URL；外部图片审核后优先存入 `public/images/about/users/` |
+| `entityType` | 否 | `company` / `team` / `studio` / `school` / `government` / `nonprofit` / `open-source-project` / `individual` / `other` |
+| `usedProjects` | 否 | 实际使用的 ContiNew 项目 ID 数组，取值见下方 |
+| `useCases` | 否 | 一至三条公开使用场景；保留提交者原意，不代写效果或评价 |
+| `region` | 否 | 省市级公开地区数组，如 `广东 · 深圳`；不要记录详细地址 |
+| `website` | 否 | 官网或项目主页，包含 `text` 与 `url` |
+| `demoUrl` | 否 | 公开演示地址，与官网分开；不得附带账号、密码等敏感信息 |
+| `createTime` | 是 | 首次登记时间，格式为 `YYYY-MM-DD HH:mm:ss` |
+| `createUser` | 否 | 登记者在 GitHub / Gitee / AtomGit 的公开账号 |
+| `source` | 否 | 登记来源平台与原始公开链接，仅用于追溯 |
+
+`usedProjects` 使用稳定 ID：
+
+- `continew-admin` — ContiNew Admin
+- `continew-admin-ui` — ContiNew Admin UI
+- `continew-starter` — ContiNew Starter
+- `continew-app` — ContiNew App
+- `other` — 其他 ContiNew 项目
+
+### 登记模板
+
+登记帖使用与 `lib/user-registration.ts` 一致的字段口径：
+
+```md
+**展示名称：**（必填）
+
+**主体类型：**（必填；公司 / 团队 / 工作室 / 学校 / 政府或事业单位 / 非营利组织 / 开源项目 / 个人 / 其他）
+
+**使用的 ContiNew 项目：**（必填，可多选；ContiNew Admin / ContiNew Admin UI / ContiNew Starter / ContiNew App / 其他）
+
+**使用场景：**（建议填写；请用一两句话说明用于什么场景）
+
+**所在地区：**（选填；如“浙江 · 杭州”，请勿填写详细地址）
+
+**官网或项目主页：**（选填）
+
+**演示地址：**（选填；请勿包含测试账号、密码或其他敏感信息）
+
+**Logo：**（选填；上传图片或提供可公开访问的图片链接）
+
+**公开展示确认：** 我确认以上信息可在 ContiNew 官方网站公开展示。
+```
+
+### 维护约定
+
+- 新字段只依据登记者明确提交的公开信息录入；字段未提供就省略，不写 `未知`、空数组或推断值；
+- `createTime`、`createUser` 与 `source` 由维护者根据登记记录补充，不要求登记者填写；
+- Logo、网址和演示地址在录入前人工核对，不从搜索引擎或第三方网站替登记者抓取；
+- 使用场景可以压缩冗余表述，但不得扩写成客户案例、效果承诺或官方背书；
+- 收到修改或撤下申请后，核对原登记身份与公开记录，再更新数据；
+- 公开登记只表示正在使用，不代表 ContiNew 与登记主体存在商业合作、认证或相互背书关系。
+
+---
+
 ## members-*.json：社区团队
 
 团队名录分为三种人工身份，身份边界与代码提交记录彼此独立：
