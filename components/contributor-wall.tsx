@@ -23,20 +23,23 @@ const CONFETTI = [
 ] as const;
 
 /**
- * 社区贡献者头像墙。
+ * 代码贡献者头像墙。
  *
- * 数据来自构建期拉取的三平台贡献者名单（见 lib/site-stats.ts 的 getContributorList），
- * 跨平台按用户名去重并剔除机器人与镜像同步账号。
+ * 数据来自构建期拉取的 GitHub Contributors API（见 lib/site-stats.ts 的 getContributorList），
+ * 跨仓库按用户名去重并剔除机器人与镜像同步账号。
  *
  * 头像一律懒加载：名单可能有上百人，首屏外的头像不该拖慢页面。
  */
 export function ContributorWall({
   contributors,
   className,
+  celebrate = true,
 }: {
   contributors: Contributor[];
   /** 追加到列表容器的类。首页需要居中（`justify-center`），团队页保持左对齐。 */
   className?: string;
+  /** 是否渲染 hover 礼花。团队页完整名单关闭，首页精选展示保留。 */
+  celebrate?: boolean;
 }) {
   if (contributors.length === 0) return null;
 
@@ -60,7 +63,10 @@ export function ContributorWall({
              * 不能用 overflow-hidden 裁头像：礼花要飞到头像外面去，裁了就只剩半截。
              * 代价是头像必须自己填满内容区（size-full）并保持圆角。
              */
-            className="cn-confetti flex size-10 items-center justify-center rounded-full border border-fd-border bg-fd-muted text-sm font-medium text-fd-muted-foreground transition-[transform,border-color] duration-200 hover:scale-[1.08] hover:border-[var(--cn-brand-line)]"
+            className={cn(
+              'flex size-10 items-center justify-center rounded-full border border-fd-border bg-fd-muted text-sm font-medium text-fd-muted-foreground transition-[transform,border-color] duration-200 hover:scale-[1.08] hover:border-[var(--cn-brand-line)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50',
+              celebrate && 'cn-confetti',
+            )}
           >
             {contributor.avatar ? (
               // 外链头像，静态导出下不经过图片优化，用原生 img
@@ -75,23 +81,24 @@ export function ContributorWall({
               // 少数平台接口不返回头像，退化为用户名首字母
               <span aria-hidden>{contributor.login.slice(0, 1).toUpperCase()}</span>
             )}
-            {CONFETTI.map((piece, index) => (
-              <span
-                key={index}
-                aria-hidden
-                className="cn-confetti-piece"
-                style={
-                  {
-                    '--cn-dx': piece.dx,
-                    '--cn-dy': piece.dy,
-                    '--cn-rot': piece.rot,
-                    background: piece.color,
-                    // 逐片错开 20ms：一起炸开像贴纸，错开一点才像真的撒出去
-                    animationDelay: `${index * 0.02}s`,
-                  } as CSSProperties
-                }
-              />
-            ))}
+            {celebrate &&
+              CONFETTI.map((piece, index) => (
+                <span
+                  key={index}
+                  aria-hidden
+                  className="cn-confetti-piece"
+                  style={
+                    {
+                      '--cn-dx': piece.dx,
+                      '--cn-dy': piece.dy,
+                      '--cn-rot': piece.rot,
+                      background: piece.color,
+                      // 逐片错开 20ms：一起炸开像贴纸，错开一点才像真的撒出去
+                      animationDelay: `${index * 0.02}s`,
+                    } as CSSProperties
+                  }
+                />
+              ))}
           </a>
         </li>
       ))}

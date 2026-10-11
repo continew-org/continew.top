@@ -181,7 +181,7 @@ async function computeStarSummary(): Promise<StarSummary> {
 /* --------------------------------- 贡献者统计 -------------------------------- */
 
 export interface ContributorSummary {
-  /** 三平台按用户名去重后的贡献者总数。 */
+  /** GitHub 组织公开仓库按用户名去重后的代码贡献者总数。 */
   total: number;
   platforms: PlatformStar[];
   live: boolean;
@@ -424,16 +424,13 @@ export async function getContributorSummary(): Promise<ContributorSummary> {
 }
 
 /**
- * 三平台贡献者名单，供页面「社区贡献者」头像墙渲染。
+ * GitHub 代码贡献者名单，供页面头像墙渲染。
  *
  * 与 `getContributorSummary` 的区别：后者只给统计数字，这里给出具体的人
- * （头像 + 个人主页）。
+ * （头像 + 个人主页）。同一账号跨仓库只保留一条。
  *
- * 跨平台去重已随数据源收敛为单平台而不再需要；同一用户名只保留一条。
- *
- * 拉取失败时**才**返回空名单（live: false）：页面据此不渲染头像墙，
+ * 拉取失败时返回空名单（live: false）：页面据此不渲染头像墙，
  * 避免出现一面空白墙或把错误信息暴露给访问者。
- * 注意判定是「全部平台都失败」——部分平台成功时仍返回已拿到的名单。
  */
 export async function getContributorList(): Promise<{
   list: Contributor[];

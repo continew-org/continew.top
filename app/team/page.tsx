@@ -1,132 +1,180 @@
 import type { Metadata } from 'next';
-import { GitPullRequestArrow, UserPlus, Users } from 'lucide-react';
-import { getCoreMembers, getEmeritiMembers, getPartnerMembers } from '@/lib/team';
-import { ShuffledMemberGrid } from '@/components/shuffled-member-grid';
-import { ContributeDialog } from '@/components/contribute-dialog';
+import { ArrowDown, ArrowRight, Code2, Radio, Users } from 'lucide-react';
+import {
+  getCommunityResonators,
+  getCoreMemberProjectGroups,
+  getCoreMembers,
+  getEmeritiMembers,
+} from '@/lib/team';
 import { ContributorWall } from '@/components/contributor-wall';
 import { getContributorList, getContributorSummary } from '@/lib/site-stats';
-import { PageContainer, PageHeader, PageNextLinks, Section } from '@/components/site-primitives';
+import { PageContainer, PageNextLinks, Section } from '@/components/site-primitives';
+import { ContributionPaths } from '@/components/team/contribution-paths';
+import { MemberGrid } from '@/components/team/member-grid';
+import { TeamNetworkVisual } from '@/components/team/team-network-visual';
 
 export const metadata: Metadata = {
   title: '社区团队',
-  description: 'ContiNew 核心团队成员、名誉核心团队成员、社区共鸣者与社区贡献者。',
+  description: '认识持续维护 ContiNew 的核心团队、社区共鸣者、名誉成员与代码贡献者，并找到适合自己的参与方式。',
 };
-
-/**
- * Fisher-Yates 洗牌（构建期）。
- *
- * 静态导出在构建时渲染一次，这里的洗牌决定 SSR/SEO 看到的首屏顺序；
- * 页面加载后 `ShuffledMemberGrid` 会在客户端再洗一次，因此每次刷新顺序都不同。
- */
-function shuffle<T>(items: readonly T[]): T[] {
-  const arr = [...items];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
 
 export default async function TeamPage() {
   const core = getCoreMembers();
+  const resonators = getCommunityResonators();
   const emeriti = getEmeritiMembers();
-  const partners = getPartnerMembers();
-  // 累计成员：官网在列的全部成员（核心 + 社区共鸣者 + 名誉核心团队成员）
-  const totalMembers = core.length + partners.length + emeriti.length;
-  // 贡献者：构建期拉取三平台提交者按用户名去重（口径见 lib/site-stats.ts）
-  const contributors = await getContributorSummary();
-  // 贡献者名单（头像墙）；拉取失败时为空数组，此时不渲染该区块
-  const { list: contributorList } = await getContributorList();
+  const coreGroups = getCoreMemberProjectGroups(core);
+  const [contributorSummary, contributorResult] = await Promise.all([
+    getContributorSummary(),
+    getContributorList(),
+  ]);
+  const contributorCount = contributorResult.list.length || contributorSummary.total;
 
-  // 排序：core[0] 为 Creator，固定首位；其余核心成员、社区共鸣者、名誉核心团队成员一律随机，
-  // 避免页面上形成固定的排名次序。
-  const [creator, ...otherCore] = core;
-  const orderedCore = creator ? [creator, ...shuffle(otherCore)] : [];
-  const orderedPartners = shuffle(partners);
-  const orderedEmeriti = shuffle(emeriti);
+  const stats = [
+    { value: core.length, label: '核心团队成员', icon: Users },
+    { value: resonators.length, label: '社区共鸣者', icon: Radio },
+    { value: contributorCount, label: 'GitHub 代码贡献者', icon: Code2 },
+  ];
 
   return (
-    <PageContainer>
-      <PageHeader
-        eyebrow="Our Team"
-        title="社区团队"
-        description="一群「代码洁癖」，用业余时间把 ContiNew 打磨得更「甜」。"
-        stats={[
-          {
-            value: String(totalMembers),
-            label: '累计成员',
-            icon: <Users className="size-4" aria-hidden />,
-          },
-          {
-            value: String(partners.length),
-            label: '社区共鸣者',
-            icon: <UserPlus className="size-4" aria-hidden />,
-          },
-          {
-            value: String(contributors.total),
-            label: '累计贡献者',
-            icon: <GitPullRequestArrow className="size-4" aria-hidden />,
-          },
-        ]}
-        actions={
-          <ContributeDialog className="inline-flex items-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]" />
-        }
-      />
+    <PageContainer className="max-w-6xl overflow-x-clip">
+      <header className="relative overflow-hidden border-b border-fd-border/70 pb-12 sm:pb-16">
+        <div
+          aria-hidden
+          className="absolute inset-y-0 right-0 w-3/5 bg-[radial-gradient(circle_at_72%_54%,color-mix(in_oklab,var(--cn-brand)_8%,transparent),transparent_50%)]"
+        />
+        <div className="relative grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14">
+          <div className="cn-stagger">
+            <p className="text-sm font-medium text-[var(--cn-brand)]">ContiNew 社区</p>
+            <h1 className="mt-5 max-w-2xl text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
+              一群人，把持续迭代变成日常
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-fd-muted-foreground">
+              核心团队承担项目的持续维护，社区共鸣者通过交流、反馈、传播与协作带来更多可能。身份不同，但每一份参与都在让 ContiNew 继续向前。
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a
+                href="#maintainers"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
+              >
+                认识维护团队
+                <ArrowDown className="size-4" aria-hidden />
+              </a>
+              <a
+                href="#contribute"
+                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/70 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
+              >
+                找到参与方式
+                <ArrowRight className="size-4" aria-hidden />
+              </a>
+            </div>
+            <p className="mt-7 text-sm text-fd-muted-foreground">
+              社区身份不按提交数量评定，代码也不是唯一的参与方式。
+            </p>
+          </div>
+
+          <TeamNetworkVisual core={core} resonators={resonators} emeriti={emeriti} />
+        </div>
+
+        <dl className="mt-10 grid grid-cols-3 divide-x divide-fd-border border-y border-fd-border/70 sm:mt-12">
+          {stats.map(({ value, label, icon: Icon }) => (
+            <div key={label} className="flex min-w-0 flex-col-reverse px-2 py-5 text-center sm:py-6">
+              <dt className="mt-1.5 text-[11px] leading-snug text-fd-muted-foreground sm:text-xs">
+                {label}
+              </dt>
+              <dd className="flex items-center justify-center gap-2 text-xl font-bold tracking-tight text-[var(--cn-brand)] tabular-nums sm:text-3xl">
+                <Icon className="hidden size-4 sm:block" aria-hidden />
+                {value.toLocaleString()}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </header>
 
       <Section
-        title="核心团队成员"
-        description="核心团队成员是那些积极参与维护一个或多个核心项目的人。他们对 ContiNew 的生态系统做出了重大贡献。"
-        action={<span className="text-sm text-fd-muted-foreground">{core.length} 位</span>}
+        id="maintainers"
+        className="scroll-mt-24"
+        title="谁在持续维护 ContiNew"
+        description="以下范围按核心成员现有资料中的项目标注整理，表达长期参与方向，不表示唯一负责人、模块所有权或贡献排名。"
+        action={
+          <span className="rounded-full border border-fd-border bg-fd-card px-3 py-1 text-xs text-fd-muted-foreground">
+            {core.length} 位核心成员
+          </span>
+        }
       >
-        <ShuffledMemberGrid members={orderedCore} fixedFirst />
+        <div className="space-y-10">
+          {coreGroups.map((group) => (
+            <section key={group.key} aria-labelledby={`core-${group.key}`}>
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-fd-border/70 pb-3">
+                <div>
+                  <h3 id={`core-${group.key}`} className="font-semibold">
+                    {group.label}
+                  </h3>
+                  <p className="mt-1 text-xs text-fd-muted-foreground">{group.description}</p>
+                </div>
+                <span className="text-xs text-fd-muted-foreground">{group.members.length} 位</span>
+              </div>
+              <MemberGrid members={group.members} kind="core" columns={2} />
+            </section>
+          ))}
+        </div>
       </Section>
 
-      {/* 名誉核心团队成员排在社区共鸣者之前：前者曾深度参与项目，后者是社区里的同路人 */}
+      <Section
+        title="社区共鸣者"
+        description="社区里积极交流、反馈、传播与协作的伙伴。有人也会提交代码，但这一身份不等同于核心维护者，也不承担核心维护责任。"
+        action={<span className="text-sm text-fd-muted-foreground">{resonators.length} 位</span>}
+      >
+        <MemberGrid members={resonators} kind="resonator" />
+      </Section>
+
       {emeriti.length > 0 && (
         <Section
           title="名誉核心团队成员"
-          description="我们在此致敬过去曾做出过突出贡献的不再活跃的团队成员。"
+          description="他们曾深度参与项目维护并留下重要贡献，目前不承担日常核心维护责任。我们在这里保留这段共同建设的历史。"
           action={<span className="text-sm text-fd-muted-foreground">{emeriti.length} 位</span>}
         >
-          <ShuffledMemberGrid members={orderedEmeriti} />
-        </Section>
-      )}
-
-      {partners.length > 0 && (
-        <Section
-          title="社区共鸣者"
-          description="特别值得一提的是，部分 ContiNew 社区成员的加入为平台注入了更多活力。我们与这些核心伙伴建立了更紧密的合作关系，经常就新功能开发和资讯发布等事宜进行密切协作。"
-          action={<span className="text-sm text-fd-muted-foreground">{partners.length} 位</span>}
-        >
-          <ShuffledMemberGrid members={orderedPartners} />
+          <MemberGrid members={emeriti} kind="emeritus" columns={2} className="lg:max-w-3xl" />
         </Section>
       )}
 
       <Section
-        title="社区贡献者"
-        description="感谢每一位提交过代码、报告过问题、参与过讨论的朋友。ContiNew 的每一步都有你们的痕迹。"
-        action={
-          contributorList.length > 0 ? (
-            <span className="text-sm text-fd-muted-foreground">{contributorList.length} 位</span>
-          ) : null
-        }
+        id="contribute"
+        className="scroll-mt-24"
+        title="从一件具体的小事开始"
+        description="代码、文档、反馈、答疑与分享都能带来价值。先选择你想做的事，再进入对应的项目或渠道。"
       >
-        {contributorList.length > 0 ? (
-          <ContributorWall contributors={contributorList} />
+        <ContributionPaths />
+      </Section>
+
+      <Section
+        id="contributors"
+        className="scroll-mt-24"
+        title="代码贡献者"
+        description="名单在站点构建时从 GitHub 组织公开仓库的 Contributors API 汇总，跨仓库按账号去重。它不覆盖只在 Gitee / AtomGit 提交，或只参与 Issue、讨论、评审与传播的伙伴。"
+      >
+        {contributorResult.list.length > 0 ? (
+          <details className="group rounded-2xl border border-fd-border bg-fd-card">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-medium transition-colors hover:bg-fd-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--cn-brand)]/50 sm:px-6 [&::-webkit-details-marker]:hidden">
+              <span>
+                <span className="group-open:hidden">查看全部 {contributorResult.list.length} 位代码贡献者</span>
+                <span className="hidden group-open:inline">收起代码贡献者名单</span>
+              </span>
+              <span className="shrink-0 text-xs font-normal text-fd-muted-foreground">
+                构建时同步
+              </span>
+            </summary>
+            <div className="border-t border-fd-border px-5 py-5 sm:px-6 sm:py-6">
+              <ContributorWall contributors={contributorResult.list} celebrate={false} />
+            </div>
+          </details>
         ) : (
-          /*
-           * 构建期没拉到名单（如 CI / 本地网络访问不到 GitHub API）时的兜底。
-           *
-           * 这里不写「拉取失败，请去 GitHub 看」——那是在向访问者暴露本站的技术故障，
-           * 而且把人赶去一个没有贡献者聚合页的组织首页。翻过来写：既然名单暂时是空的，
-           * 那就邀请访问者成为名单上的第一个人，出口同样是「参与贡献」弹层，
-           * 与全站其它位置保持同一个平台推荐顺序。
-           */
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-dashed border-fd-border px-5 py-4">
             <p className="text-sm text-fd-muted-foreground">
-              贡献者名单在构建时自动汇总。想让你的头像出现在这里？欢迎提交 Issue 或 PR。
+              本次构建未取得完整名单。参与入口仍然可用，欢迎从适合你的方式开始。
             </p>
-            <ContributeDialog className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--cn-brand)] hover:underline" />
+            <a href="#contribute" className="text-sm font-medium text-[var(--cn-brand)] hover:underline">
+              查看参与方式
+            </a>
           </div>
         )}
       </Section>
@@ -135,13 +183,13 @@ export default async function TeamPage() {
         links={[
           {
             href: '/sponsor',
-            title: '支持维护者',
-            description: '通过各位成员的赞赏码或爱发电主页请他们喝杯咖啡，或了解赞助权益。',
+            title: '支持 ContiNew',
+            description: '了解项目支持方式，以及所有曾提供资金、资源与工具的支持者。',
           },
           {
             href: '/timeline',
             title: '发展历程',
-            description: '看看这群人一起把 ContiNew 做到了哪一步。',
+            description: '看看这些人一起走过的版本、里程碑与社区时刻。',
           },
         ]}
       />

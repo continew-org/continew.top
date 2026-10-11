@@ -7,6 +7,14 @@ import { AfdianIcon, AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/bra
 import { cardHover } from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
 
+export type TeamMemberKind = 'core' | 'resonator' | 'emeritus';
+
+const kindLabel: Record<TeamMemberKind, string> = {
+  core: '核心团队成员',
+  resonator: '社区共鸣者',
+  emeritus: '名誉核心团队成员',
+};
+
 /**
  * 成员卡片赞赏弹层：展示成员的微信/支付宝赞赏码。
  *
@@ -112,7 +120,7 @@ function socialLinks(member: TeamMember) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`${member.name} 的 ${item.label}`}
-          className="text-fd-muted-foreground transition-colors hover:text-fd-foreground"
+          className="flex size-9 items-center justify-center rounded-lg text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
         >
           {item.icon}
         </a>
@@ -121,7 +129,13 @@ function socialLinks(member: TeamMember) {
   );
 }
 
-export function TeamMemberCard({ member }: { member: TeamMember }) {
+export function TeamMemberCard({
+  member,
+  kind,
+}: {
+  member: TeamMember;
+  kind: TeamMemberKind;
+}) {
   const [showSponsor, setShowSponsor] = useState(false);
   // 先算出来：既避免在 JSX 里重复调用，也用来判断底部操作区要不要渲染——
   // 三者都没有时整块不渲染，否则会留一条孤零零的分割线。
@@ -131,7 +145,7 @@ export function TeamMemberCard({ member }: { member: TeamMember }) {
   return (
     <div
       className={cn(
-        'flex h-full flex-col rounded-xl border border-fd-border p-5',
+        'flex h-full flex-col rounded-xl border border-fd-border bg-fd-card p-5',
         cardHover,
       )}
     >
@@ -146,55 +160,56 @@ export function TeamMemberCard({ member }: { member: TeamMember }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold">{member.name}</h3>
-            {/*
-              职称默认用中性色：成员卡片量大，若每人都挂主色 pill 会超出色彩预算。
-              仅 Creator（数据里 featured: true）用主色，让创建者在列表里一眼可辨。
-            */}
-            <span
-              className={cn(
-                'rounded-full px-2 py-0.5 text-xs font-medium',
-                /*
-                  Creator 的职称徽章走琥珀金：全站唯一一位，值得一点「尊贵感」，
-                  也与主色区分开（主色留给交互态，避免误以为可点击）。
-                  其余成员走中性色——卡片量大，每人都挂彩色会超出色彩预算。
-                */
-                member.featured
-                  ? 'border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                  : 'border border-fd-border bg-fd-muted text-fd-muted-foreground',
-              )}
-            >
-              {member.title}
-            </span>
+            {member.featured && (
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                Creator
+              </span>
+            )}
           </div>
+          <p className="mt-1 text-xs font-medium text-fd-foreground/75">{kindLabel[kind]}</p>
+          {!member.featured && (
+            <p className="mt-1 text-xs text-fd-muted-foreground">{member.title}</p>
+          )}
           {member.motto && (
-            <p className="mt-1 line-clamp-2 text-xs text-fd-muted-foreground">{member.motto}</p>
+            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-fd-muted-foreground">
+              {member.motto}
+            </p>
           )}
         </div>
       </div>
 
-      <div className="mt-4 flex flex-1 flex-col gap-1.5 text-xs text-fd-muted-foreground">
-        {member.projects?.map((p) => (
-          <a
-            key={p.label}
-            href={p.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-fit hover:text-fd-primary hover:underline"
-          >
-            {p.label}
-          </a>
-        ))}
-        {member.location && <span>{member.location}</span>}
-        {member.website && (
-          <a
-            href={member.website.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-fit hover:text-fd-primary hover:underline"
-          >
-            {member.website.label}
-          </a>
+      <div className="mt-4 flex flex-1 flex-col gap-3 text-xs text-fd-muted-foreground">
+        {member.projects && member.projects.length > 0 && (
+          <div>
+            <p className="font-medium text-fd-foreground/70">参与范围</p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {member.projects.map((project) => (
+                <a
+                  key={project.label}
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md border border-fd-border bg-fd-background px-2 py-1 transition-colors hover:border-[var(--cn-brand-line)] hover:text-[var(--cn-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
+                >
+                  {project.label}
+                </a>
+              ))}
+            </div>
+          </div>
         )}
+        <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+          {member.location && <span>{member.location}</span>}
+          {member.website && (
+            <a
+              href={member.website.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-[var(--cn-brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
+            >
+              {member.website.label}
+            </a>
+          )}
+        </div>
       </div>
 
       {hasActions && (
@@ -214,7 +229,7 @@ export function TeamMemberCard({ member }: { member: TeamMember }) {
               <button
                 type="button"
                 onClick={() => setShowSponsor(true)}
-                className="inline-flex items-center gap-1 rounded-full border border-pink-500/25 bg-pink-500/10 px-2.5 py-1 text-xs font-medium text-pink-600 transition-colors hover:border-pink-500/45 hover:bg-pink-500/15 dark:border-pink-400/25 dark:text-pink-400"
+                className="inline-flex items-center gap-1 rounded-full border border-pink-500/25 bg-pink-500/10 px-2.5 py-1 text-xs font-medium text-pink-600 transition-colors hover:border-pink-500/45 hover:bg-pink-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/50 dark:border-pink-400/25 dark:text-pink-400"
               >
                 <Coffee className="size-3.5" aria-hidden />
                 {member.sponsorText ?? '赞赏'}
@@ -226,7 +241,7 @@ export function TeamMemberCard({ member }: { member: TeamMember }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`在爱发电按月支持 ${member.name}`}
-                className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 transition-colors hover:border-amber-500/50 hover:bg-amber-500/15 dark:border-amber-400/25 dark:text-amber-400"
+                className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-700 transition-colors hover:border-amber-500/50 hover:bg-amber-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 dark:border-amber-400/25 dark:text-amber-400"
               >
                 <AfdianIcon className="size-3.5" aria-hidden />
                 爱发电
