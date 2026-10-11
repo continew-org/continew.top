@@ -27,5 +27,15 @@
     "platform": "github",
     "url": "https://github.com/continew-org/continew.top/issues/6#issuecomment-6081377589",
     "createdAt": "2026-10-09"
+  },
+  {
+    "content": "我用 ContiNew Admin 快速搭建了公司的产品的后台管理系统，省去了权限模块和基础脚手架的重复开发。最推荐它完善的 RBAC 权限设计，开箱即用，非常省心",
+    "author": "无名之辈",
+    "title": "后端开发工程师",
+    "region": "深圳",
+    "avatar": "https://avatars.githubusercontent.com/u/13583865?v=4",
+    "platform": "github",
+    "url": "https://github.com/continew-org/continew.top/issues/6#issuecomment-6104448055",
+    "createdAt": "2026-10-11"
   }
 ]

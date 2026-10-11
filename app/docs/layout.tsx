@@ -14,7 +14,7 @@ export default async function Layout({ children }: LayoutProps<'/docs'>) {
   const stars = await getStarSummary();
 
   return (
-    <DocsLayout tree={source.getPageTree()} tabs={tabs} {...baseOptions(stars)}>
+    <DocsLayout tree={source.getPageTree()} tabs={tabs} {...baseOptions(stars, { docs: true })}>
       {children}
     </DocsLayout>
   );

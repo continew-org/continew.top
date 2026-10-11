@@ -100,8 +100,8 @@ export default function UsersPage() {
           },
           {
             href: '/sponsor',
-            title: '成为赞助者',
-            description: '赞助者可在官网获得 Logo 展示位，了解赞助权益。',
+            title: '支持 ContiNew',
+            description: '以个人、资源或企业合作的方式进入支持者名录。',
           },
         ]}
       />

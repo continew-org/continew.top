@@ -5,6 +5,7 @@ import type { StarSummary } from './site-stats';
 import { NavAboutMenu } from '@/components/nav-about-menu';
 import { NavSponsorLink } from '@/components/nav-sponsor-link';
 import { NavStarCount } from '@/components/nav-star-count';
+import { HeartHandshake } from 'lucide-react';
 import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 
 /**
@@ -14,7 +15,10 @@ import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
  * 是因为本函数是同步的，而数据拉取是异步的——由各 layout 负责 await 后注入。
  * 不传时导航不渲染星数（降级），其余部分照常。
  */
-export function baseOptions(stars?: StarSummary): BaseLayoutProps {
+export function baseOptions(
+  stars?: StarSummary,
+  options?: { docs?: boolean },
+): BaseLayoutProps {
   return {
     nav: {
       title: (
@@ -87,6 +91,22 @@ export function baseOptions(stars?: StarSummary): BaseLayoutProps {
        *
        * 小屏（lg 以下）Fumadocs 会自动把它们收进「⋯」菜单，不用额外适配。
        */
+      ...(options?.docs
+        ? [
+            {
+              type: 'icon' as const,
+              icon: (
+                <span className="cn-doc-support-link inline-flex items-center gap-1.5">
+                  <HeartHandshake />
+                  <span className="cn-doc-support-text">支持</span>
+                </span>
+              ),
+              text: '支持',
+              label: '支持 ContiNew',
+              url: '/sponsor',
+            },
+          ]
+        : []),
       {
         type: 'icon',
         icon: <GitHubIcon />,

@@ -22,6 +22,11 @@ export interface Backer {
   /** 是否仍在支持。仅个人支持者使用（在支持 / 往期），缺省为在支持。 */
   status?: 'active' | 'past';
   /**
+   * 个人支持方式。`one-time` 只表示单次发生过，不算「正在持续支持」；
+   * 身份仍会永久保留。缺省为 `recurring`，兼容已有的按月支持数据。
+   */
+  supportMode?: 'recurring' | 'one-time';
+  /**
    * 是否上首页：**内部策展标记，绝不渲染成标签。**
    *
    * 首页是社会证明位，不是排行榜——资源伙伴按价值阈值、个人按长期与否，
@@ -193,14 +198,18 @@ export function groupResourceByNeed(partners: ResourcePartner[]): ResourceNeedGr
   });
 }
 
-/** 当前在支持的个人支持者。 */
+/** 当前仍在持续支持的个人支持者；单次支持不计入当前状态。 */
 export function getActiveSupporters(): Supporter[] {
-  return getSponsors('supporter').filter((s) => s.status !== 'past');
+  return getSponsors('supporter').filter(
+    (s) => s.status !== 'past' && s.supportMode !== 'one-time',
+  );
 }
 
-/** 往期的个人支持者。 */
+/** 已完成的个人支持：主动停止的持续支持，以及单次支持。 */
 export function getPastSupporters(): Supporter[] {
-  return getSponsors('supporter').filter((s) => s.status === 'past');
+  return getSponsors('supporter').filter(
+    (s) => s.status === 'past' || s.supportMode === 'one-time',
+  );
 }
 
 /**
@@ -218,6 +227,74 @@ export interface HomepageBackers {
   strategic: Sponsor[];
   resource: ResourcePartner[];
   supporters: Supporter[];
+}
+
+/**
+ * 支持页上的一个公开支持者身份。
+ *
+ * 数据文件仍按关系记录贡献，页面展示时再按名字聚合：同一个人先后提供多项资源，
+ * 应该拥有一张稳定身份卡，而不是在名单里被拆成多条账目。`relations` 只说明支持方式，
+ * 不代表等级；`active` 只控制「正在同行」状态，不影响历史身份的视觉待遇。
+ */
+export interface Companion extends Backer {
+  relations: TierKey[];
+  active: boolean;
+  description?: string;
+  resourceEntries: ResourcePartner[];
+}
+
+/** 聚合全部公开支持者，保留数据中的首次出现顺序。 */
+export function getCompanions(): Companion[] {
+  const companions = new Map<string, Companion>();
+
+  const merge = (
+    backer: Backer,
+    relation: TierKey,
+    active: boolean,
+    resourceEntry?: ResourcePartner,
+    description?: string,
+  ) => {
+    const existing = companions.get(backer.name);
+    if (existing) {
+      if (!existing.relations.includes(relation)) existing.relations.push(relation);
+      existing.active ||= active;
+      if (!existing.url && backer.url) existing.url = backer.url;
+      if (!existing.logo && backer.logo) existing.logo = backer.logo;
+      if (!existing.avatar && backer.avatar) existing.avatar = backer.avatar;
+      if (!existing.supportMode && backer.supportMode) existing.supportMode = backer.supportMode;
+      if (!existing.description && description) existing.description = description;
+      if (resourceEntry) existing.resourceEntries.push(resourceEntry);
+      return;
+    }
+
+    companions.set(backer.name, {
+      name: backer.name,
+      url: backer.url,
+      logo: backer.logo,
+      avatar: backer.avatar,
+      supportMode: backer.supportMode,
+      relations: [relation],
+      active,
+      description,
+      resourceEntries: resourceEntry ? [resourceEntry] : [],
+    });
+  };
+
+  for (const sponsor of getSponsors('strategic')) {
+    merge(sponsor, 'strategic', sponsor.status !== 'past', undefined, sponsor.description);
+  }
+  for (const partner of getResourcePartners()) {
+    merge(partner, 'infrastructure', partner.current === true, partner);
+  }
+  for (const supporter of getSponsors('supporter')) {
+    merge(
+      supporter,
+      'supporter',
+      supporter.status !== 'past' && supporter.supportMode !== 'one-time',
+    );
+  }
+
+  return [...companions.values()];
 }
 
 export function getHomepageBackers(fallbackCount = 3): HomepageBackers {

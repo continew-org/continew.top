@@ -41,10 +41,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       toc={page.data.toc}
       full={page.data.full}
       /*
-       * 赞助展示位挂在右侧目录底部：不在阅读流里、不滚动、不弹窗，
-       * 是文档页里对读者打扰最小、对赞助商又真实可见的位置。
-       * 没有战略合作伙伴时组件返回 null，不留空位。
-       * 要撤掉这处展示，删掉这个 prop 即可。
+       * 支持入口挂在右侧目录底部：不在阅读流里、不滚动、不弹窗，
+       * 是文档页里对读者打扰最小、又能自然说明维护来源的位置。
+       * 有开源合作伙伴时，入口下方会追加紧凑名单。
        */
       tableOfContent={{
         style: 'clerk',

@@ -498,11 +498,11 @@ export default async function HomePage() {
       <section className="bg-[color-mix(in_oklab,var(--cn-brand)_6%,transparent)] px-6 py-14 sm:py-16">
         <div className="mx-auto max-w-3xl">
           <SectionHeading
-            eyebrow="当前支持者"
+            eyebrow="ContiNew 支持者"
             title={
-              hasBackers ? '他们，撑起 ContiNew 的日常运转' : '席位开放中，等第一位伙伴'
+              hasBackers ? '让持续迭代继续发生的人' : '支持者名录，等第一位伙伴'
             }
-            description="提交记录里或许看不到他们，但 ContiNew 能持续下去，他们是源源不断的力量。"
+            description="有人贡献代码，有人提供资源，有人按月支持。方式不同，但都让 ContiNew 走得更远。"
           />
 
           {hasBackers ? (
@@ -560,7 +560,7 @@ export default async function HomePage() {
                 href="/sponsor"
                 className="text-sm font-medium text-[var(--cn-brand)] hover:underline"
               >
-                成为赞助者 →
+                了解支持方式 →
               </Link>
             </div>
           )}

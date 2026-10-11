@@ -1,40 +1,25 @@
+import { Heart } from 'lucide-react';
 import type { Supporter } from '@/lib/sponsors';
 import { cn } from '@/lib/cn';
 
-/**
- * 个人支持者：一颗紧凑的胶囊——小头像 + 名字。
- *
- * 【为什么从长卡片改成胶囊】
- * 个人支持者这一档只有「头像 + 名字」两个信息，之前用与企业同款的横向长卡片，
- * 内容少、卡片长，大片留白没有任何意义，看着也不像「一个人」。
- * 胶囊只占内容本身的宽度，几个人排成一行紧凑、也更像一群同伴。
- * 不写金额、不写日期、不写任何说明；往期的胶囊与在支持的完全同款，只整体收轻颜色。
- */
-function SupporterChip({
-  supporter,
-  muted = false,
-}: {
-  supporter: Supporter;
-  muted?: boolean;
-}) {
+function SupporterChip({ supporter }: { supporter: Supporter }) {
   const inner = (
     <>
       {supporter.avatar ? (
-        // 外链头像，静态导出不经过图片优化，用原生 img
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={supporter.avatar}
           alt=""
           aria-hidden
           loading="lazy"
-          className="size-9 rounded-full object-cover"
+          className="size-9 rounded-full border border-amber-400/30 object-cover"
         />
       ) : (
         <span
           aria-hidden
-          className="flex size-9 items-center justify-center rounded-full bg-fd-muted text-sm font-semibold text-fd-muted-foreground"
+          className="flex size-9 items-center justify-center rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300"
         >
-          {supporter.name.slice(0, 1)}
+          <Heart className="size-4" />
         </span>
       )}
       <span className="pr-0.5 text-[15px] font-medium">{supporter.name}</span>
@@ -42,10 +27,9 @@ function SupporterChip({
   );
 
   const cls = cn(
-    'inline-flex items-center gap-2.5 rounded-full border border-fd-border bg-fd-card py-1.5 pl-1.5 pr-4',
-    muted ? 'text-fd-muted-foreground' : 'text-fd-foreground',
+    'inline-flex items-center gap-2.5 rounded-full border border-amber-400/35 bg-amber-500/[0.06] py-1.5 pl-1.5 pr-4 text-amber-950 dark:text-amber-100',
     supporter.url &&
-      'transition-colors hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/40',
+      'transition-colors hover:border-amber-500/60 hover:bg-amber-500/10',
   );
 
   return supporter.url ? (
@@ -57,17 +41,11 @@ function SupporterChip({
   );
 }
 
-export function SupporterChips({
-  supporters,
-  muted = false,
-}: {
-  supporters: Supporter[];
-  muted?: boolean;
-}) {
+export function SupporterChips({ supporters }: { supporters: Supporter[] }) {
   return (
     <div className="flex flex-wrap gap-2">
       {supporters.map((supporter) => (
-        <SupporterChip key={supporter.name} supporter={supporter} muted={muted} />
+        <SupporterChip key={supporter.name} supporter={supporter} />
       ))}
     </div>
   );

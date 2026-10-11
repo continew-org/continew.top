@@ -191,8 +191,8 @@ export default function DemoPage() {
           },
           {
             href: '/sponsor',
-            title: '成为赞助者',
-            description: '演示环境的服务器来自社区支持，了解如何参与。',
+            title: '支持 ContiNew',
+            description: '演示环境由社区伙伴共同支撑，了解如何参与。',
           },
         ]}
       />

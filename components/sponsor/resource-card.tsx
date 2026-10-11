@@ -62,9 +62,10 @@ export function MiniVisual({
 const NEED_ICONS: Record<string, LucideIcon> = {
   云服务器: Server,
   'Token Plan 或额度': Bot,
-  '公共后端 API': Globe,
-  '数据库 / 缓存环境': Database,
-  任务调度中心: Clock,
+  '公共后端 API 服务': Globe,
+  数据库服务: Database,
+  数据库与缓存服务: Database,
+  任务调度服务: Clock,
 };
 
 /** 卡片内的一位提供者：标识 + 名字（+ 具体提供物），右侧起止时间。 */

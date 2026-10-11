@@ -66,19 +66,10 @@
         "period": "2024.10 ~ 2025.8"
       },
       {
-        "name": "Charles7c",
-        "url": "https://gitee.com/charles7c",
-        "avatar": "https://foruda.gitee.com/avatar/1672402076723496711/1294645_charles7c_1672402076.png",
-        "need": "云服务器",
-        "detail": "2C2G + 3M",
-        "qty": "×1",
-        "period": "~ 2025.8"
-      },
-      {
         "name": "莫愁",
         "url": "https://gitee.com/kiki1373639299",
         "avatar": "https://foruda.gitee.com/avatar/1761026926560618595/10166803_kiki1373639299_1761026926.png",
-        "need": "公共后端 API",
+        "need": "公共后端 API 服务",
         "qty": "×1",
         "period": "~ 2025.8"
       },
@@ -86,7 +77,7 @@
         "name": "Kils",
         "url": "https://gitee.com/jskils",
         "avatar": "https://foruda.gitee.com/avatar/1718788214524419935/1751401_jskils_1718788214.png",
-        "need": "数据库 / 缓存环境",
+        "need": "数据库服务",
         "detail": "PostgreSQL",
         "qty": "×1",
         "period": "~ 2025.8"
@@ -95,16 +86,25 @@
         "name": "Bull-BCLS",
         "url": "https://gitee.com/Yoofff",
         "avatar": "https://foruda.gitee.com/avatar/1703510035628602809/10061682_yoofff_1703510035.png",
-        "need": "数据库 / 缓存环境",
-        "detail": "MySQL · Redis（2C2G）",
+        "need": "数据库服务",
+        "detail": "MySQL（2C2G）",
         "qty": "×1",
         "period": "2023.10 ~ 2024.9"
       },
+        {
+          "name": "Bull-BCLS",
+          "url": "https://gitee.com/Yoofff",
+          "avatar": "https://foruda.gitee.com/avatar/1703510035628602809/10061682_yoofff_1703510035.png",
+          "need": "Redis 服务",
+          "detail": "Redis（2C2G）",
+          "qty": "×1",
+          "period": "2023.10 ~ 2024.9"
+        },
       {
         "name": "Kils",
         "url": "https://gitee.com/jskils",
         "avatar": "https://foruda.gitee.com/avatar/1718788214524419935/1751401_jskils_1718788214.png",
-        "need": "任务调度中心",
+        "need": "任务调度服务",
         "qty": "×1",
         "period": "2024.5 ~ 2024.9"
       }
@@ -114,7 +114,7 @@
         "name": "Charlie",
         "avatar": "https://foruda.gitee.com/avatar/1676983733495045769/1695736_tecsmile_1587698621.png",
         "url": "https://gitee.com/tecsmile",
-        "featured": true
+        "supportMode": "one-time"
       }
     ]
   }

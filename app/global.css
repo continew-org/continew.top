@@ -281,6 +281,24 @@ html > body[data-scroll-locked] {
 }
 
 /*
+ * 文档页右上角「支持」：Spacious 布局只渲染 icon 类型，并默认把每项压成方形按钮。
+ * 这一项需要和官网导航一致地呈现「合作图标 + 支持」，所以只对它放宽宽度；
+ * 小屏进入 Options 菜单后，菜单本身会渲染 item.text，隐藏内层文字避免重复。
+ */
+@media (min-width: 64rem) {
+  a:has(> .cn-doc-support-link) {
+    width: auto;
+    padding-inline: 0.5rem;
+  }
+}
+
+@media (max-width: 63.999rem) {
+  .cn-doc-support-text {
+    display: none;
+  }
+}
+
+/*
  * 跑马灯：登记用户与用户留言两处共用。
  *
  * 内容在 DOM 里渲染两份，动画平移 -50%，视觉上就是无缝循环——不需要 JS 测量宽度，
