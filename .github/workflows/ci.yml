@@ -37,3 +37,6 @@ jobs:
 
       - name: 构建
         run: pnpm build
+
+      - name: 检查站内链接
+        run: pnpm links:check

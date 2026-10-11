@@ -91,7 +91,12 @@ jobs:
           node:22
           bash -c "corepack enable && pnpm i --frozen-lockfile && pnpm build"
 
-      # 4、同步部署文件到 Nginx 站点目录（--delete 保证与构建产物一致，清理已下线页面）
+      # 4、解析最终静态产物中的 <a href>，按浏览器 URL 语义校验路由与锚点。
+      #    不能用源文件路径代替：MDX 组件属性不会自动改写相对链接，Windows 的反斜杠也会制造假阴性。
+      - name: 检查站内链接
+        run: node scripts/check-internal-links.mjs out
+
+      # 5、同步部署文件到 Nginx 站点目录（--delete 保证与构建产物一致，清理已下线页面）
       - name: Copy
         run: |
           rsync -a --delete out/ ${{ secrets.SERVER_PATH }}/

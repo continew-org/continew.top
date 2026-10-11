@@ -82,9 +82,10 @@ pnpm types:check      # TypeScript 类型检查
 
 1. `pnpm lint` —— ESLint 无报错；
 2. `pnpm types:check` —— TypeScript 类型检查通过；
-3. `pnpm build` —— 静态导出构建成功。
+3. `pnpm build` —— 静态导出构建成功；
+4. `pnpm links:check` —— 按浏览器 URL 语义解析最终 `out/**/*.html`，站内路由与锚点全部可达（反斜杠 URL、目录假页面和缺失 fragment 均失败）。
 
-仅改动文案、文档占位（`content/docs/**/*.mdx` 的占位内容）或非源码文件时，仍建议至少跑 `pnpm build` 确认可正常构建。
+仅改动文案、文档占位（`content/docs/**/*.mdx` 的占位内容）或非源码文件时，仍建议至少跑 `pnpm build && pnpm links:check`。真实项目文档需按部署流程汇聚后再执行，官网骨架构建不能代替全站验证。
 
 ## 代码风格
 

@@ -13,7 +13,8 @@
     "dev": "next dev",
     "build": "next build",
     "types:check": "next typegen && tsc --noEmit",
-    "lint": "eslint"
+    "lint": "eslint",
+    "links:check": "node scripts/check-internal-links.mjs out"
   },
   "dependencies": {
     "fumadocs-core": "catalog:",

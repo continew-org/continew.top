@@ -60,7 +60,7 @@ ContiNew Starter 的 CRUD 套件为所有列表、树型、导出类接口提供
 
 ## 升级指引
 
-**ContiNew Admin 用户**：v4.2.0 发布后升级至 [v4.2.0](https://github.com/continew-org/continew-admin/releases) 或更高版本（内置 Starter 依赖随版升至 2.16.1），按[升级指南](/docs/admin/guide/upgrade)执行即可；自行管理过 Starter 依赖的项目不必等待 Admin 发版，现在直接将 Starter 升至 2.16.1+ 即可，v4.2.0 发布前可先按下方临时缓解方案处置。
+**ContiNew Admin 用户**：v4.2.0 发布后升级至 [v4.2.0](https://github.com/continew-org/continew-admin/releases) 或更高版本（内置 Starter 依赖随版升至 2.16.1），参照 [CHANGELOG.md](https://github.com/continew-org/continew-admin/blob/dev/CHANGELOG.md) 的 v4.2.0 条目核对本批破坏性变更即可；自行管理过 Starter 依赖的项目不必等待 Admin 发版，现在直接将 Starter 升至 2.16.1+ 即可，v4.2.0 发布前可先按下方临时缓解方案处置。
 
 **ContiNew Starter 用户**：将 Maven 依赖升级至 2.16.1 或更高版本：
 
@@ -72,7 +72,7 @@ ContiNew Starter 的 CRUD 套件为所有列表、树型、导出类接口提供
 </dependency>
 ```
 
-**暂时无法升级的用户**：可在自己的项目中添加排序参数校验过滤器（无需升级依赖，代码见[安全通告页](/docs/admin/security)），或在网关 / WAF 层对 `sort` 参数做标识符白名单过滤，作为临时缓解措施，并尽快安排升级。
+**暂时无法升级的用户**：可在自己的项目中添加排序参数校验过滤器（无需升级依赖，代码见[安全通告页](https://continew.top/docs/admin/reference/security)），或在网关 / WAF 层对 `sort` 参数做标识符白名单过滤，作为临时缓解措施，并尽快安排升级。
 
 **升级后的额外建议**：由于该漏洞可被用于读取接口未返回的数据列（如密码散列），如果你曾将服务暴露给不受信任的用户群体，建议排查历史访问日志中的异常排序请求，并视情况轮换管理员密码等敏感凭证。
 
@@ -82,7 +82,7 @@ ContiNew Starter 的 CRUD 套件为所有列表、树型、导出类接口提供
 
 - **请勿公开披露**：如你发现安全漏洞，请勿在任何代码托管平台通过公开 Issue、PR 或讨论区披露，请通过 [GitHub 私有漏洞报告](https://github.com/continew-org/continew-admin/security/advisories/new) 提交，在通告发布前只有维护者与报告者可以查看；
 - **快速响应**：我们承诺在 7 个工作日内确认受理、14 个工作日内给出评估（详见[安全策略](https://github.com/continew-org/continew-admin/blob/dev/SECURITY.md)），严重问题加急发版；
-- **透明披露**：修复随版本发布后，我们会在[安全通告页](/docs/admin/security)集中公示所有已披露漏洞的编号、影响范围与修复版本，方便跟进。
+- **透明披露**：修复随版本发布后，我们会在[安全通告页](https://continew.top/docs/admin/reference/security)集中公示所有已披露漏洞的编号、影响范围与修复版本，方便跟进。
 
 最后，衷心感谢 tonghuaroot 的负责任披露，让我们有机会在漏洞被广泛利用前完成修复。🙏
 
@@ -90,7 +90,7 @@ ContiNew Starter 的 CRUD 套件为所有列表、树型、导出类接口提供
 
 相关链接：
 
-- ContiNew Admin 安全通告页：[https://continew.top/docs/admin/security](https://continew.top/docs/admin/security)
-- ContiNew Starter 安全通告页：[https://continew.top/docs/starter/security](https://continew.top/docs/starter/security)
+- ContiNew Admin 安全通告页：[https://continew.top/docs/admin/reference/security](https://continew.top/docs/admin/reference/security)
+- ContiNew Starter 安全通告页：[https://continew.top/docs/starter/reference/security](https://continew.top/docs/starter/reference/security)
 - Starter 修复版本：[https://github.com/continew-org/continew-starter/releases/tag/v2.16.1](https://github.com/continew-org/continew-starter/releases/tag/v2.16.1)
 - GitHub 安全通告：[https://github.com/continew-org/continew-admin/security/advisories/GHSA-g8qc-r85v-gqpp](https://github.com/continew-org/continew-admin/security/advisories/GHSA-g8qc-r85v-gqpp)
