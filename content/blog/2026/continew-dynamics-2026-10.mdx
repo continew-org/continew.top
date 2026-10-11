@@ -1,0 +1,81 @@
+---
+title: ContiNew 动态｜官网重做开源、Admin 4.2.0 封版、移动端脚手架立项，顺带聊聊脚手架还有未来吗？
+author: Charles7c
+originalLink: https://mp.weixin.qq.com/s/ib9cgNYTOegzK4yz_dDaYg
+datetime: 2026-10-10 13:30
+category: 社区动态
+description: 近 2 个月，Vibe Coding 疯魔半年的我终于腾出点空，以 AI for All 的主理人视角，把 ContiNew 系列集中梳理了一遍，也借这个机会和各位大佬聊聊我个人视角脚手架可预见的未来。
+---
+
+近 2 个月，Vibe Coding 疯魔半年的我终于腾出点空，以 AI for All 的主理人视角，把 ContiNew 系列集中梳理了一遍，也借这个机会和各位大佬聊聊我个人视角脚手架可预见的未来。
+
+## 官网和文档站，这次彻底开源了
+
+原来的官网严格说只是个文档站，我一个人私下维护。这次梳理，我再也受不了那七零八落的文档，强迫症早就不得劲了，对当年人工加「前任 AI」做出来的审美也消耗殆尽。于是花了 2 天调研、3 个晚上，AI 全流程设计搭建的新官网加文档站就上线了，顺利得有点意外，又在预料之中。
+
+![AI 全流程设计搭建的新官网首页](/images/blog/continew-dynamics-2026-10/continew-top-homepage.png)
+
+这次我从一开始就定好了文档和官网的协作方式，全面开源，AI 优先。
+
+各项目仓库的 /docs 目录放对应项目的纯文档，比如 continew-starter/docs，方便 AI 直接检索和维护。想象一下这个场景，AI 辅助你开发时能不出库、不联网搜索就检索到完整文档，开发完顺手把对应文档一起维护了。官网我也单独开仓库开源了，希望对有需要的大佬有所帮助，也用来承载 CI/CD 自动构建。
+
+官网仓库地址我放在文末。官网现在正在征集用户留言，恳请各位大佬百忙中抽点时间去 Issue 里聊聊真实使用感受，我们会精选留言放到首页展示。也欢迎人工 Star 和 AI 评审优化。
+
+## AI for All 工作流重构
+
+纯 Vibe Coding 半年（还得再练 2 年）之后，考虑到各位大佬和我的实际情况，让基于本系列项目 Vibe Coding 时更专业可靠，更舒服，更优雅成了 ContiNew 新的顶级需求之一。
+
+1. 严格打磨 AGENTS.md 和开源基座（贡献者指南、安全指南、README 等），对标 Nacos 等顶级开源项目的规范，让你的 AI "小甜甜"更懂 ContiNew。
+2. 本地 5 道自动化门禁。后端 validate 阶段跑 Enforcer → Spotless → Checkstyle，再编译和跑单元测试（你没看错，我终于敢下手单元测试了），verify 阶段接 SpotBugs；前端跑 lint、typecheck、build。
+3. 线上 3 道 CI 门禁，完整门禁检查、SonarQube 扫描、LLM Code Review，你我的 PR 都有硬性标准守着。
+4. 维护团队成员用顶级模型（max）多轮交叉评审。这里尤其感谢 Token 自由的熊佬、老莫，没错，我用 flash 写的 PR，也能让顶级模型把关一遍。
+
+还有很多规范细节，有兴趣的大佬可以翻翻最近 2 个月的提交记录。
+
+## ContiNew APP 正式开源
+
+移动端这个方向我们很早就有计划，维护成员老莫也尝试过 app 脚手架开发。闭关半年里我自己产出了多个 APP 和桌面端应用，多轮重构加踩坑之后我才想明白，Vibe Coding 更需要一个专业的脚手架。
+
+continew-app 正式立项，面向 Vibe Coding 的多端工程脚手架，目标覆盖 App（Android/iOS）、微信小程序、H5 和桌面端（Tauri，规划中）。
+
+目前刚刚初始化完工程，请别心急，让小有审美和小有需求的我先打磨一阵。仓库地址放在文末，欢迎大佬们人工 Star 和 AI 评审优化。
+
+## 什么时候上 5.0？
+
+ContiNew Admin 喊了 1 年的 5.0，v4.2.0 也停滞了一年，但我此刻觉得刚刚好。1 年前我前端不行，AI 看起来也不行；1 年后我前端还是不行，但 AI + Harness 行了。正好维护成员番茄大佬（前端大佬）也终于出声下场，希望这次他持久一点。
+
+进度是这样，ContiNew Admin v4.2.0 已经封版，正在收尾发布，等我把 AI 发版流程跑完，5.0 就正式开始。另外，我们在 AtomGit 为 continew-admin 和 continew-starter 维护了计划看板，后续需求和 Bug 可以关注一下。
+
+### 求助
+
+AI 时代适合 Vibe Coding 的高质量前端模板，大佬们用过觉得顺手的，欢迎推荐给我们，我们会认真评估，你也可以直接提需求。我最理想的情况是，某位大佬维护一套高质量前端模板，我们直接基于它做开发适配，两个项目并行。
+
+## 脚手架还有未来吗？
+
+年初刚开始纯 Vibe Coding 的时候，我认真想过一阵，觉得 AI 太强了，continew-admin 这类脚手架大概率没意义了。项目停滞不单是精力分散，也因为我看不到希望。前两天我在刷新闻的时候也看到过类似观点。
+
+![社交平台上关于 AI 能否从零搭建全面脚手架的讨论](/images/blog/continew-dynamics-2026-10/scaffold-ai-comments.png)
+
+实际探索半年之后，我的判断反过来了，脚手架反而大有可为。我一直倡导的那句「人人都应该有自己的脚手架」，可能真要来了。
+
+老用户知道我们维护这些项目很佛系，需求和动力大多来自自身。所以就算打磨得越来越好，它也不可能完美适配每个项目和每个人，更别说每个团队、每家公司。Vibe Coding 时代，APP 喷涌，一个规范专业的基座会缩短你的启动时间，延缓"腐烂"的速度。
+
+所以，有时间你就 fork 到自己仓库，把我们当 upstream 分支来维护。有适合你的需求和修复，让 AI 合并一下；有好的通用点子，也让 AI 提个 PR 回来。让它真的变为你的脚手架、你团队的脚手架、你公司的脚手架。
+
+开源 fork 的意义不就在这儿吗？AI 时代，我们一起多花点 Token，你自己就少耗一点时间。
+
+## 致谢
+
+感谢风铃云信息科技的服务器赞助。前段时间老板为我们把演示环境服务器延长了一年，很多服务才有机会展示给各位。
+
+如果您有多余的资源，且您愿意支持我们的开源故事，诚邀您的赞助支持。
+
+![官网赞助页的合作方式](/images/blog/continew-dynamics-2026-10/sponsor-cooperation.png)
+
+## 相关链接
+
+- 官网与文档站：[GitHub](https://github.com/continew-org/continew.top) / [AtomGit](https://atomgit.com/continew/continew.top) / [Gitee](https://gitee.com/continew/continew.top)
+- continew-app：[GitHub](https://github.com/continew-org/continew-app) / [AtomGit](https://atomgit.com/continew/continew-app) / [Gitee](https://gitee.com/continew/continew-app)
+- 计划看板（AtomGit）：[continew-admin](https://atomgit.com/org/continew/kanban/1) / [continew-starter](https://atomgit.com/org/continew/kanban/2)
+- 征集留言：[continew.top Issue #6](https://github.com/continew-org/continew.top/issues/6)
+- 赞助支持：[https://continew.top/sponsor/](https://continew.top/sponsor/)
