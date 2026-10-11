@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { BadgeCheck, ChevronDown, Milestone, UsersRound } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 const aboutLinks = [
-  { text: '发展历程', url: '/timeline' },
-  { text: '社区团队', url: '/team' },
-  { text: '谁在使用', url: '/users' },
+  { text: '发展历程', url: '/timeline', icon: Milestone },
+  { text: '社区团队', url: '/team', icon: UsersRound },
+  { text: '谁在使用', url: '/users', icon: BadgeCheck },
 ];
 
 /**
@@ -80,6 +80,7 @@ export function NavAboutMenu() {
       >
         {aboutLinks.map((link) => {
           const current = isCurrent(link.url);
+          const Icon = link.icon;
           return (
             <li key={link.url}>
               <Link
@@ -87,14 +88,15 @@ export function NavAboutMenu() {
                 aria-current={current ? 'page' : undefined}
                 // 点击后收起（不用 effect 监听 pathname：会触发 react-hooks/set-state-in-effect）
                 onClick={() => setOpen(false)}
-                // 与全局导航同一套读法：只换文字色，不加图标、不加指示条
+                // 与全局导航同一套读法：图标辅助识别，当前项的图标与文字一同使用品牌色
                 className={cn(
-                  'block rounded-md px-3 py-1.5 transition-colors',
+                  'flex items-center gap-2 rounded-md px-3 py-1.5 transition-colors',
                   current
                     ? 'text-[var(--cn-brand)]'
                     : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-foreground',
                 )}
               >
+                <Icon className="size-4 shrink-0" aria-hidden />
                 {link.text}
               </Link>
             </li>

@@ -207,7 +207,7 @@ export default async function HomePage() {
           <Image src="/logo.svg" alt={appName} width={64} height={64} priority />
           <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-4 py-1.5 text-xs font-medium text-[var(--cn-brand)]">
             <span aria-hidden className="size-1.5 rounded-full bg-[var(--cn-brand)]" />
-            ContiNew Admin v4.1.0 已发布
+            ContiNew Admin v4.2.0 已发布
           </p>
           <h1 className="mt-6 text-balance font-bold tracking-tight text-4xl sm:text-5xl">
             持续迭代，持续舒适的开发体验
@@ -366,7 +366,7 @@ export default async function HomePage() {
       <section className="px-6 py-14 sm:py-20">
         <div className="mx-auto max-w-6xl">
           <SectionHeading
-            eyebrow="登记用户"
+            eyebrow="谁在使用"
             title="他们正在用 ContiNew"
             description="如您使用了 ContiNew 系列项目进行开发，我们诚挚邀请您抽出宝贵时间完成用户登记。"
           />
@@ -484,7 +484,7 @@ export default async function HomePage() {
       <section className="bg-[color-mix(in_oklab,var(--cn-brand)_6%,transparent)] px-6 py-14 sm:py-16">
         <div className="mx-auto max-w-3xl">
           <SectionHeading
-            eyebrow="当前支持"
+            eyebrow="赞助支持"
             title={
               hasBackers ? '这些支持，让持续迭代继续发生' : '支持者名录，等第一位伙伴'
             }
