@@ -2,6 +2,7 @@ import { Handshake, Heart, Server, type LucideIcon } from 'lucide-react';
 import { CompanionCard } from '@/components/sponsor/companion-card';
 import type { Companion, TierKey } from '@/lib/sponsors';
 import { cn } from '@/lib/cn';
+import { focusRing, siteType } from '@/lib/site-design';
 
 const initialCount = 12;
 const gridClass =
@@ -69,8 +70,8 @@ function CompanionGroup({
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1">
         <Icon className={cn('size-4', iconClass)} aria-hidden />
-        <h3 className="text-sm font-semibold text-fd-foreground">{label}</h3>
-        <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', countClass)}>
+        <h3 className={siteType.cardTitle}>{label}</h3>
+        <span className={cn('rounded-full px-2 py-0.5 text-xs leading-5 font-medium', countClass)}>
           {companions.length} 位
         </span>
         <p className="w-full text-xs text-fd-muted-foreground sm:ml-6 sm:w-auto">
@@ -86,7 +87,7 @@ function CompanionGroup({
 
       {remaining.length > 0 && (
         <details className="group mt-4">
-          <summary className="mx-auto flex w-fit cursor-pointer list-none items-center rounded-full border border-fd-border bg-fd-card px-4 py-2 text-xs font-medium text-fd-muted-foreground transition-colors hover:border-[var(--cn-brand-line)] hover:text-fd-foreground [&::-webkit-details-marker]:hidden">
+          <summary className={cn('mx-auto flex min-h-11 w-fit cursor-pointer list-none items-center rounded-lg border border-fd-border bg-fd-card px-4 py-2 text-sm font-medium text-fd-muted-foreground transition-colors hover:border-[var(--cn-brand-line)] hover:text-fd-foreground [&::-webkit-details-marker]:hidden', focusRing)}>
             <span className="group-open:hidden">查看本组全部 {companions.length} 位</span>
             <span className="hidden group-open:inline">收起较早记录</span>
           </summary>

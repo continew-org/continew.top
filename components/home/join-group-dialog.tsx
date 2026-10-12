@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, X } from 'lucide-react';
+import { Button, type ActionSize } from '@/components/site-actions';
 
 /**
  * 「加入交流群」弹层。
@@ -14,7 +15,13 @@ import { MessageCircle, X } from 'lucide-react';
  * 原生 `<dialog>` + `showModal()` 自带 Esc 关闭、焦点陷阱、背景 inert，
  * 手写这三样很容易漏，而键盘用户是真实存在的。图片查看器也沿用同一做法。
  */
-export function JoinGroupDialog({ className }: { className?: string }) {
+export function JoinGroupDialog({
+  className,
+  size = 'md',
+}: {
+  className?: string;
+  size?: Extract<ActionSize, 'md' | 'lg'>;
+}) {
   const ref = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -27,10 +34,10 @@ export function JoinGroupDialog({ className }: { className?: string }) {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
+      <Button size={size} onClick={() => setOpen(true)} className={className}>
         <MessageCircle className="size-4" aria-hidden />
         加入交流群
-      </button>
+      </Button>
 
       <dialog
         ref={ref}
@@ -50,14 +57,15 @@ export function JoinGroupDialog({ className }: { className?: string }) {
               与维护团队直接沟通，获取第一手动态；参与功能讨论和需求收集。
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setOpen(false)}
             aria-label="关闭"
-            className="shrink-0 rounded-lg p-1.5 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-foreground"
+            className="text-fd-muted-foreground hover:text-fd-foreground"
           >
             <X className="size-4" aria-hidden />
-          </button>
+          </Button>
         </div>
 
         {/* 静态导出下不经过图片优化，用原生 img */}

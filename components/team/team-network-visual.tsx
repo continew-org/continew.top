@@ -22,7 +22,7 @@ function AvatarStack({
         />
       ))}
       {members.length > 4 && (
-        <span className="flex size-8 items-center justify-center rounded-full border-2 border-fd-background bg-fd-muted text-[10px] font-medium text-fd-muted-foreground sm:size-9">
+        <span className="flex size-8 items-center justify-center rounded-full border-2 border-fd-background bg-fd-muted text-xs font-medium text-fd-muted-foreground sm:size-9">
           +{members.length - 4}
         </span>
       )}
@@ -63,7 +63,7 @@ export function TeamNetworkVisual({
       <div className="relative grid min-h-64 grid-cols-2 grid-rows-[1fr_auto_1fr] gap-x-6 gap-y-5">
         <div className="self-start">
           <p className="text-xs font-medium text-fd-foreground">核心团队</p>
-          <p className="mt-1 text-[11px] text-fd-muted-foreground">持续维护</p>
+          <p className="mt-1 text-xs leading-5 text-fd-muted-foreground">持续维护</p>
           <div className="mt-3">
             <AvatarStack members={core} />
           </div>
@@ -71,7 +71,7 @@ export function TeamNetworkVisual({
 
         <div className="self-start text-right">
           <p className="text-xs font-medium text-fd-foreground">社区共鸣者</p>
-          <p className="mt-1 text-[11px] text-fd-muted-foreground">积极协作</p>
+          <p className="mt-1 text-xs leading-5 text-fd-muted-foreground">积极协作</p>
           <div className="mt-3">
             <AvatarStack members={resonators} align="right" />
           </div>
@@ -88,7 +88,7 @@ export function TeamNetworkVisual({
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-xs font-medium text-fd-foreground">名誉核心团队成员</p>
-              <p className="mt-1 text-[11px] text-fd-muted-foreground">重要的历史贡献</p>
+              <p className="mt-1 text-xs leading-5 text-fd-muted-foreground">重要的历史贡献</p>
             </div>
             <AvatarStack members={emeriti} align="right" />
           </div>

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { AlertTriangle, ArrowRight, ExternalLink, Server } from 'lucide-react';
+import { AlertTriangle, Server } from 'lucide-react';
 import { getCurrentResourcePartners } from '@/lib/sponsors';
 import { demoUrl } from '@/lib/shared';
+import { ActionLink } from '@/components/site-actions';
 import {
   PageContainer,
   PageHeader,
@@ -10,6 +10,7 @@ import {
   Section,
 } from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
+import { siteType } from '@/lib/site-design';
 
 export const metadata: Metadata = {
   title: '在线演示',
@@ -42,26 +43,18 @@ export default function DemoPage() {
   return (
     <PageContainer>
       <PageHeader
+        variant="task"
+        align="center"
         eyebrow="Live Demo"
         title="在线演示"
         description="无需安装，直接体验 ContiNew Admin 的完整界面与内置功能。进入前请先花一分钟看完下面的注意事项。"
         actions={
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              href={demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]"
-            >
-              前往演示环境 <ExternalLink className="size-4" aria-hidden />
-            </a>
-            <Link
-              href="/docs/admin"
-              className="inline-flex items-center gap-2 rounded-lg border border-fd-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent"
-            >
-              本地部署指南 <ArrowRight className="size-4" aria-hidden />
-            </Link>
-          </div>
+          <>
+            <ActionLink href={demoUrl} variant="primary">
+              前往演示环境
+            </ActionLink>
+            <ActionLink href="/docs/admin">本地部署指南</ActionLink>
+          </>
         }
       />
 
@@ -75,9 +68,9 @@ export default function DemoPage() {
       >
         <ul className="flex flex-col gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-5">
           {notices.map((notice) => (
-            <li key={notice} className="flex gap-2.5 text-sm leading-relaxed">
+            <li key={notice} className={cn('flex gap-2.5', siteType.body)}>
               <AlertTriangle
-                className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-500"
+                className="mt-1.5 size-4 shrink-0 text-amber-600 dark:text-amber-500"
                 aria-hidden
               />
               <span className="text-fd-foreground">{notice}</span>
@@ -92,20 +85,14 @@ export default function DemoPage() {
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-xl border border-fd-border p-5">
-            <h3 className="text-sm font-medium text-fd-muted-foreground">地址</h3>
-            <a
-              href={demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1.5 text-base font-medium text-[var(--cn-brand)] hover:underline"
-            >
-              {demoUrl.replace(/^https?:\/\//, '')}
-              <ExternalLink className="size-3.5" aria-hidden />
-            </a>
+            <h3 className={cn('font-medium text-fd-muted-foreground', siteType.compact)}>地址</h3>
+            <ActionLink href={demoUrl} variant="text" className="mt-2 max-w-full">
+              <span className="break-all">{demoUrl.replace(/^https?:\/\//, '')}</span>
+            </ActionLink>
           </div>
           <div className="rounded-xl border border-fd-border p-5">
-            <h3 className="text-sm font-medium text-fd-muted-foreground">系统管理员</h3>
-            <p className="mt-2 text-base">
+            <h3 className={cn('font-medium text-fd-muted-foreground', siteType.compact)}>系统管理员</h3>
+            <p className={cn('mt-2', siteType.body)}>
               <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-sm">
                 admin
               </code>
@@ -136,15 +123,15 @@ export default function DemoPage() {
           <div className="rounded-xl border border-fd-border p-5">
             <div className="flex items-center gap-2">
               <Server className="size-4 shrink-0 text-teal-600 dark:text-teal-400" aria-hidden />
-              <span className="text-sm font-medium">当前在用环境</span>
-              <span className="rounded bg-teal-600/10 px-1.5 py-0.5 text-xs font-medium text-teal-700 dark:text-teal-400">
+              <span className={cn('font-medium', siteType.compact)}>当前在用环境</span>
+              <span className={cn('rounded bg-teal-600/10 px-1.5 py-0.5 font-medium text-teal-700 dark:text-teal-400', siteType.meta)}>
                 在用
               </span>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-fd-muted-foreground">
+            <p className={cn('mt-3 text-fd-muted-foreground', siteType.compact)}>
               {currentEnv.env}
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <div className={cn('mt-3 flex flex-wrap items-center gap-x-6 gap-y-2', siteType.compact)}>
               <span className="text-fd-muted-foreground">
                 配置
                 <span className="ml-1.5 font-medium tabular-nums text-fd-foreground">
@@ -154,14 +141,9 @@ export default function DemoPage() {
               <span className="text-fd-muted-foreground">
                 提供者
                 {currentEnv.url ? (
-                  <a
-                    href={currentEnv.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-1.5 font-medium text-[var(--cn-brand)] hover:underline"
-                  >
+                  <ActionLink href={currentEnv.url} variant="text" className="ml-1.5">
                     {currentEnv.name}
-                  </a>
+                  </ActionLink>
                 ) : (
                   <span className="ml-1.5 font-medium text-fd-foreground">
                     {currentEnv.name}
@@ -170,14 +152,11 @@ export default function DemoPage() {
               </span>
             </div>
           </div>
-          <p className="mt-4 text-xs text-fd-muted-foreground">
+          <p className={cn('mt-4 text-fd-muted-foreground', siteType.compact)}>
             这套环境是社区和赞助商一台台撑起来的，
-            <Link
-              href="/sponsor"
-              className="ml-1 font-medium text-[var(--cn-brand)] hover:underline"
-            >
-              查看完整的服务器支持历程 →
-            </Link>
+            <ActionLink href="/sponsor" variant="text" className="ml-1">
+              查看完整的服务器支持历程
+            </ActionLink>
           </p>
         </Section>
       )}

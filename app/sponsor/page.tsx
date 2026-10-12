@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import {
-  ArrowRight,
   Check,
   Handshake,
   Heart,
@@ -22,7 +21,8 @@ import {
 import { assertSponsorAssetsExist } from '@/lib/sponsors-assets';
 import { CompanionDirectory } from '@/components/sponsor/companion-directory';
 import { MiniVisual } from '@/components/sponsor/resource-card';
-import { PageContainer, PageNextLinks, Section } from '@/components/site-primitives';
+import { PageContainer, PageIntro, PageNextLinks, Section } from '@/components/site-primitives';
+import { ActionLink } from '@/components/site-actions';
 import { cn } from '@/lib/cn';
 
 export const metadata: Metadata = {
@@ -73,15 +73,7 @@ function buildTiers(strategicRemaining: number): Tier[] {
       price: '¥20 / 月起',
       summary: '以个人身份支持持续维护。名字会进入永久支持者名录，也可以选择匿名。',
       action: (
-        <a
-          href={afdianUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-amber-300 px-5 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10"
-        >
-          <Heart className="size-4" aria-hidden />
-          在爱发电支持
-        </a>
+        <ActionLink href={afdianUrl} className="mt-5 w-full">在爱发电支持</ActionLink>
       ),
     },
     {
@@ -97,13 +89,7 @@ function buildTiers(strategicRemaining: number): Tier[] {
       requirement:
         '品牌名称 + 官方链接 + 一句话业务介绍；广告图 680×320（2:1）+ 透明底 Logo PNG/SVG 高 ≥80px',
       action: (
-        <a
-          href={contactAnchor}
-          className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-fd-primary px-5 py-2.5 text-sm font-medium text-fd-primary-foreground transition-opacity hover:opacity-90"
-        >
-          <Handshake className="size-4" aria-hidden />
-          聊聊合作
-        </a>
+        <ActionLink href={contactAnchor} variant="primary" className="mt-5 w-full">聊聊合作</ActionLink>
       ),
     },
     {
@@ -113,13 +99,7 @@ function buildTiers(strategicRemaining: number): Tier[] {
       price: '按项目当前需求提供资源',
       summary: '以服务器、云服务或 Token 额度等资源，支撑演示环境与日常开发。',
       action: (
-        <a
-          href={contactAnchor}
-          className="mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-teal-500/40 px-5 py-2.5 text-sm font-medium text-teal-700 transition-colors hover:bg-teal-50 dark:text-teal-300 dark:hover:bg-teal-500/10"
-        >
-          <Server className="size-4" aria-hidden />
-          提供资源支持
-        </a>
+        <ActionLink href={contactAnchor} className="mt-5 w-full">提供资源支持</ActionLink>
       ),
     },
   ];
@@ -189,7 +169,7 @@ function TierCard({ tier, className }: { tier: Tier; className?: string }) {
       {tier.key === 'infrastructure' && <ResourceNeedsList />}
       <div className="flex-1" />
       {tier.requirement && (
-        <p className="mt-4 border-t border-fd-border/60 pt-3 text-xs leading-relaxed text-fd-muted-foreground">
+        <p className="mt-4 border-t border-fd-border/60 pt-3 text-sm leading-6 text-fd-muted-foreground">
           需提供：{tier.requirement}
         </p>
       )}
@@ -214,7 +194,7 @@ function ResourceNeedsList() {
       </p>
       <ul className="mt-3 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
         {needs.map((need) => (
-          <li key={need.name} className="flex gap-2 text-xs leading-relaxed">
+          <li key={need.name} className="flex gap-2 text-sm leading-6">
             {need.provider ? (
               <Check className="mt-[2px] size-3.5 shrink-0 text-teal-600 dark:text-teal-400" aria-hidden />
             ) : (
@@ -245,20 +225,13 @@ function NeedProvider({ need }: { need: ResolvedResourceNeed }) {
       </>
     );
     return partner.url ? (
-      <a
-        href={partner.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-1 inline-flex items-center gap-1.5 rounded-full px-0.5 py-0.5 transition-colors hover:bg-fd-accent"
-      >
-        {inner}
-      </a>
+      <ActionLink href={partner.url} variant="text" className="mt-1">{inner}</ActionLink>
     ) : (
       <span className="mt-1 inline-flex items-center gap-1.5 px-0.5 py-0.5">{inner}</span>
     );
   }
   return (
-    <span className="mt-1.5 inline-flex items-center rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-medium text-teal-700 dark:text-teal-300">
+    <span className="mt-1.5 inline-flex items-center rounded-full bg-teal-500/10 px-2 py-0.5 text-xs font-medium text-teal-700 dark:text-teal-300">
       待支持
     </span>
   );
@@ -271,7 +244,7 @@ function BenefitTable() {
   const rows = (items: Benefit[]) =>
     items.map((benefit) => (
       <tr key={benefit.label} className="border-t border-fd-border/40">
-        <td className="px-4 py-2.5 text-xs leading-relaxed text-fd-foreground/80 sm:text-sm">
+        <td className="px-4 py-2.5 text-sm leading-6 text-fd-foreground/80">
           {benefit.label}
         </td>
         <td className="px-2 py-2.5 text-center">
@@ -353,7 +326,7 @@ export default function SponsorPage() {
   ];
 
   return (
-    <PageContainer className="max-w-6xl">
+    <PageContainer>
       <header className="relative overflow-hidden border-b border-fd-border/70 pb-12 sm:pb-16">
         <div
           aria-hidden
@@ -382,39 +355,27 @@ export default function SponsorPage() {
         </svg>
 
         <div className="relative grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
-          <div className="cn-stagger">
-            <div className="flex items-center gap-3 text-sm font-medium text-[var(--cn-brand)]">
-              <Image src="/logo.svg" alt="" width={28} height={28} aria-hidden />
-              <span>ContiNew 支持者</span>
-            </div>
-            <h1 className="mt-6 max-w-2xl text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
-              让持续迭代，
-              <br />
-              继续发生
-            </h1>
-            <p className="mt-6 max-w-xl text-base leading-8 text-fd-muted-foreground">
-              有人贡献代码，有人提供服务器，有人按月支持。方式不同，但都让 ContiNew
-              走得更远。每一份公开支持，都会留在支持者名录中。
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href="#companions"
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]"
-              >
-                查看支持者
-                <ArrowRight className="size-4" aria-hidden />
-              </a>
-              <a
-                href="#join"
-                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/70 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent"
-              >
-                我也要支持
-              </a>
-            </div>
-            <p className="mt-7 text-sm text-fd-muted-foreground">
+          <PageIntro
+            className="cn-stagger"
+            eyebrow={
+              <span className="flex items-center gap-3">
+                <Image src="/logo.svg" alt="" width={28} height={28} aria-hidden />
+                ContiNew 支持者
+              </span>
+            }
+            title={<>让持续迭代，<br />继续发生</>}
+            description="有人贡献代码，有人提供服务器，有人按月支持。方式不同，但都让 ContiNew 走得更远。每一份公开支持，都会留在支持者名录中。"
+            actions={
+              <>
+                <ActionLink href="#companions" variant="primary">查看支持者</ActionLink>
+                <ActionLink href="#join">我也要支持</ActionLink>
+              </>
+            }
+          >
+            <p className="mt-7 text-sm leading-6 text-fd-muted-foreground">
               支持方式不同，感谢没有高低。
             </p>
-          </div>
+          </PageIntro>
 
           <div className="relative rounded-2xl border border-fd-border/80 bg-fd-background/80 p-5 shadow-sm backdrop-blur sm:p-6">
             <div className="flex items-center justify-between gap-4">
@@ -533,15 +494,7 @@ export default function SponsorPage() {
             <p className="mt-2 text-sm leading-relaxed text-fd-muted-foreground">
               无需提前沟通，在爱发电选择月度支持即可。需要公开展示时，我们会确认你的名称、头像与主页链接。
             </p>
-            <a
-              href={afdianUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex w-fit items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-amber-950 transition-colors hover:bg-amber-400"
-            >
-              前往爱发电
-              <ArrowRight className="size-4" aria-hidden />
-            </a>
+            <ActionLink href={afdianUrl} variant="primary" className="mt-5 w-fit">前往爱发电</ActionLink>
           </div>
           <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
             {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,6 +1,8 @@
 import { ExternalLink, Handshake, Heart, Server, type LucideIcon } from 'lucide-react';
 import { sponsorLogoUrl, type Companion, type TierKey } from '@/lib/sponsors';
 import { cn } from '@/lib/cn';
+import { cardHover } from '@/components/site-primitives';
+import { focusRing, siteType } from '@/lib/site-design';
 
 const relationMeta: Record<
   TierKey,
@@ -119,7 +121,7 @@ function CompanionCardContent({ companion }: { companion: Companion }) {
         <CompanionVisual companion={companion} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="min-w-0 flex-1 break-words text-[15px] font-semibold leading-5 text-fd-foreground">
+            <h3 className={cn('min-w-0 flex-1 break-words text-fd-foreground', siteType.cardTitle)}>
               {companion.name}
             </h3>
             {companion.active && (
@@ -137,7 +139,7 @@ function CompanionCardContent({ companion }: { companion: Companion }) {
               return (
                 <span
                   key={relation}
-                  className="inline-flex items-center gap-1 text-[11px] text-fd-muted-foreground"
+                  className="inline-flex items-center gap-1 text-xs text-fd-muted-foreground"
                 >
                   <Icon className={cn('size-3', meta.iconClass)} aria-hidden />
                   {meta.label}
@@ -155,7 +157,7 @@ function CompanionCardContent({ companion }: { companion: Companion }) {
       </div>
 
       {companion.description && (
-        <p className="relative z-10 mt-3 text-xs leading-relaxed text-fd-muted-foreground">
+        <p className="relative z-10 mt-3 text-sm leading-6 text-fd-muted-foreground">
           {companion.description}
         </p>
       )}
@@ -163,7 +165,7 @@ function CompanionCardContent({ companion }: { companion: Companion }) {
       {companion.resourceEntries.length > 0 && (
         <ul className="relative z-10 mt-3 space-y-2 border-t border-fd-border/60 pt-2.5">
           {companion.resourceEntries.map((entry) => (
-            <li key={`${entry.need}-${entry.period}`} className="text-[11px] leading-4">
+            <li key={`${entry.need}-${entry.period}`} className="text-xs leading-5">
               <div className="flex items-start justify-between gap-2">
                 <span className="inline-flex rounded-md bg-teal-500/10 px-1.5 py-0.5 font-medium text-teal-700 dark:text-teal-300">
                   {entry.need}
@@ -187,9 +189,9 @@ export function CompanionCard({ companion }: { companion: Companion }) {
   const accent = relationMeta[getPrimaryRelation(companion)];
   const primaryRelation = getPrimaryRelation(companion);
   const className = cn(
-    'group relative block overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4 text-left transition-[border-color,background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-fd-accent/15 hover:shadow-md hover:shadow-fd-border/25',
+    'group relative block overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4 text-left',
     primaryRelation === 'supporter' ? 'min-h-0' : 'h-full min-h-40',
-    accent.hoverClass,
+    companion.url && cn(cardHover, accent.hoverClass, focusRing),
   );
 
   return companion.url ? (
@@ -200,6 +202,7 @@ export function CompanionCard({ companion }: { companion: Companion }) {
       className={className}
     >
       <CompanionCardContent companion={companion} />
+      <span className="sr-only">（在新窗口打开）</span>
     </a>
   ) : (
     <div className={className}>

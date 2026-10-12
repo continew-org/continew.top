@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { BlogArchive } from '@/components/blog-archive';
 import { BlogWechatDialog } from '@/components/blog-wechat-dialog';
-import { PageContainer, PageNextLinks, cardHover } from '@/components/site-primitives';
+import { PageContainer, PageIntro, PageNextLinks, cardHover } from '@/components/site-primitives';
 import { getBlogPosts, type BlogPost } from '@/lib/blog-source';
 import { cn } from '@/lib/cn';
+import { focusRing, siteMotion, siteType } from '@/lib/site-design';
 
 export const metadata: Metadata = {
   title: '官方博客',
@@ -16,26 +17,27 @@ function LatestPost({ post }: { post: BlogPost }) {
   return (
     <section aria-labelledby="latest-post-title" className="mt-14 sm:mt-16">
       <div className="mb-5 flex items-center gap-3">
-        <h2 id="latest-post-title" className="text-sm font-semibold text-[var(--cn-brand)]">最新发布</h2>
+        <h2 id="latest-post-title" className={cn('font-semibold text-[var(--cn-brand)]', siteType.compact)}>最新发布</h2>
         <span className="h-px flex-1 bg-fd-border" aria-hidden />
       </div>
       <Link
         href={post.url}
         className={cn(
-          'group block rounded-2xl border border-fd-border bg-fd-card px-6 py-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50 sm:px-9 sm:py-9',
+          'group block rounded-2xl border border-fd-border bg-fd-card px-6 py-7 sm:px-9 sm:py-9',
           cardHover,
+          focusRing,
         )}
       >
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fd-muted-foreground">
+        <div className={cn('flex flex-wrap items-center gap-x-3 gap-y-1 text-fd-muted-foreground', siteType.meta)}>
           <span className="font-medium text-[var(--cn-brand)]">{post.category}</span>
           <time dateTime={post.date} className="tabular-nums">{post.date}</time>
         </div>
-        <h3 className="mt-5 max-w-3xl text-xl font-semibold leading-snug tracking-tight transition-colors group-hover:text-[var(--cn-brand)] sm:text-2xl">
+        <h3 className={cn('mt-5 max-w-3xl text-xl font-semibold leading-snug tracking-tight group-hover:text-[var(--cn-brand)] group-focus-visible:text-[var(--cn-brand)] sm:text-2xl', siteMotion.feedback)}>
           {post.title}
         </h3>
-        {post.description && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-fd-muted-foreground sm:text-base">{post.description}</p>}
-        <span className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--cn-brand)]">
-          阅读文章 <ArrowUpRight className="size-4" aria-hidden />
+        {post.description && <p className={cn('mt-4 max-w-2xl text-fd-muted-foreground sm:text-base', siteType.compact)}>{post.description}</p>}
+        <span className={cn('mt-7 inline-flex items-center gap-1.5 font-medium text-[var(--cn-brand)]', siteType.compact)}>
+          阅读文章 <ArrowRight className={cn('size-4', siteMotion.arrow)} aria-hidden />
         </span>
       </Link>
     </section>
@@ -49,15 +51,20 @@ export default async function BlogIndexPage() {
   return (
     <PageContainer>
       <header className="relative lg:flex lg:items-start lg:justify-between lg:gap-12">
-        <div className="max-w-3xl">
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">ContiNew 官方博客</h1>
-          <p className="mt-5 text-base leading-relaxed text-fd-muted-foreground sm:text-lg">
-            记录版本发布、项目决策、社区进展与安全通告。
-            <br className="hidden sm:block" />
-            了解 ContiNew 正在做什么，以及为什么这样做。
-          </p>
+        <PageIntro
+          variant="editorial"
+          title="ContiNew 官方博客"
+          description={
+            <>
+              记录版本发布、项目决策、社区进展与安全通告。
+              <br className="hidden sm:block" />
+              了解 ContiNew 正在做什么，以及为什么这样做。
+            </>
+          }
+          className="max-w-3xl"
+        >
           <BlogWechatDialog />
-        </div>
+        </PageIntro>
         <div className="hidden shrink-0 text-center lg:block">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

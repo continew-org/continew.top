@@ -115,7 +115,7 @@ function ProviderRow({
         >
           {name}
           {marked && (
-            <span className="shrink-0 rounded-full bg-teal-500/15 px-1.5 py-px text-[10px] font-medium leading-4 text-teal-700 dark:text-teal-300">
+            <span className="shrink-0 rounded-full bg-teal-500/15 px-1.5 py-px text-xs font-medium leading-4 text-teal-700 dark:text-teal-300">
               在用
             </span>
           )}
@@ -166,7 +166,7 @@ export function ResourceNeedCard({
         {showQty && (
           <span
             className={cn(
-              'ml-auto rounded-full px-2 py-0.5 text-[11px] font-medium leading-4 tabular-nums',
+              'ml-auto rounded-full px-2 py-0.5 text-xs font-medium leading-4 tabular-nums',
               unlimited
                 ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300'
                 : 'bg-fd-muted text-fd-muted-foreground',

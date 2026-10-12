@@ -1,18 +1,10 @@
 import type { RegisteredUser } from '@/lib/users';
 import { cn } from '@/lib/cn';
+import { focusRing } from '@/lib/site-design';
 
 /**
- * 登记用户跑马灯（双行反向滚动）。
- *
- * 【为什么是文字 chip 而不是 logo 墙】
- * data/users.json 里 21 家登记用户只有 6 家有 logo。做 logo 墙会有三分之二的位置是灰方块——
- * 那不是在展示用户，是在展示我们没收集到素材。改成公司名 chip 后 21 家一家不落，
- * 有 logo 的才显示 logo，视觉上也比「6 个 logo + 15 个灰块」整齐。
- *
- * 【为什么不用 JS】
- * 内容渲染两份 + CSS 平移 -50% 就是无缝循环，不需要测量宽度、不需要客户端组件，
- * 静态导出下照跑。间距用 margin 而非 gap：gap 只加在元素之间，两份内容接缝处会少一个间距，
- * 每轮循环都能看出一次顿挫。
+ * 登记用户跑马灯：纯 CSS 双行循环，无 JS 时内容与暂停入口仍可用。
+ * 每行拥有独立的键盘滚动区；reduce / 聚焦 / 手动暂停时只保留第一份内容。
  */
 function UserChip({ user }: { user: RegisteredUser }) {
   return (
@@ -36,46 +28,59 @@ function UserChip({ user }: { user: RegisteredUser }) {
 function MarqueeRow({
   users,
   reverse,
-  duration,
+  label,
 }: {
   users: RegisteredUser[];
   reverse?: boolean;
-  /** 单行跑完一轮的秒数。两行刻意取不同值，避免上下两行整齐地一起动。 */
-  duration: number;
+  label: string;
 }) {
   return (
-    <ul
-      className={cn(
-        'cn-marquee flex w-max list-none p-0',
-        reverse && 'cn-marquee-reverse',
-      )}
-      style={{ '--cn-marquee-duration': `${duration}s` } as React.CSSProperties}
+    <div
+      role="region"
+      aria-label={`${label}，聚焦后可用左右方向键横向浏览`}
+      tabIndex={0}
+      className={cn('cn-marquee-viewport cn-marquee-fade rounded-lg p-1', focusRing)}
     >
-      {users.map((user, index) => (
-        <li key={`a-${user.name}-${index}`} className="mr-3">
-          <UserChip user={user} />
-        </li>
-      ))}
-      {/* 第二份是循环用的视觉副本，对辅助技术隐藏，避免读屏把每家读两遍 */}
-      {users.map((user, index) => (
-        <li key={`b-${user.name}-${index}`} aria-hidden className="mr-3">
-          <UserChip user={user} />
-        </li>
-      ))}
-    </ul>
+      <ul
+        className={cn(
+          'cn-marquee cn-marquee-users flex w-max list-none p-0',
+          reverse && 'cn-marquee-reverse',
+        )}
+      >
+        {users.map((user, index) => (
+          <li key={`a-${user.name}-${index}`} className="mr-3">
+            <UserChip user={user} />
+          </li>
+        ))}
+        {/* 视觉副本同时 inert 和 aria-hidden；将来 chip 添加链接也不会产生隐藏焦点。 */}
+        {users.map((user, index) => (
+          <li key={`b-${user.name}-${index}`} aria-hidden inert className="cn-marquee-copy mr-3">
+            <UserChip user={user} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 export function UsersMarquee({ users }: { users: RegisteredUser[] }) {
   if (users.length === 0) return null;
 
-  // 均分成两行；奇数时第一行多一个，视觉上不至于让第二行明显短一截
   const half = Math.ceil(users.length / 2);
 
   return (
-    <div className="cn-marquee-host cn-marquee-fade space-y-3">
-      <MarqueeRow users={users.slice(0, half)} duration={64} />
-      <MarqueeRow users={users.slice(half)} duration={78} reverse />
+    <div className="cn-marquee-host space-y-3">
+      <MarqueeRow users={users.slice(0, half)} label="登记用户第一行" />
+      {users.length > half && (
+        <MarqueeRow users={users.slice(half)} label="登记用户第二行" reverse />
+      )}
+      <div className="cn-marquee-control flex justify-center">
+        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-fd-border px-4 py-2 text-sm text-fd-muted-foreground hover:bg-fd-accent">
+          <input type="checkbox" className={cn('cn-marquee-toggle size-4 accent-[var(--cn-brand)]', focusRing)} />
+          暂停自动滚动
+          <span className="sr-only">，勾选后可横向浏览全部登记用户；取消勾选恢复自动滚动</span>
+        </label>
+      </div>
     </div>
   );
 }

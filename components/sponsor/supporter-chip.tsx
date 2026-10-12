@@ -1,6 +1,7 @@
 import { Heart } from 'lucide-react';
 import type { Supporter } from '@/lib/sponsors';
 import { cn } from '@/lib/cn';
+import { focusRing } from '@/lib/site-design';
 
 function SupporterChip({ supporter }: { supporter: Supporter }) {
   const inner = (
@@ -22,14 +23,13 @@ function SupporterChip({ supporter }: { supporter: Supporter }) {
           <Heart className="size-4" />
         </span>
       )}
-      <span className="pr-0.5 text-[15px] font-medium">{supporter.name}</span>
+      <span className="pr-0.5 text-base leading-6 font-medium">{supporter.name}</span>
     </>
   );
 
   const cls = cn(
     'inline-flex items-center gap-2.5 rounded-full border border-amber-400/35 bg-amber-500/[0.06] py-1.5 pl-1.5 pr-4 text-amber-950 dark:text-amber-100',
-    supporter.url &&
-      'transition-colors hover:border-amber-500/60 hover:bg-amber-500/10',
+    supporter.url && cn('transition-colors hover:border-amber-500/60 hover:bg-amber-500/10', focusRing),
   );
 
   return supporter.url ? (

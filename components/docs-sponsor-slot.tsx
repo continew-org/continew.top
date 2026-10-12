@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { HeartHandshake } from 'lucide-react';
 import { getActiveStrategic, sponsorLogoUrl } from '@/lib/sponsors';
+import { cn } from '@/lib/cn';
+import { focusRing } from '@/lib/site-design';
 
 /**
  * 文档目录底部的支持入口。
@@ -15,26 +17,26 @@ export function DocsSponsorSlot() {
     <aside className="mt-4 border-t border-fd-border pt-4" aria-label="支持 ContiNew">
       <Link
         href="/sponsor"
-        className="group block rounded-xl border border-fd-border bg-fd-card p-3 transition-colors hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30"
+        className={cn('group block rounded-xl border border-fd-border bg-fd-card p-3 transition-colors hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30', focusRing)}
       >
         <span className="flex items-center gap-2 text-xs font-semibold text-fd-foreground">
           <HeartHandshake
-            className="size-4 text-[var(--cn-brand)] transition-transform group-hover:scale-105"
+            className="size-4 text-[var(--cn-brand)] transition-transform motion-safe:group-hover:scale-105"
             aria-hidden
           />
           支持 ContiNew
         </span>
-        <span className="mt-2 block text-[11px] leading-relaxed text-fd-muted-foreground">
+        <span className="mt-2 block text-xs leading-relaxed text-fd-muted-foreground">
           你的支持用于持续维护项目、文档与在线演示。
         </span>
-        <span className="mt-2 block text-[11px] font-medium text-[var(--cn-brand)]">
+        <span className="mt-2 block text-xs font-medium text-[var(--cn-brand)]">
           了解支持方式 →
         </span>
       </Link>
 
       {sponsors.length > 0 && (
         <div className="mt-3">
-          <p className="text-[10px] font-medium text-fd-muted-foreground">开源合作伙伴</p>
+          <p className="text-xs font-medium text-fd-muted-foreground">开源合作伙伴</p>
           <ul className="mt-1.5 flex flex-col gap-0.5">
             {sponsors.map((sponsor) => (
               <li key={sponsor.name}>
@@ -43,7 +45,7 @@ export function DocsSponsorSlot() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={sponsor.name}
-                  className="flex items-center gap-2 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-fd-accent/50"
+                  className={cn('flex min-h-11 items-center gap-2 rounded-lg px-1.5 py-1.5 transition-colors hover:bg-fd-accent/50', focusRing)}
                 >
                   {sponsor.logo && (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -55,7 +57,7 @@ export function DocsSponsorSlot() {
                       className="size-7 shrink-0 object-contain"
                     />
                   )}
-                  <span className="min-w-0 truncate text-[11px] text-fd-muted-foreground">
+                  <span className="min-w-0 truncate text-xs text-fd-muted-foreground">
                     {sponsor.name}
                   </span>
                 </a>

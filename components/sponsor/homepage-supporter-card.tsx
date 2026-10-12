@@ -1,6 +1,7 @@
 import { ExternalLink, Handshake, Heart, Server, type LucideIcon } from 'lucide-react';
 import { sponsorLogoUrl, type Companion, type TierKey } from '@/lib/sponsors';
 import { cn } from '@/lib/cn';
+import { focusRing } from '@/lib/site-design';
 
 const relationMeta: Record<
   TierKey,
@@ -145,7 +146,7 @@ function CardContent({ companion }: { companion: Companion }) {
               return (
                 <span
                   key={item}
-                  className="inline-flex items-center gap-1 text-[11px] text-fd-muted-foreground"
+                  className="inline-flex items-center gap-1 text-xs leading-5 text-fd-muted-foreground"
                 >
                   <Icon className={cn('size-3', meta.iconClass)} aria-hidden />
                   {meta.label}
@@ -191,19 +192,22 @@ function CardContent({ companion }: { companion: Companion }) {
 
 export function HomepageSupporterCard({ companion }: { companion: Companion }) {
   const accent = relationMeta[getPrimaryRelation(companion)];
-  const className = cn(
-    'group relative block h-full min-h-32 overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4 text-left transition-[border-color,background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-fd-accent/20 hover:shadow-md hover:shadow-fd-border/25',
-    accent.hoverClass,
-  );
+  const className = 'relative block h-full min-h-32 overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4 text-left';
 
   return companion.url ? (
     <a
       href={companion.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={className}
+      className={cn(
+        className,
+        'group transition-[border-color,background-color,translate,box-shadow] duration-[var(--cn-motion-duration-fast)] motion-safe:hover:-translate-y-px hover:bg-fd-accent/20 hover:shadow-md hover:shadow-fd-border/25',
+        accent.hoverClass,
+        focusRing,
+      )}
     >
       <CardContent companion={companion} />
+      <span className="sr-only">（在新窗口打开）</span>
     </a>
   ) : (
     <div className={className}>

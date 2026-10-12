@@ -34,6 +34,9 @@ import { getContributorList, getContributorSummary, getStarSummary } from '@/lib
 import { getUsers } from '@/lib/users';
 import { getHomepageCompanions } from '@/lib/sponsors';
 import { HomepageSupporterCard } from '@/components/sponsor/homepage-supporter-card';
+import { ActionLink } from '@/components/site-actions';
+import { cn } from '@/lib/cn';
+import { focusRing, siteLayout, siteMotion, siteType } from '@/lib/site-design';
 
 /**
  * 首页文案集中在本文件。
@@ -209,37 +212,31 @@ export default async function HomePage() {
             <span aria-hidden className="size-1.5 rounded-full bg-[var(--cn-brand)]" />
             ContiNew Admin v4.2.0 已发布
           </p>
-          <h1 className="mt-6 text-balance font-bold tracking-tight text-4xl sm:text-5xl">
+          <h1 className={cn('mt-6', siteType.displayTitle)}>
             持续迭代，持续舒适的开发体验
           </h1>
           <p className="mt-5 text-base leading-relaxed text-fd-muted-foreground sm:text-lg">
             {appDescription}
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/docs/admin"
-              className="rounded-lg bg-[var(--cn-brand)] px-6 py-3 text-sm font-medium text-[var(--cn-brand-on)] shadow-sm transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-[var(--cn-brand-strong)] hover:shadow-md"
-            >
+            <ActionLink href="/docs/admin" variant="primary" size="lg">
               快速上手
-            </Link>
+            </ActionLink>
             {/*
               「在线演示」先到官网的 /demo 说明页，再进演示环境。
               演示环境有数据重置、操作受限、部署期短暂不可用等限制，
               直接跳过去的人多半不知道，容易在里面存重要数据或对改不了数据感到困惑；
               先看一页说明再进，对使用者和演示环境都省事。
             */}
-            <Link
-              href="/demo"
-              className="rounded-lg border border-fd-border px-6 py-3 text-sm font-medium transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-fd-accent hover:shadow-sm"
-            >
+            <ActionLink href="/demo" size="lg">
               在线演示
-            </Link>
+            </ActionLink>
             {/*
               交流群入口同样放首屏：Issue 模板、greeting 机器人、各仓库 CONTRIBUTING
               都把「入群方式」指向官网首页，若入口只埋在底部收尾区，读者滚不到就找不到。
               边框样式与「在线演示」同级，不稀释实心主按钮「快速上手」。
             */}
-            <JoinGroupDialog className="inline-flex items-center gap-2 rounded-lg border border-fd-border px-6 py-3 text-sm font-medium transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-px hover:bg-fd-accent hover:shadow-sm" />
+            <JoinGroupDialog size="lg" />
           </div>
           <p className="mt-6 text-xs text-fd-muted-foreground">
             Apache-2.0 / LGPL-3.0 开源协议 · 已有 {users.length} 家企业登记使用
@@ -289,7 +286,7 @@ export default async function HomePage() {
 
       {/* 项目矩阵 */}
       <section className="px-6 py-14 sm:py-20">
-        <div className="mx-auto max-w-6xl">
+        <div className={siteLayout.content}>
           <SectionHeading
             eyebrow="项目生态"
             title="三个项目，一套方法论"
@@ -300,9 +297,11 @@ export default async function HomePage() {
               <Link
                 key={project.name}
                 href={project.href}
-                // 半强度品牌边框（--cn-brand-line）：实色边框在圆角上会显毛边；
-                // 抬升 + 阴影给「卡片浮起来」的空间反馈，与边框变色同时发生
-                className="cn-reveal group flex flex-col rounded-xl border border-fd-border bg-fd-card p-6 transition-[border-color,background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30 hover:shadow-lg hover:shadow-fd-border/40"
+                // 抬升只在未要求减少动态效果时启用；边框与底色反馈不依赖位移。
+                className={cn(
+                  'cn-reveal group flex flex-col rounded-xl border border-fd-border bg-fd-card p-6 transition-[border-color,background-color,translate,box-shadow] duration-[var(--cn-motion-duration-fast)] motion-safe:hover:-translate-y-0.5 hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30 hover:shadow-lg hover:shadow-fd-border/40',
+                  focusRing,
+                )}
               >
                 {/*
                  * 图标与项目名同行、标签退到右上角。
@@ -316,7 +315,7 @@ export default async function HomePage() {
                     {project.name}
                     <ArrowRight
                       aria-hidden
-                      className="size-4 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
+                      className={cn('size-4 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100', siteMotion.arrow)}
                     />
                   </h3>
                   <span className="shrink-0 rounded-md bg-[var(--cn-brand-soft)] px-2 py-0.5 text-xs font-medium text-[var(--cn-brand)]">
@@ -337,7 +336,7 @@ export default async function HomePage() {
 
       {/* 为什么选我们 */}
       <section className="bg-fd-muted/40 px-6 py-14 sm:py-20">
-        <div className="mx-auto max-w-6xl">
+        <div className={siteLayout.content}>
           <SectionHeading
             eyebrow="核心能力"
             title="不只是脚手架，是一套能直接落地的工程实践"
@@ -347,7 +346,7 @@ export default async function HomePage() {
             {capabilities.map((capability) => (
               <div
                 key={capability.title}
-                className="cn-reveal rounded-xl border border-fd-border bg-fd-card p-7 transition-[border-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-fd-primary/50 hover:shadow-lg hover:shadow-fd-border/40"
+                className="cn-reveal rounded-xl border border-fd-border bg-fd-card p-7"
               >
                 <span className="flex size-10 items-center justify-center rounded-lg bg-[var(--cn-brand-soft)] text-[var(--cn-brand)]">
                   {capability.icon}
@@ -364,37 +363,24 @@ export default async function HomePage() {
 
       {/* 登记用户滚动 */}
       <section className="px-6 py-14 sm:py-20">
-        <div className="mx-auto max-w-6xl">
+        <div className={siteLayout.content}>
           <SectionHeading
             eyebrow="谁在使用"
             title="他们正在用 ContiNew"
             description="如您使用了 ContiNew 系列项目进行开发，我们诚挚邀请您抽出宝贵时间完成用户登记。"
           />
         </div>
-        <div className="mt-10 sm:mt-12">
+        <div className={cn(siteLayout.content, 'mt-10 sm:mt-12')}>
           <UsersMarquee users={users} />
         </div>
-        <div className="mx-auto mt-10 flex max-w-6xl flex-wrap items-center justify-center gap-3 px-6">
-          {/*
-           * 这是外链（GitHub 登记帖），用原生 <a> 而非 next/link：
-           * Link 默认同标签跳转，会把访客整个带离本站；登记要填表，
-           * 同标签走掉等于放弃当前浏览。与 /users 页的登记按钮保持一致。
-           */}
-          <a
-            href={registerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]"
-          >
+        <div className={cn(siteLayout.content, 'mt-10 flex flex-wrap items-center justify-center gap-3')}>
+          {/* ActionLink 为登记帖保留原生外链和新窗口提示，站内名单使用 Next Link。 */}
+          <ActionLink href={registerUrl} variant="primary">
             我也是使用者，立即登记
-          </a>
-          <Link
-            href="/users"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-fd-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent"
-          >
+          </ActionLink>
+          <ActionLink href="/users">
             查看全部登记用户
-            <ArrowRight aria-hidden className="size-4" />
-          </Link>
+          </ActionLink>
         </div>
       </section>
 
@@ -407,7 +393,7 @@ export default async function HomePage() {
        * 它就是这块区域唯一的内容，必须照样立得住。
        */}
       <section className="bg-fd-muted/40 px-6 py-14 sm:py-20">
-        <div className="mx-auto max-w-6xl">
+        <div className={siteLayout.content}>
           <SectionHeading
             eyebrow="社区声音"
             title="用过的人怎么说"
@@ -415,7 +401,7 @@ export default async function HomePage() {
           />
         </div>
         {messages.length > 0 ? (
-          <div className="mt-10 sm:mt-12">
+          <div className={cn(siteLayout.content, 'mt-10 sm:mt-12')}>
             <MessagesMarquee messages={messages} />
           </div>
         ) : (
@@ -423,21 +409,16 @@ export default async function HomePage() {
             还没有可展示的留言——第一条由你来开。
           </p>
         )}
-        <div className="mx-auto mt-10 flex max-w-6xl flex-col items-center gap-3 px-6 sm:mt-12">
+        <div className={cn(siteLayout.content, 'mt-10 flex flex-col items-center gap-3 sm:mt-12')}>
           {/*
            * 用描边按钮而非品牌实底：上方「登记用户」已经有一个实底主按钮，
            * 隔一屏再来一个同权重的按钮会互相抢。征集留言是次级动作，
            * 描边 + GitHub 图标恰好也把「点进去会离开本站」这件事说清楚了。
            */}
-          <a
-            href={messageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-fd-border px-5 py-2.5 text-sm font-medium transition-colors hover:border-[var(--cn-brand-line)] hover:bg-[var(--cn-brand-soft)]"
-          >
-            <GitHubIcon className="size-4" />
+          <ActionLink href={messageUrl}>
+            <GitHubIcon className="size-4" aria-hidden />
             我要留言
-          </a>
+          </ActionLink>
         </div>
       </section>
 
@@ -450,7 +431,7 @@ export default async function HomePage() {
        * 它同时也是这条首页上最硬的一条社会证明。
        */}
       <section className="px-6 py-14 sm:py-20">
-        <div className="mx-auto max-w-6xl">
+        <div className={siteLayout.content}>
           <SectionHeading
             eyebrow="社区贡献者"
             title={`${contributorSummary.total} 位贡献者，把它打磨到现在`}
@@ -466,7 +447,7 @@ export default async function HomePage() {
             </p>
           )}
           <div className="mt-10 flex justify-center">
-            <ContributeDialog className="inline-flex items-center gap-1.5 rounded-lg border border-fd-border px-5 py-2.5 text-sm font-medium transition-colors hover:border-[var(--cn-brand-line)] hover:bg-[var(--cn-brand-soft)]" />
+            <ContributeDialog />
           </div>
         </div>
       </section>
@@ -482,7 +463,7 @@ export default async function HomePage() {
         底色使用极淡品牌色，承接前一段白底与后一段中性灰，同时给致谢区保留独立语义。
       */}
       <section className="bg-[color-mix(in_oklab,var(--cn-brand)_6%,transparent)] px-6 py-14 sm:py-16">
-        <div className="mx-auto max-w-3xl">
+        <div className={siteLayout.content}>
           <SectionHeading
             eyebrow="赞助支持"
             title={
@@ -499,25 +480,19 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="mt-9 flex justify-center sm:mt-10">
-              <Link
-                href="/sponsor"
-                className="inline-flex items-center gap-2 rounded-xl border border-dashed border-fd-border bg-fd-card px-5 py-3 text-sm font-medium text-[var(--cn-brand)] transition-colors hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30"
-              >
+              <ActionLink href="/sponsor">
                 <HeartHandshake className="size-4" aria-hidden />
                 成为第一位支持者
-              </Link>
+              </ActionLink>
             </div>
           )}
 
           {hasBackers && (
             <div className="mt-8 flex justify-center">
-              <Link
-                href="/sponsor"
-                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-card/70 px-4 py-2 text-sm font-medium text-fd-foreground transition-[border-color,background-color,transform] hover:-translate-y-px hover:border-[var(--cn-brand-line)] hover:bg-fd-card"
-              >
+              <ActionLink href="/sponsor">
                 <HeartHandshake className="size-4 text-[var(--cn-brand)]" aria-hidden />
                 查看全部支持者与支持方式
-              </Link>
+              </ActionLink>
             </div>
           )}
         </div>
@@ -525,7 +500,7 @@ export default async function HomePage() {
 
       {/* 常见问题 */}
       <section className="bg-fd-muted/40 px-6 py-14 sm:py-20">
-        <div className="mx-auto max-w-6xl">
+        <div className={siteLayout.content}>
           <SectionHeading eyebrow="常见问题" title="先解决你的顾虑" />
           <Faq items={faqItems} className="mt-10 sm:mt-12" />
         </div>
@@ -551,20 +526,14 @@ export default async function HomePage() {
             description="克隆仓库、引入依赖，或者先看一眼在线演示。遇到问题时，交流群里有人在。"
           />
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/docs/admin"
-              className="rounded-lg bg-[var(--cn-brand)] px-6 py-3 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)]"
-            >
+            <ActionLink href="/docs/admin" variant="primary" size="lg">
               快速上手
-            </Link>
+            </ActionLink>
             {/* 同上：先到 /demo 说明页，再进演示环境 */}
-            <Link
-              href="/demo"
-              className="rounded-lg border border-fd-border bg-fd-card px-6 py-3 text-sm font-medium transition-colors hover:bg-fd-accent"
-            >
+            <ActionLink href="/demo" size="lg">
               在线演示
-            </Link>
-            <JoinGroupDialog className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-card px-6 py-3 text-sm font-medium transition-colors hover:bg-fd-accent" />
+            </ActionLink>
+            <JoinGroupDialog size="lg" />
           </div>
         </div>
       </section>

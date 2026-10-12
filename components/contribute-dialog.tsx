@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { GitPullRequestArrow, X } from 'lucide-react';
 import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 import { contributePlatforms } from '@/lib/shared';
+import { ActionLink, Button } from '@/components/site-actions';
 
 const PLATFORM_ICON = {
   github: GitHubIcon,
@@ -47,10 +48,10 @@ export function ContributeDialog({
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className}>
+      <Button onClick={() => setOpen(true)} className={className}>
         <GitPullRequestArrow className="size-4" aria-hidden />
         {label}
-      </button>
+      </Button>
 
       <dialog
         ref={ref}
@@ -69,14 +70,15 @@ export function ContributeDialog({
               提 Issue、提 PR、参与讨论，选一个你常用的平台。
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setOpen(false)}
             aria-label="关闭"
-            className="shrink-0 rounded-lg p-1.5 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-foreground"
+            className="text-fd-muted-foreground hover:text-fd-foreground"
           >
             <X className="size-4" aria-hidden />
-          </button>
+          </Button>
         </div>
 
         <ul className="mt-5 flex flex-col gap-2">
@@ -84,12 +86,10 @@ export function ContributeDialog({
             const Icon = PLATFORM_ICON[platform.key];
             return (
               <li key={platform.key}>
-                <a
+                <ActionLink
                   href={platform.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 rounded-xl border border-fd-border px-4 py-3 transition-colors hover:border-[var(--cn-brand-line)] hover:bg-[var(--cn-brand-soft)]"
+                  className="w-full text-left"
                 >
                   <Icon className="size-5 shrink-0" />
                   <span className="min-w-0 flex-1">
@@ -101,7 +101,7 @@ export function ContributeDialog({
                       推荐
                     </span>
                   )}
-                </a>
+                </ActionLink>
               </li>
             );
           })}

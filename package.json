@@ -14,7 +14,8 @@
     "build": "next build",
     "types:check": "next typegen && tsc --noEmit",
     "lint": "eslint",
-    "links:check": "node scripts/check-internal-links.mjs out"
+    "links:check": "node scripts/check-internal-links.mjs out",
+    "ui:check": "node --test tests/design-system.test.mjs"
   },
   "dependencies": {
     "fumadocs-core": "catalog:",

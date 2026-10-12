@@ -3,6 +3,9 @@ import type { LucideIcon } from 'lucide-react';
 import { Award, Star, Trophy } from 'lucide-react';
 import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 import { cn } from '@/lib/cn';
+import { PageIntro } from '@/components/site-primitives';
+import { ActionLink } from '@/components/site-actions';
+import { focusRing } from '@/lib/site-design';
 import type { PlatformStar, StarSummary } from '@/lib/site-stats';
 import type { TimelineItem } from '@/lib/timeline';
 import { TimelineGallery } from './timeline-gallery';
@@ -118,7 +121,7 @@ function TimelineGraph() {
           <circle cx="92" cy="109" r="2.5" />
           <circle cx="92" cy="28" r="2.5" />
         </g>
-        <g className="fill-fd-muted-foreground font-mono text-[11px]">
+        <g className="fill-fd-muted-foreground font-mono text-xs">
           <text x="112" y="228">2022 · first commit</text>
           <text x="112" y="180">2023 · v1.0</text>
           <text x="340" y="80" textAnchor="end">2024 · organization</text>
@@ -144,24 +147,19 @@ function TimelineHero({
   return (
     <header className="relative border-b border-fd-border/70 pb-12 sm:pb-16">
       <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="cn-stagger">
-          <p className="font-mono text-sm font-medium text-[var(--cn-brand)]">Since {startYear}</p>
-          <h1 className="mt-4 text-balance text-4xl font-bold tracking-tight sm:text-5xl">
-            发展历程
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-fd-muted-foreground sm:text-lg">
-            2022
-            年的冬天，一次再普通不过的项目初始化，成了这段旅程的起点。此后的每一次发版、每一个
-            Star、每一份来自平台和社区的认可，都被留在了这条时间线上。
-          </p>
-        </div>
+        <PageIntro
+          className="cn-stagger"
+          eyebrow={<span className="font-mono">Since {startYear}</span>}
+          title="发展历程"
+          description="2022 年的冬天，一次再普通不过的项目初始化，成了这段旅程的起点。此后的每一次发版、每一个 Star、每一份来自平台和社区的认可，都被留在了这条时间线上。"
+        />
         <TimelineGraph />
       </div>
 
       <dl className="mt-10 grid grid-cols-3 divide-x divide-fd-border border-y border-fd-border/70 sm:mt-12">
         {stats.map((stat) => (
           <div key={stat.label} className="flex min-w-0 flex-col-reverse px-2 py-5 text-center sm:py-6">
-            <dt className="mt-1.5 text-[11px] leading-snug text-fd-muted-foreground sm:text-xs">
+            <dt className="mt-1.5 text-xs leading-snug text-fd-muted-foreground sm:text-xs">
               {stat.label}
             </dt>
             <dd className="text-xl font-bold tracking-tight text-[var(--cn-brand)] tabular-nums sm:text-3xl">
@@ -175,19 +173,13 @@ function TimelineHero({
         {stars.platforms.map((platform) => {
           const PlatformIcon = platformIcons[platform.key];
           return (
-            <a
-              key={platform.key}
-              href={platform.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 transition-colors hover:text-[var(--cn-brand)]"
-            >
-              <PlatformIcon className="size-3.5" />
+            <ActionLink key={platform.key} href={platform.url} variant="text">
+              <PlatformIcon className="size-4" aria-hidden />
               <span className="font-semibold text-fd-foreground tabular-nums">
                 {platform.count.toLocaleString()}
               </span>
               {platform.name}
-            </a>
+            </ActionLink>
           );
         })}
       </div>
@@ -207,10 +199,10 @@ function YearNavigation({ groups }: { groups: TimelineYearGroup[] }) {
           <a
             key={year}
             href={`#${year}`}
-            className="inline-flex items-baseline gap-1.5 rounded-md px-3 py-1.5 font-mono text-sm font-medium text-fd-muted-foreground transition-colors hover:bg-[var(--cn-brand-soft)] hover:text-[var(--cn-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/40"
+            className={cn('inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 font-mono text-sm font-medium text-fd-muted-foreground transition-colors hover:bg-[var(--cn-brand-soft)] hover:text-[var(--cn-brand)]', focusRing)}
           >
             {year}
-            <span className="text-[10px] tabular-nums opacity-65">{items.length}</span>
+            <span className="text-xs tabular-nums opacity-65">{items.length}</span>
           </a>
         ))}
       </div>

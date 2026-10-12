@@ -1,5 +1,4 @@
 import {
-  ArrowUpRight,
   BookOpenText,
   Code2,
   MessageCircleMore,
@@ -7,6 +6,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { JoinGroupDialog } from '@/components/home/join-group-dialog';
+import { ActionLink } from '@/components/site-actions';
 import { gitConfig } from '@/lib/shared';
 
 const projects = [
@@ -24,17 +24,7 @@ const docsProjects = [
 ] as const;
 
 function ExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-[var(--cn-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
-    >
-      {children}
-      <ArrowUpRight className="size-3" aria-hidden />
-    </a>
-  );
+  return <ActionLink href={href} variant="ghost">{children}</ActionLink>;
 }
 
 function PathCard({
@@ -112,7 +102,7 @@ export function ContributionPaths() {
         description="分享真实使用体验、参与功能讨论、帮助其他开发者，或把有价值的实践讲给更多人。"
         tone="amber"
       >
-        <JoinGroupDialog className="inline-flex items-center gap-1.5 rounded-lg border border-fd-border px-3 py-2 text-xs font-medium transition-colors hover:border-[var(--cn-brand-line)] hover:bg-fd-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50" />
+        <JoinGroupDialog />
         <ExternalLink href={`https://github.com/${gitConfig.user}`}>浏览 GitHub 组织</ExternalLink>
       </PathCard>
 

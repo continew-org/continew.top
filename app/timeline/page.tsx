@@ -29,7 +29,7 @@ export default async function TimelinePage() {
   const stars = await getStarSummary();
 
   return (
-    <PageContainer className="max-w-6xl overflow-x-clip">
+    <PageContainer className="overflow-x-clip">
       <TimelineContent
         groups={groups}
         stars={stars}

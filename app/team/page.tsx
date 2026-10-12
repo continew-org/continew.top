@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { ArrowDown, ArrowRight, Code2, Radio, Users } from 'lucide-react';
+import { Code2, Radio, Users } from 'lucide-react';
 import {
   getCommunityResonators,
   getCoreMemberProjectGroups,
@@ -8,7 +8,8 @@ import {
 } from '@/lib/team';
 import { ContributorWall } from '@/components/contributor-wall';
 import { getContributorList, getContributorSummary } from '@/lib/site-stats';
-import { PageContainer, PageNextLinks, Section } from '@/components/site-primitives';
+import { PageContainer, PageIntro, PageNextLinks, Section } from '@/components/site-primitives';
+import { ActionLink } from '@/components/site-actions';
 import { ContributionPaths } from '@/components/team/contribution-paths';
 import { MemberGrid } from '@/components/team/member-grid';
 import { TeamNetworkVisual } from '@/components/team/team-network-visual';
@@ -36,41 +37,29 @@ export default async function TeamPage() {
   ];
 
   return (
-    <PageContainer className="max-w-6xl overflow-x-clip">
+    <PageContainer className="overflow-x-clip">
       <header className="relative overflow-hidden border-b border-fd-border/70 pb-12 sm:pb-16">
         <div
           aria-hidden
           className="absolute inset-y-0 right-0 w-3/5 bg-[radial-gradient(circle_at_72%_54%,color-mix(in_oklab,var(--cn-brand)_8%,transparent),transparent_50%)]"
         />
         <div className="relative grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14">
-          <div className="cn-stagger">
-            <p className="text-sm font-medium text-[var(--cn-brand)]">ContiNew 社区</p>
-            <h1 className="mt-5 max-w-2xl text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
-              一群人，把持续迭代变成日常
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-fd-muted-foreground">
-              核心团队承担项目的持续维护，社区共鸣者通过交流、反馈、传播与协作带来更多可能。身份不同，但每一份参与都在让 ContiNew 继续向前。
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href="#maintainers"
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
-              >
-                认识维护团队
-                <ArrowDown className="size-4" aria-hidden />
-              </a>
-              <a
-                href="#contribute"
-                className="inline-flex items-center gap-2 rounded-lg border border-fd-border bg-fd-background/70 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
-              >
-                找到参与方式
-                <ArrowRight className="size-4" aria-hidden />
-              </a>
-            </div>
-            <p className="mt-7 text-sm text-fd-muted-foreground">
+          <PageIntro
+            className="cn-stagger"
+            eyebrow="ContiNew 社区"
+            title="一群人，把持续迭代变成日常"
+            description="核心团队承担项目的持续维护，社区共鸣者通过交流、反馈、传播与协作带来更多可能。身份不同，但每一份参与都在让 ContiNew 继续向前。"
+            actions={
+              <>
+                <ActionLink href="#maintainers" variant="primary">认识维护团队</ActionLink>
+                <ActionLink href="#contribute">找到参与方式</ActionLink>
+              </>
+            }
+          >
+            <p className="mt-7 text-sm leading-6 text-fd-muted-foreground">
               社区身份不按提交数量评定，代码也不是唯一的参与方式。
             </p>
-          </div>
+          </PageIntro>
 
           <TeamNetworkVisual core={core} resonators={resonators} emeriti={emeriti} />
         </div>
@@ -78,7 +67,7 @@ export default async function TeamPage() {
         <dl className="mt-10 grid grid-cols-3 divide-x divide-fd-border border-y border-fd-border/70 sm:mt-12">
           {stats.map(({ value, label, icon: Icon }) => (
             <div key={label} className="flex min-w-0 flex-col-reverse px-2 py-5 text-center sm:py-6">
-              <dt className="mt-1.5 text-[11px] leading-snug text-fd-muted-foreground sm:text-xs">
+              <dt className="mt-1.5 text-xs leading-5 text-fd-muted-foreground">
                 {label}
               </dt>
               <dd className="flex items-center justify-center gap-2 text-xl font-bold tracking-tight text-[var(--cn-brand)] tabular-nums sm:text-3xl">
@@ -109,7 +98,7 @@ export default async function TeamPage() {
                   <h3 id={`core-${group.key}`} className="font-semibold">
                     {group.label}
                   </h3>
-                  <p className="mt-1 text-xs text-fd-muted-foreground">{group.description}</p>
+                  <p className="mt-1 text-sm leading-6 text-fd-muted-foreground">{group.description}</p>
                 </div>
                 <span className="text-xs text-fd-muted-foreground">{group.members.length} 位</span>
               </div>
@@ -172,9 +161,7 @@ export default async function TeamPage() {
             <p className="text-sm text-fd-muted-foreground">
               本次构建未取得完整名单。参与入口仍然可用，欢迎从适合你的方式开始。
             </p>
-            <a href="#contribute" className="text-sm font-medium text-[var(--cn-brand)] hover:underline">
-              查看参与方式
-            </a>
+            <ActionLink href="#contribute" variant="text">查看参与方式</ActionLink>
           </div>
         )}
       </Section>

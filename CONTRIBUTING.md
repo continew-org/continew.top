@@ -53,6 +53,7 @@ pnpm dev          # http://localhost:3000
 pnpm lint          # ESLint
 pnpm types:check   # TypeScript 类型检查
 pnpm build         # 静态导出构建（验证可正常构建）
+pnpm ui:check      # 检查本次构建产物的设计契约
 ```
 
 CI 会对每个 PR 执行同样的检查（见 [.github/workflows/ci.yml](.github/workflows/ci.yml)），未通过的 PR 不会被审查。
@@ -60,8 +61,9 @@ CI 会对每个 PR 执行同样的检查（见 [.github/workflows/ci.yml](.githu
 ## PR 检查清单
 
 - [ ] 一个 PR 只做一件事，不夹带无关改动
-- [ ] `pnpm lint`、`pnpm types:check`、`pnpm build` 全部通过
-- [ ] 改动官网页面时已自检桌面端与移动端显示效果
+- [ ] `pnpm lint`、`pnpm types:check`、`pnpm build`、`pnpm ui:check` 全部通过
+- [ ] 官网 UI 遵循 [设计契约](DESIGN_SYSTEM.md)，已检查受影响页面与 `/design-system` 的桌面 / 移动、浅色 / 深色效果
+- [ ] 交互改动已检查键盘焦点、禁用、筛选状态与弹层；动效改动已检查 reduced-motion 静态替代
 - [ ] 涉及文档架构/目录约定变更时，已同步更新 [AGENTS.md](AGENTS.md)
 - [ ] commit message 符合 Conventional Commits 规范
 - [ ] 未引入任何敏感信息（凭据、内网地址等）

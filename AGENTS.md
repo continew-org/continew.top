@@ -72,6 +72,7 @@ pnpm dev              # 开发服务器（http://localhost:3000，默认渲染�
 pnpm build            # 静态导出到 out/
 pnpm lint             # ESLint
 pnpm types:check      # TypeScript 类型检查
+pnpm ui:check         # 构建后检查设计契约与静态产物
 ```
 
 本地预览真实文档：将对应项目仓库的 `docs/` 复制进分区即可（如 `cp -r ../continew-starter/docs/. content/docs/starter/`），复制内容属构建期汇聚产物，不提交。
@@ -82,7 +83,8 @@ pnpm types:check      # TypeScript 类型检查
 
 1. `pnpm lint` —— ESLint 无报错；
 2. `pnpm types:check` —— TypeScript 类型检查通过；
-3. `pnpm build` —— 静态导出构建成功。
+3. `pnpm build` —— 静态导出构建成功；
+4. `pnpm ui:check` —— 检查本次构建产物的设计契约。
 
 `pnpm links:check`（按浏览器 URL 语义解析最终 `out/**/*.html`，校验站内路由与锚点可达，反斜杠 URL、目录假页面和缺失 fragment 均失败）**只在 Deploy 中执行**，位于各项目 `docs/` 汇聚之后、`rsync` 之前。CI 不跑这一步：CI 不汇聚文档，分区只剩骨架，真实文档路由不存在，跑它会结构性必挂。本地同样如此——未汇聚真实文档时跑 `links:check` 必然报死链，需先把各项目仓库的 `docs/` 复制进 `content/docs/<project>/` 再执行，官网骨架构建不能代替全站验证。
 
@@ -95,6 +97,13 @@ pnpm types:check      # TypeScript 类型检查
 - fumadocs 相关包（`fumadocs-core` / `fumadocs-ui`）版本号保持一致，`fumadocs-mdx` 为独立发布线，升级时核对其 peer 约束（见 `pnpm-workspace.yaml` 注释）。
 
 > **为何 `fumadocs-ui` 写作 `npm:@fumadocs/base-ui@<version>`**：自 Fumadocs 16 起，官方脚手架（`create-fumadocs-app`）将 UI 运行时拆分为基础包 `@fumadocs/base-ui`，`fumadocs-ui` 作为指向它的 npm 别名安装，二者版本号保持一致。这是官方当前的标准安装方式，并非 hack；升级 fumadocs 时，沿用 `npm:@fumadocs/base-ui@<新版本>` 形式同步 bump 即可，不要改回裸 `fumadocs-ui@<version>`（可能与官方模板的内部导出路径不一致）。
+
+## 官网 UI 协作
+
+- [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) 是官网 UI 的唯一设计契约；开发前先确定页面类型，查找公共组件及全部调用点。
+- 布局 / 排版使用 `lib/site-design.ts` 与 `components/site-primitives.tsx`；行动控件使用 `components/site-actions.tsx`。不要靠追加冲突的尺寸类绕过变体。
+- 新增变体须说明语义、适用页面和例外理由；共享组件调整后检查所有受影响类型，不能只验收一页。
+- `/design-system` 是 noindex 固定样例，不进入导航、搜索或 sitemap。自动契约检查不代替浏览器视觉与交互验收。
 
 ## 文档架构约定（写文档的 AI 必读）
 
@@ -137,7 +146,7 @@ description: 一句话描述（用于 SEO、搜索摘要、OG 图片与 llms.txt
 **提交前检查**：
 
 ```bash
-pnpm lint && pnpm types:check && pnpm build
+pnpm lint && pnpm types:check && pnpm build && pnpm ui:check
 ```
 
 ## 部署

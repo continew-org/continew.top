@@ -1,16 +1,14 @@
 import type { Metadata } from 'next';
 import {
-  ArrowDown,
-  ArrowRight,
   Check,
   ClipboardCheck,
   FileText,
-  Search,
   ShieldCheck,
   UsersRound,
 } from 'lucide-react';
 import { Faq } from '@/components/home/faq';
-import { PageContainer, PageNextLinks, Section } from '@/components/site-primitives';
+import { PageContainer, PageIntro, PageNextLinks, Section } from '@/components/site-primitives';
+import { ActionLink } from '@/components/site-actions';
 import { UserDirectory } from '@/components/user-directory';
 import { UserRegistrationActions } from '@/components/user-registration-actions';
 import { registerUrl } from '@/lib/shared';
@@ -70,31 +68,18 @@ export default function UsersPage() {
   return (
     <PageContainer>
       <header className="relative grid items-center gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14">
-        <div className="cn-stagger">
-          <p className="text-sm font-medium text-[var(--cn-brand)]">真实使用</p>
-          <h1 className="mt-5 max-w-2xl text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
-            谁在使用 ContiNew
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-fd-muted-foreground">
-            来自公司、团队、学校与开源项目的真实公开登记。先看看谁正在使用，也欢迎公开分享你的实践。
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <a
-              href="#register"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--cn-brand)] px-5 py-2.5 text-sm font-medium text-[var(--cn-brand-on)] transition-colors hover:bg-[var(--cn-brand-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
-            >
-              登记你的使用信息
-              <ArrowRight className="size-4" aria-hidden />
-            </a>
-            <a
-              href="#directory"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-fd-border bg-fd-background/70 px-5 py-2.5 text-sm font-medium transition-colors hover:bg-fd-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50"
-            >
-              查看使用者
-              <ArrowDown className="size-4" aria-hidden />
-            </a>
-          </div>
-        </div>
+        <PageIntro
+          className="cn-stagger"
+          eyebrow="真实使用"
+          title="谁在使用 ContiNew"
+          description="来自公司、团队、学校与开源项目的真实公开登记。先看看谁正在使用，也欢迎公开分享你的实践。"
+          actions={
+            <>
+              <ActionLink href="#register" variant="primary">登记你的使用信息</ActionLink>
+              <ActionLink href="#directory">查看使用者</ActionLink>
+            </>
+          }
+        />
 
         <aside className="rounded-2xl border border-fd-border bg-fd-card/90 p-6 shadow-sm sm:p-7">
           <div className="flex items-center gap-3">
@@ -166,7 +151,7 @@ export default function UsersPage() {
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:gap-10">
           <div>
-            <h3 className="text-lg font-semibold">登记模板</h3>
+            <h3 className="text-base font-semibold leading-6">登记模板</h3>
             <p className="mt-2 text-sm leading-relaxed text-fd-muted-foreground">
               复制模板并按提示填写。带“选填”的字段可以省略，未提供的信息不会被推断补齐。
             </p>

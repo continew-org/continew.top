@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { Contributor } from '@/lib/site-stats';
 import { cn } from '@/lib/cn';
+import { focusRing } from '@/lib/site-design';
 
 /*
  * 礼花：8 片，每片一组「方向 + 旋转 + 颜色」。
@@ -59,12 +60,14 @@ export function ContributorWall({
             target="_blank"
             rel="noopener noreferrer"
             title={contributor.login}
+            aria-label={`${contributor.login}（在新窗口打开）`}
             /*
              * 不能用 overflow-hidden 裁头像：礼花要飞到头像外面去，裁了就只剩半截。
              * 代价是头像必须自己填满内容区（size-full）并保持圆角。
              */
             className={cn(
-              'flex size-10 items-center justify-center rounded-full border border-fd-border bg-fd-muted text-sm font-medium text-fd-muted-foreground transition-[transform,border-color] duration-200 hover:scale-[1.08] hover:border-[var(--cn-brand-line)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50',
+              'flex size-11 items-center justify-center rounded-full border border-fd-border bg-fd-muted text-sm font-medium text-fd-muted-foreground transition-[scale,border-color] duration-[var(--cn-motion-duration-fast)] motion-safe:hover:scale-[1.08] hover:border-[var(--cn-brand-line)]',
+              focusRing,
               celebrate && 'cn-confetti',
             )}
           >

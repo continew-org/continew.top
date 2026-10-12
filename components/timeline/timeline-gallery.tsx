@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { Button, actionStyles } from '@/components/site-actions';
 
 interface TimelineGalleryProps {
   images: readonly string[];
@@ -63,36 +64,39 @@ function TimelineLightbox({
       }}
       className="fixed inset-0 m-0 h-dvh w-dvw max-h-none max-w-none place-items-center bg-transparent p-3 text-white backdrop:bg-black/80 open:grid sm:p-8"
     >
-      <button
+      <Button
         ref={closeButtonRef}
-        type="button"
+        variant="overlay"
+        size="icon"
         onClick={close}
         aria-label="关闭图片查看器"
-        className="absolute top-3 right-3 z-10 flex size-11 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 sm:top-6 sm:right-6"
+        className="absolute top-3 right-3 z-10 sm:top-6 sm:right-6"
       >
         <X className="size-5" aria-hidden />
-      </button>
+      </Button>
 
       {images.length > 1 && (
         <>
-          <button
-            type="button"
+          <Button
+            variant="overlay"
+            size="icon"
             disabled={!hasPrevious}
             onClick={() => onActiveIndexChange(activeIndex - 1)}
             aria-label="查看上一张图片"
-            className="absolute top-1/2 left-3 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:pointer-events-none disabled:opacity-25 sm:left-6"
+            className="absolute top-1/2 left-3 z-10 -translate-y-1/2 sm:left-6"
           >
             <ChevronLeft className="size-6" aria-hidden />
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="overlay"
+            size="icon"
             disabled={!hasNext}
             onClick={() => onActiveIndexChange(activeIndex + 1)}
             aria-label="查看下一张图片"
-            className="absolute top-1/2 right-3 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 disabled:pointer-events-none disabled:opacity-25 sm:right-6"
+            className="absolute top-1/2 right-3 z-10 -translate-y-1/2 sm:right-6"
           >
             <ChevronRight className="size-6" aria-hidden />
-          </button>
+          </Button>
         </>
       )}
 
@@ -147,10 +151,13 @@ export function TimelineGallery({ images, alt, variant }: TimelineGalleryProps) 
               type="button"
               onClick={() => setActiveIndex(index)}
               aria-label={`放大查看：${altText}`}
-              className={cn(
-                'group relative w-full overflow-hidden rounded-xl border border-fd-border bg-fd-muted/30 transition-colors hover:border-[var(--cn-brand-line)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-fd-background',
-                featured ? 'aspect-video' : 'aspect-4/3',
-              )}
+              className={actionStyles({
+                size: 'media',
+                className: cn(
+                  'group relative w-full overflow-hidden',
+                  featured ? 'aspect-video' : 'aspect-4/3',
+                ),
+              })}
             >
               {/* 静态导出不经过图片优化；固定比例外框负责预留空间，避免加载时布局跳动。 */}
               {/* eslint-disable-next-line @next/next/no-img-element */}

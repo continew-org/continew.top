@@ -1,5 +1,6 @@
 import type { Message } from '@/lib/messages';
 import { cn } from '@/lib/cn';
+import { focusRing } from '@/lib/site-design';
 
 /**
  * 用户留言跑马灯（横向滚动卡片）。
@@ -55,22 +56,34 @@ export function MessagesMarquee({
   if (messages.length === 0) return null;
 
   return (
-    <div className={cn('cn-marquee-host cn-marquee-fade', className)}>
-      <ul
-        className="cn-marquee flex w-max list-none items-stretch p-0"
-        style={{ '--cn-marquee-duration': '72s' } as React.CSSProperties}
+    <div className={cn('cn-marquee-host space-y-3', className)}>
+      <div
+        role="region"
+        aria-label="社区留言，聚焦后可用左右方向键横向浏览"
+        tabIndex={0}
+        className={cn('cn-marquee-viewport cn-marquee-fade rounded-lg p-1', focusRing)}
       >
-        {messages.map((message, index) => (
-          <li key={`a-${index}`} className="mr-4">
-            <MessageCard message={message} />
-          </li>
-        ))}
-        {messages.map((message, index) => (
-          <li key={`b-${index}`} aria-hidden className="mr-4">
-            <MessageCard message={message} />
-          </li>
-        ))}
-      </ul>
+        <ul className="cn-marquee cn-marquee-messages flex w-max list-none items-stretch p-0">
+          {messages.map((message, index) => (
+            <li key={`a-${index}`} className="mr-4">
+              <MessageCard message={message} />
+            </li>
+          ))}
+          {/* 副本没有辅助技术或键盘入口；静态浏览模式下完全隐藏。 */}
+          {messages.map((message, index) => (
+            <li key={`b-${index}`} aria-hidden inert className="cn-marquee-copy mr-4">
+              <MessageCard message={message} />
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="cn-marquee-control flex justify-center">
+        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-fd-border px-4 py-2 text-sm text-fd-muted-foreground hover:bg-fd-accent">
+          <input type="checkbox" className={cn('cn-marquee-toggle size-4 accent-[var(--cn-brand)]', focusRing)} />
+          暂停自动滚动
+          <span className="sr-only">，勾选后可横向浏览全部留言；取消勾选恢复自动滚动</span>
+        </label>
+      </div>
     </div>
   );
 }

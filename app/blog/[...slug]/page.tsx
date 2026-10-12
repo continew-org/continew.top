@@ -10,15 +10,17 @@ import { blogSource, excerptOf, getBlogPostContext, type BlogPost } from '@/lib/
 import { tocTitle } from '@/lib/i18n';
 import { getMDXComponents } from '@/components/mdx';
 import { siteUrl } from '@/lib/shared';
-import { cardHover } from '@/components/site-primitives';
+import { ActionLink } from '@/components/site-actions';
+import { PageContainer, cardHover } from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
+import { focusRing, siteType } from '@/lib/site-design';
 
 function NeighbourLink({ post, label, align = 'left' }: { post?: BlogPost; label: string; align?: 'left' | 'right' }) {
   if (!post) return null;
   return (
-    <Link href={post.url} className={cn('block min-w-0 rounded-xl border border-fd-border p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50', cardHover, align === 'right' && 'sm:text-right')}>
-      <span className="text-xs text-fd-muted-foreground">{label}</span>
-      <span className="mt-2 block text-sm font-medium leading-snug">{post.title}</span>
+    <Link href={post.url} className={cn('block min-w-0 rounded-xl border border-fd-border p-4', cardHover, focusRing, align === 'right' && 'sm:text-right')}>
+      <span className={cn('text-fd-muted-foreground', siteType.meta)}>{label}</span>
+      <span className={cn('mt-2 block font-medium', siteType.compact)}>{post.title}</span>
     </Link>
   );
 }
@@ -47,7 +49,7 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
    * 桌面：右侧常驻目录（带滚动高亮）；移动：文章顶部放折叠的内联目录。
    */
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-16">
+    <PageContainer variant="reading">
       <TOCProvider toc={toc}>
         {/*
           间距照文档站的做法：外层只留很小的 gap，主要间距由目录列的左内边距（ps-12）撑开，
@@ -56,8 +58,8 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
         <div className="flex items-start gap-4">
           <article className="min-w-0 flex-1">
             <header className="flex flex-col gap-4 border-b border-fd-border pb-8">
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full bg-fd-primary/10 px-2.5 py-0.5 font-medium text-fd-primary">
+              <div className={cn('flex flex-wrap items-center gap-2', siteType.meta)}>
+                <span className="rounded-full bg-[var(--cn-brand-soft)] px-2.5 py-0.5 font-medium text-[var(--cn-brand)]">
                   {page.data.category}
                 </span>
                 {page.data.original === false && (
@@ -66,25 +68,20 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
                   </span>
                 )}
               </div>
-              <h1 className="text-2xl font-bold leading-snug tracking-tight sm:text-3xl">
+              <h1 className={siteType.articleTitle}>
                 {page.data.title}
               </h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-fd-muted-foreground">
+              <div className={cn('flex flex-wrap items-center gap-x-4 gap-y-1 text-fd-muted-foreground', siteType.compact)}>
                 <span>{page.data.author}</span>
-                <span className="tabular-nums">{date}</span>
+                <time dateTime={date} className="tabular-nums">{date}</time>
                 {page.data.originalLink && (
-                  <a
-                    href={page.data.originalLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-fd-primary hover:underline"
-                  >
-                    公众号原文 →
-                  </a>
+                  <ActionLink href={page.data.originalLink} variant="text">
+                    公众号原文
+                  </ActionLink>
                 )}
               </div>
               {authoredDescription && (
-                <p className="max-w-2xl text-base leading-relaxed text-fd-muted-foreground">
+                <p className={cn('max-w-2xl text-fd-muted-foreground', siteType.body)}>
                   {authoredDescription}
                 </p>
               )}
@@ -111,19 +108,19 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
                   <ul className="mt-4 divide-y divide-fd-border/70">
                     {related.map((post) => (
                       <li key={post.url}>
-                        <Link href={post.url} className="group block rounded-sm py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50">
-                          <span className="text-xs tabular-nums text-fd-muted-foreground">{post.date}</span>
-                          <span className="mt-1 block text-sm font-medium leading-snug group-hover:text-[var(--cn-brand)]">{post.title}</span>
-                          {post.description && <span className="mt-1 line-clamp-2 block text-xs leading-relaxed text-fd-muted-foreground">{post.description}</span>}
+                        <Link href={post.url} className={cn('group block rounded-sm py-4', cardHover, focusRing)}>
+                          <span className={cn('tabular-nums text-fd-muted-foreground', siteType.meta)}>{post.date}</span>
+                          <span className={cn('mt-1 block font-medium group-hover:text-[var(--cn-brand)] group-focus-visible:text-[var(--cn-brand)]', siteType.compact)}>{post.title}</span>
+                          {post.description && <span className={cn('mt-1 line-clamp-2 block text-fd-muted-foreground', siteType.compact)}>{post.description}</span>}
                         </Link>
                       </li>
                     ))}
                   </ul>
                 </section>
               )}
-              <Link href="/blog" className="mt-10 inline-block rounded-sm text-sm text-[var(--cn-brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50">
-                ← 返回全部文章
-              </Link>
+              <ActionLink href="/blog" variant="text" className="mt-10">
+                返回全部文章
+              </ActionLink>
             </footer>
           </article>
 
@@ -133,7 +130,7 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
           </div>
         </div>
       </TOCProvider>
-    </main>
+    </PageContainer>
   );
 }
 
