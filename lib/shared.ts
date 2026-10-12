@@ -25,7 +25,7 @@ export const siteUrl = 'https://continew.top';
  * 关键字眼是「最新」：抽 6.0 之后主角会换人，届时只需在 lib/docs-sections.ts
  * 调整版本顺序（首个即默认版本），此处与引用它的页面自动跟上，不必逐个文件排查。
  *
- * 版本段不可省：`/docs/admin` 是项目版本选择入口，最新文档需直达版本目录。
+ * 版本段不可省：`/docs/admin` 保留为旧地址兼容跳转，导航应直达版本目录。
  */
 export const currentDocsUrl = buildDefaultDocsUrl();
 

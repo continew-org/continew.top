@@ -25,6 +25,7 @@ for (const section of docSections) {
     }
   }
   await collect(base);
+  routes.set(join(root, 'docs', section.key) + '.html', `/docs/${section.key}/${archive.key}`);
 }
 
 for (const [file, target] of routes) {

@@ -189,6 +189,11 @@ export function getDocVersion(sectionKey: string | undefined, versionKey: string
     ?.versions?.find((version) => version.key === versionKey);
 }
 
+/** 仅版本目录本身是 Root Type，不能把其下的普通目录标成版本根。 */
+export function getVersionForFolderPath(folderPath: string): DocVersion | undefined {
+  return sourceUnits.find(({ dir }) => dir === folderPath)?.version;
+}
+
 /** 该分区是否启用了版本机制。 */
 export function hasVersions(sectionKey: string | undefined): boolean {
   if (!sectionKey) return false;

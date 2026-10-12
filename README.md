@@ -15,7 +15,7 @@ ContiNew（Continue New）是一套以「约定优于配置」为核心的开源
 | 项目 | 说明 | 文档分区 |
 |:-----|:-----|:---------|
 | [ContiNew Starter](https://github.com/continew-org/continew-starter) | Spring Boot 3.x 企业级 Starter 库 | `/docs/starter` |
-| [ContiNew Admin](https://github.com/continew-org/continew-admin) | 多租户中后台管理系统框架（含[前端](https://github.com/continew-org/continew-admin-ui)） | `/docs/admin` |
+| [ContiNew Admin](https://github.com/continew-org/continew-admin) | 多租户中后台管理系统框架（含[前端](https://github.com/continew-org/continew-admin-ui)） | `/docs/admin/5.0`（4.2 归档在 `/docs/admin/4.2`） |
 | [ContiNew App](https://github.com/continew-org/continew-app) | 移动端应用解决方案 | `/docs/app` |
 
 ## 文档从哪里来（重要）
@@ -55,7 +55,7 @@ cp -r ../continew-starter/docs/. content/docs/starter/
 pnpm dev
 ```
 
-Admin 的两个版本需分别从 `dev` 和 `4.2.x` 的 `docs/` 复制到 `content/docs/admin/5.0/`、`content/docs/admin/4.2/`。`/docs/admin` 是官网管理的版本选择入口；版本目录的内容仅供构建使用，不提交。预览完无需清理——汇聚内容已忽略，不影响提交。
+Admin 的两个版本需分别从 `dev` 和 `4.2.x` 的 `docs/` 复制到 `content/docs/admin/5.0/`、`content/docs/admin/4.2/`。版本通过 Fumadocs 侧边栏下拉切换，不设额外版本选择页；旧 `/docs/admin` 保留为指向 4.2 的兼容跳转。版本目录的内容仅供构建使用，不提交。预览完无需清理——汇聚内容已忽略，不影响提交。
 
 其他命令：
 

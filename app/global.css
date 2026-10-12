@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/generated/spacious.css';
 @import 'fumadocs-ui/css/preset.css';
 
 @theme {
@@ -311,32 +310,5 @@ html > body[data-scroll-locked] {
   :is([class*='hover:scale-'], [class*='hover:-scale-']) {
     scale: 1 !important;
     transform: none !important;
-  }
-}
-
-/* 移动端文档：移除双层外嵌卡片，恢复全宽正文与清晰的吸顶栏。 */
-@media (max-width: 47.999rem) {
-  #nd-page-panel {
-    margin-inline: 0 !important;
-    border-radius: 0 !important;
-    border-inline: 0 !important;
-  }
-
-  #fd-spacious-layout {
-    background-color: var(--color-fd-background) !important;
-  }
-
-  [grid-area='toc-popover'] > div:nth-child(2) {
-    display: none !important;
-  }
-
-  #nd-subnav {
-    background-color: var(--color-fd-background) !important;
-    border-bottom: 1px solid var(--color-fd-border);
-  }
-
-  [grid-area='toc-popover'] header {
-    background-color: var(--color-fd-background) !important;
-    border-bottom: 1px solid var(--color-fd-border);
   }
 }

@@ -41,9 +41,9 @@
 | `content/docs/admin/4.2/` | `/docs/admin/4.2/*` | `continew-org/continew-admin` 的 `4.2.x` 分支 `docs/`（归档） |
 | `content/docs/app/` | `/docs/app/*` | `continew-org/continew-app` 的 `docs/` |
 
-项目分区的 `meta.json` 标记 `root: true`，组成项目切换器；Admin 的项目入口 `index.mdx` 由官网维护，列出可选版本。其下各版本的文档（含 `meta.json` 和 `index.mdx`）由对应项目仓库的 `docs/` 汇聚，不提交。版本目录的 `meta.json` 使用相同的 `root: "version"`：这是 Fumadocs Root Type，同项目内切换时优先投影到另一版本的对应页面，缺页则回到版本入口。旧 `/docs/admin/<页面>` 地址由构建后静态跳转页固定指向 4.2；`/docs/admin` 为项目入口。
+项目分区的 `meta.json` 标记 `root: true`；Admin 不单设版本选择页。其下各版本的文档（含 `meta.json` 和 `index.mdx`）由对应项目仓库的 `docs/` 汇聚，不提交。`lib/source.ts` 将 Admin 版本目录的 Root Type 统一设为 `"version"`，Fumadocs 标准 Docs 布局在侧边栏（手机端为侧栏抽屉）自动渲染项目与版本下拉；切换时优先投影到另一版本的对应页面，缺页则回到版本入口。旧 `/docs/admin/<页面>` 地址由构建后静态跳转页固定指向 4.2；`/docs/admin` 同样保留为指向 4.2 的旧地址跳转，不是新增的导航页。
 
-文档拉取目录、仓库和 git 引用统一注册在 `lib/docs-sections.ts`，`scripts/gen-docs-sources.mjs` 据此生成部署映射；新增版本需在注册表中声明，并确保源仓库相应 `docs/meta.json` 使用 `root: "version"`。
+文档拉取目录、仓库和 git 引用统一注册在 `lib/docs-sections.ts`，`scripts/gen-docs-sources.mjs` 据此生成部署映射；新增版本需在注册表中声明；站点会按注册表把对应版本目录设为 `root: "version"`，不依赖上游 `docs/meta.json` 的取值。
 
 ### 关键文件
 

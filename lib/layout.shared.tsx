@@ -1,6 +1,6 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from 'next/image';
-import { appName } from './shared';
+import { appName, currentDocsUrl } from './shared';
 import type { StarSummary } from './site-stats';
 import { NavAboutMenu } from '@/components/nav-about-menu';
 import { NavSponsorLink } from '@/components/nav-sponsor-link';
@@ -44,12 +44,11 @@ export function baseOptions(
      */
     links: [
       /*
-       * 文档直达 ContiNew Admin 分区，而不是 /docs 根：
-       * 根路径只是分区索引，多一次点击，而 Admin 是目前内容最全的主力文档。
+       * 文档直达 ContiNew Admin 当前版本，不经过 /docs 根路径。
        */
       {
         text: '文档',
-        url: '/docs/admin',
+        url: currentDocsUrl,
         on: 'nav',
       },
       {

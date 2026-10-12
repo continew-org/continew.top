@@ -5,7 +5,7 @@ import {
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
-} from 'fumadocs-ui/layouts/spacious/page';
+} from 'fumadocs-ui/layouts/docs/page';
 import { DocsPageBreadcrumb } from '@/components/docs-page-breadcrumb';
 import { ViewOptionsPopover } from '@/components/view-options-popover';
 import { DocsSponsorSlot } from '@/components/docs-sponsor-slot';

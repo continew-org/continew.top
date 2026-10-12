@@ -4,7 +4,7 @@ import { readFile, access, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promise
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { docSections, getSourceUnitForFile, getVersionTags } from '../lib/docs-sections.ts';
+import { docSections, getSourceUnitForFile, getVersionForFolderPath, getVersionTags } from '../lib/docs-sections.ts';
 import { rewriteDocUrl } from '../lib/mdx-plugins/remark-archive-doc-links.ts';
 
 const admin = docSections.find(({ key }) => key === 'admin');
@@ -14,7 +14,15 @@ const current = getSourceUnitForFile('D:\\project\\content\\docs\\admin\\5.0\\in
 test('source unit matching distinguishes versions and leaves the section landing alone', () => {
   assert.equal(archive?.dir, 'admin/4.2');
   assert.equal(current?.dir, 'admin/5.0');
-  assert.equal(getSourceUnitForFile('/project/content/docs/admin/index.mdx'), undefined);
+  assert.equal(getSourceUnitForFile('/project/content/docs/admin/meta.json'), undefined);
+});
+
+test('only configured version folders become version roots', () => {
+  assert.equal(getVersionForFolderPath('admin/5.0')?.key, '5.0');
+  assert.equal(getVersionForFolderPath('admin/4.2')?.key, '4.2');
+  assert.equal(getVersionForFolderPath('admin/5.0/manual'), undefined);
+  assert.equal(getVersionForFolderPath('admin/4.2/manual/system'), undefined);
+  assert.equal(getVersionForFolderPath('starter'), undefined);
 });
 
 test('legacy self links stay within the compiling version and explicit cross-version links stay unchanged', () => {
@@ -60,6 +68,8 @@ test('legacy redirect generator preserves query and anchor and refuses to overwr
     execFileSync(process.execPath, [script, output]);
     const redirect = await readFile(join(output, 'docs', 'admin', 'configuration.html'), 'utf8');
     assert.match(redirect, /location\.replace\("\/docs\/admin\/4\.2\/configuration" \+ location\.search \+ location\.hash\)/);
+    const projectRedirect = await readFile(join(output, 'docs', 'admin.html'), 'utf8');
+    assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.2" \+ location\.search \+ location\.hash\)/);
     assert.throws(() => execFileSync(process.execPath, [script, output], { stdio: 'pipe' }));
   } finally {
     await rm(output, { recursive: true, force: true });
@@ -74,6 +84,8 @@ test('export contains both version routes and legacy static redirect when snapsh
     t.skip('requires an exported build with upstream Admin snapshots');
     return;
   }
+  const projectRedirect = await readFile(join(process.cwd(), 'out', 'docs', 'admin.html'), 'utf8');
+  assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.2" \+ location\.search \+ location\.hash\)/);
   const legacy = await readFile(join(dir, 'reference', 'security.html'), 'utf8');
   assert.match(legacy, /location\.replace\("\/docs\/admin\/4\.2\/reference\/security" \+ location\.search \+ location\.hash\)/);
   const latest = await readFile(join(dir, '5.0.html'), 'utf8');

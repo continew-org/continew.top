@@ -3,7 +3,7 @@ import type { Folder } from 'fumadocs-core/page-tree';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
-import { getDefaultVersion, getDocVersion, hasVersions } from './docs-sections';
+import { getDefaultVersion, getDocVersion, getVersionForFolderPath, hasVersions } from './docs-sections';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 
@@ -58,9 +58,7 @@ const versionedSectionsPlugin = () => ({
   name: 'continew:versioned-sections',
   transformPageTree: {
     folder(node: Folder, folderPath: string): Folder {
-      // folderPath 对版本分区形如 `admin/4.2`，对普通分区即分区 key。
-      const [sectionKey, versionKey] = folderPath.split('/');
-      const version = versionKey ? getDocVersion(sectionKey, versionKey) : undefined;
+      const version = getVersionForFolderPath(folderPath);
       if (!version) return node;
 
       return {

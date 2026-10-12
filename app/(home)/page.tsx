@@ -26,6 +26,7 @@ import { getMessages } from '@/lib/messages';
 import {
   appDescription,
   appName,
+  currentDocsUrl,
   gitConfig,
   messageUrl,
   registerUrl,
@@ -68,7 +69,7 @@ const projects: Array<{
     icon: <LayoutDashboard className="size-5" aria-hidden />,
     description:
       '页面现代美观、专注设计与代码细节的高质量多租户中后台管理系统框架。开箱即用，前后端分离，内置代码生成器。',
-    href: '/docs/admin',
+    href: currentDocsUrl,
     repo: 'continew-admin',
   },
   {
@@ -219,7 +220,7 @@ export default async function HomePage() {
             {appDescription}
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <ActionLink href="/docs/admin" variant="primary" size="lg">
+            <ActionLink href={currentDocsUrl} variant="primary" size="lg">
               快速上手
             </ActionLink>
             {/*
@@ -526,7 +527,7 @@ export default async function HomePage() {
             description="克隆仓库、引入依赖，或者先看一眼在线演示。遇到问题时，交流群里有人在。"
           />
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <ActionLink href="/docs/admin" variant="primary" size="lg">
+            <ActionLink href={currentDocsUrl} variant="primary" size="lg">
               快速上手
             </ActionLink>
             {/* 同上：先到 /demo 说明页，再进演示环境 */}

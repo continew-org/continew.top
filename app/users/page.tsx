@@ -11,7 +11,7 @@ import { PageContainer, PageIntro, PageNextLinks, Section } from '@/components/s
 import { ActionLink } from '@/components/site-actions';
 import { UserDirectory } from '@/components/user-directory';
 import { UserRegistrationActions } from '@/components/user-registration-actions';
-import { registerUrl } from '@/lib/shared';
+import { currentDocsUrl, registerUrl } from '@/lib/shared';
 import { getCityCount, getTopCities, getUsers } from '@/lib/users';
 
 export const metadata: Metadata = {
@@ -190,7 +190,7 @@ export default function UsersPage() {
       <PageNextLinks
         links={[
           {
-            href: '/docs/admin',
+            href: currentDocsUrl,
             title: '快速开始',
             description: '还没用上？从 ContiNew Admin 的文档开始，十分钟跑起来。',
           },

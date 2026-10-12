@@ -3,5 +3,5 @@
   "description": "多租户中后台管理系统框架",
   "icon": "LayoutDashboard",
   "root": true,
-  "pages": ["index", "5.0", "4.2"]
+  "pages": ["5.0", "4.2"]
 }
