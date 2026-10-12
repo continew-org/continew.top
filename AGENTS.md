@@ -37,19 +37,20 @@
 | 分区目录 | URL | 文档源仓库 |
 |:---------|:----|:-----------|
 | `content/docs/starter/` | `/docs/starter/*` | `continew-org/continew-starter` 的 `docs/` |
-| `content/docs/admin/` | `/docs/admin/*` | `continew-org/continew-admin` 的 `docs/`（含前端 `continew-admin-ui` 文档） |
+| `content/docs/admin/5.0/` | `/docs/admin/5.0/*` | `continew-org/continew-admin` 的 `dev` 分支 `docs/` |
+| `content/docs/admin/4.2/` | `/docs/admin/4.2/*` | `continew-org/continew-admin` 的 `4.2.x` 分支 `docs/`（归档） |
 | `content/docs/app/` | `/docs/app/*` | `continew-org/continew-app` 的 `docs/` |
 
-每个分区以 `meta.json`（声明分区标题、图标、页面顺序，并标记 `root: true` 构成 Root Folder）+ `index.mdx`（分区入口占位）构成骨架，纳入版本控制；真实文档页为构建期汇聚产物，不提交。
+项目分区的 `meta.json` 标记 `root: true`，组成项目切换器；Admin 的项目入口 `index.mdx` 由官网维护，列出可选版本。其下各版本的文档（含 `meta.json` 和 `index.mdx`）由对应项目仓库的 `docs/` 汇聚，不提交。版本目录的 `meta.json` 使用相同的 `root: "version"`：这是 Fumadocs Root Type，同项目内切换时优先投影到另一版本的对应页面，缺页则回到版本入口。旧 `/docs/admin/<页面>` 地址由构建后静态跳转页固定指向 4.2；`/docs/admin` 为项目入口。
 
-分区即 Fumadocs **Root Folder**：`meta.json` 标记 `root: true` 后，`app/docs/layout.tsx` 以 `tabMode="top"` 在侧边栏顶部渲染项目切换器，且仅显示当前打开的项目分支，其余隐藏。新增项目分区时，在其 `meta.json` 加 `root: true` 并在 `lib/shared.ts` 的 `docSourceRepos` 登记源仓库映射即可。
+文档拉取目录、仓库和 git 引用统一注册在 `lib/docs-sections.ts`，`scripts/gen-docs-sources.mjs` 据此生成部署映射；新增版本需在注册表中声明，并确保源仓库相应 `docs/meta.json` 使用 `root: "version"`。
 
 ### 关键文件
 
 | 文件 | 职责 |
 |:-----|:-----|
 | `lib/source.ts` | Fumadocs 数据源（`defineDocs` 指向 `content/docs`），加载页面树 |
-| `lib/shared.ts` | 站点常量（站点名、组织 GitHub、路由前缀）、`docSourceRepos` 分区→源仓库映射、`getEditOnGithubUrl` 编辑链接生成 |
+| `lib/shared.ts` / `lib/docs-sections.ts` | 站点常量、文档分区与版本的源仓库映射、`getEditOnGithubUrl` 编辑链接生成 |
 | `lib/layout.shared.tsx` | 布局共享配置（导航、各分区链接） |
 | `app/docs/[[...slug]]/page.tsx` | 文档页渲染（MDX、TOC、Markdown 复制、按分区映射源仓库的「在 GitHub 编辑」） |
 | `app/api/search/route.ts` | 静态搜索（构建期预生成 Orama 索引，`staticGET`） |
@@ -75,7 +76,7 @@ pnpm types:check      # TypeScript 类型检查
 pnpm ui:check         # 构建后检查设计契约与静态产物
 ```
 
-本地预览真实文档：将对应项目仓库的 `docs/` 复制进分区即可（如 `cp -r ../continew-starter/docs/. content/docs/starter/`），复制内容属构建期汇聚产物，不提交。
+本地预览真实文档：将对应项目仓库的 `docs/` 复制进注册表声明的目录即可（如 `cp -r ../continew-starter/docs/. content/docs/starter/`；Admin 的 `dev` 和 `4.2.x` 分别复制到 `content/docs/admin/5.0/`、`content/docs/admin/4.2/`）。复制内容属构建期汇聚产物，不提交。
 
 ### 提交前检查（必须通过）
 

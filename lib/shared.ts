@@ -1,4 +1,6 @@
 import { createGetUrl } from 'fumadocs-core/source';
+import { docSourceRepos, getDefaultVersion, hasVersions } from './docs-sections';
+import { docSections } from './docs-sections';
 
 export const appName = 'ContiNew';
 export const appDescription =
@@ -15,6 +17,24 @@ export const gitConfig = {
 };
 
 export const siteUrl = 'https://continew.top';
+
+/**
+ * 当前版本文档的入口路径（含版本段）。
+ *
+ * /docs 根、首页「文档」入口等处都以此为准——它们是同一个语义：去看最新文档。
+ * 关键字眼是「最新」：抽 6.0 之后主角会换人，届时只需在 lib/docs-sections.ts
+ * 调整版本顺序（首个即默认版本），此处与引用它的页面自动跟上，不必逐个文件排查。
+ *
+ * 版本段不可省：`/docs/admin` 是项目版本选择入口，最新文档需直达版本目录。
+ */
+export const currentDocsUrl = buildDefaultDocsUrl();
+
+function buildDefaultDocsUrl(): string {
+  const first = docSections[0];
+  if (!first) return docsRoute;
+  const version = getDefaultVersion(first.key);
+  return version ? `${docsRoute}/${first.key}/${version}` : `${docsRoute}/${first.key}`;
+}
 
 /**
  * 用户登记入口：ContiNew Admin 仓库的登记 Issue（固定帖里有统一格式，比 issues 列表页更好填）。
@@ -78,26 +98,48 @@ export const contributePlatforms = [
   },
 ] as const;
 
-// 文档唯一权威源：各文档分区 -> 其内容所在的项目仓库。
-// 文档页「在 GitHub 编辑」链接按分区映射到对应项目仓库的 docs/ 目录，
-// 而非本仓库（content/docs/ 为构建期汇聚产物，不提交）。
-export const docSourceRepos: Record<string, { repo: string; branch: string }> = {
-  starter: { repo: 'continew-starter', branch: 'dev' },
-  admin: { repo: 'continew-admin', branch: 'dev' },
-  app: { repo: 'continew-app', branch: 'dev' },
-};
+/**
+ * 文档页「在 GitHub 编辑」链接指向的源仓库与 git 引用，key 形如 `admin/4.2`。
+ * 由唯一事实源派生，此处不再单独维护——见 lib/docs-sections.ts。
+ *
+ * 启用版本的分区按「分区/版本」二级 key 索引：admin/5.0 与 admin/4.2 指向
+ * 同一仓库的不同 git 引用，单看分区名无法分辨。
+ */
+export { docSourceRepos } from './docs-sections';
+
+/**
+ * 解析页面所属的源单元与其在源仓库 docs/ 内的相对路径。
+ *
+ * ## 为什么按「分区/版本」二级匹配
+ *
+ * 同一个分区的多个版本指向同一仓库的不同 git 引用（admin/5.0→dev、admin/4.2→4.2.x），
+ * 单看分区名无法分辨。启用版本的分区取前两段作 key，未启用的取第一段。
+ */
+function resolveSource(page: { slugs: string[]; path: string }) {
+  const [section, ...rest] = page.slugs;
+  if (!section) return undefined;
+
+  const versioned = hasVersions(section);
+  const key = versioned
+    ? [section, rest[0]].filter(Boolean).join('/')
+    : section;
+  const source = docSourceRepos[key];
+  if (!source) return undefined;
+
+  // page.path 形如 admin/4.2/guide/upgrade.mdx，去掉分区/版本前缀即源仓库 docs/ 内相对路径。
+  // 版本段的存在与否随分区而异，这里统一按「已消耗的 slug 数」截取，不在分区路径上做假设。
+  const consumed = [section, versioned ? rest[0] : undefined].filter(Boolean).join('/');
+  return { source, pathInRepo: page.path.slice(consumed.length + 1) };
+}
 
 /**
  * 生成文档页在其源仓库的「在 GitHub 编辑」链接。
- * page.slugs[0] 为分区名；命中映射则指向对应项目仓库的 docs/，
- * 未命中（如文档总入口页）返回 undefined，由调用方隐藏编辑入口。
+ * 未命中映射（如文档总入口页）返回 undefined，由调用方隐藏编辑入口。
  */
 export function getEditOnGithubUrl(page: { slugs: string[]; path: string }): string | undefined {
-  const section = page.slugs[0];
-  const source = section ? docSourceRepos[section] : undefined;
-  if (!source) return undefined;
-  // page.path 形如 starter/guide/getting-started.mdx，去掉分区前缀即源仓库 docs/ 内相对路径
-  const pathInRepo = page.path.slice(section.length + 1);
+  const resolved = resolveSource(page);
+  if (!resolved) return undefined;
+  const { source, pathInRepo } = resolved;
   return `https://github.com/${gitConfig.user}/${source.repo}/blob/${source.branch}/docs/${pathInRepo}`;
 }
 
@@ -107,10 +149,9 @@ export function getEditOnHostUrl(
   page: { slugs: string[]; path: string },
   host: 'github' | 'atomgit' | 'gitee',
 ): string | undefined {
-  const section = page.slugs[0];
-  const source = section ? docSourceRepos[section] : undefined;
-  if (!source) return undefined;
-  const pathInRepo = page.path.slice(section.length + 1);
+  const resolved = resolveSource(page);
+  if (!resolved) return undefined;
+  const { source, pathInRepo } = resolved;
   if (host === 'github') {
     return `https://github.com/${gitConfig.user}/${source.repo}/blob/${source.branch}/docs/${pathInRepo}`;
   }

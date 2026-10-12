@@ -34,6 +34,8 @@ yarn-error.log*
 .vercel
 next-env.d.ts
 
-# 文档汇聚产物：content/docs/<project>/ 在构建期由 CI 从各项目仓库 docs/ 拉取渲染。
+# 文档汇聚产物：仅保留官网管理的分区入口与 meta.json，真实文档由部署时拉取。
 content/docs/starter/
-content/docs/admin/
+content/docs/admin/*
+!content/docs/admin/meta.json
+!content/docs/admin/index.mdx

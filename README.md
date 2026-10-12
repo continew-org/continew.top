@@ -23,13 +23,14 @@ ContiNew（Continue New）是一套以「约定优于配置」为核心的开源
 **官网文档的「唯一权威源」是各项目仓库的 `docs/` 目录，而非本仓库。**
 
 - 修改某项目的文档 → 到对应项目仓库的 `docs/` 下提 PR；
-- 本仓库只在**构建时**把各项目 `docs/` 汇聚到 `content/docs/<project>/` 再渲染，汇聚产物不提交，因此不存在「维护两处」；
+- 本仓库只在**构建时**把各项目 `docs/` 汇聚到 `content/docs/<project>/`（Admin 按版本汇聚到 `admin/5.0/` 和 `admin/4.2/`）再渲染，汇聚产物不提交，因此不存在「维护两处」；
 - 本仓库自身维护的是**官网页面**（首页、生态、关于等，在 `app/`）与**文档站框架**。
 
 ```
-continew-starter/docs  ─┐
-continew-admin/docs   ─┼─ 构建时汇聚（CI 用 actions/checkout 拉取各仓库 docs/）
-continew-app/docs     ─┘
+continew-starter@dev/docs     ─┐
+continew-admin@dev/docs       ─┼─ 构建时按分区/版本汇聚
+continew-admin@4.2.x/docs     ─┤
+continew-app@dev/docs         ─┘
         ↓
 continew.top  (Next.js + Fumadocs)  →  静态导出 out/  →  Nginx
 ```
@@ -54,7 +55,7 @@ cp -r ../continew-starter/docs/. content/docs/starter/
 pnpm dev
 ```
 
-预览完无需清理——`content/docs/<project>/` 下除分区骨架（`index.mdx`、`meta.json`）外的内容本就属于构建期汇聚产物，不影响提交。
+Admin 的两个版本需分别从 `dev` 和 `4.2.x` 的 `docs/` 复制到 `content/docs/admin/5.0/`、`content/docs/admin/4.2/`。`/docs/admin` 是官网管理的版本选择入口；版本目录的内容仅供构建使用，不提交。预览完无需清理——汇聚内容已忽略，不影响提交。
 
 其他命令：
 

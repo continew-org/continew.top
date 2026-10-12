@@ -34,36 +34,49 @@ jobs:
         uses: actions/checkout@v4
 
       # 2、拉取并组装各项目文档（docs/ 为文档唯一权威源；公开仓库浅克隆）
+      #
+      # 分区 -> 源仓库写在 lib/docs-sections.ts（唯一事实源），deploy.yml 原本手抄一份，
+      # 两处会漂移：改了配置忘了改这里，线上就拉不到新分支。故改为构建前由
+      # 该配置生成映射再读回来——新增归档版本时只改配置，此脚本无需改动。
+      - name: 生成分区拉取映射
+        run: |
+          docker run --rm -v "$PWD":/ws -w /ws node:22 \
+            node scripts/gen-docs-sources.mjs > "$RUNNER_TEMP/docs-sources.env"
+
       - name: 拉取并组装各项目文档
         run: |
           set -e
-          # 分区名 -> 源仓库
-          declare -A REPOS=(
-            [admin]=continew-admin
-            [starter]=continew-starter
-            [app]=continew-app
-          )
+          # 分区名 -> 源仓库@git引用（分支或 tag），每行一条 `分区=仓库@ref`，
+          # 由 gen-docs-sources.mjs 从 lib/docs-sections.ts 生成。
+          # 用 while read 逐行读取而非 source 该文件：source 会把 runner 环境变量
+          # 一并带入循环命名空间，分区名与之重名时会被静静覆盖。
+          sources_file="$RUNNER_TEMP/docs-sources.env"
           # 上次成功同步的文档在 runner 本机的留存（跨次部署持久）。拉取失败时沿用
           # 它继续部署，而不是把分区静默降级成骨架——克隆失败是基础设施抖动，不是
           # 「没有文档」，二者的后果不该一样。
           cache_root="$HOME/.cache/continew-docs"
           mkdir -p "$cache_root"
-          for proj in "${!REPOS[@]}"; do
-            repo="${REPOS[$proj]}"
+          while IFS='=' read -r proj source; do
+            [ -z "$proj" ] && continue
+            repo="${source%@*}"
+            ref="${source##*@}"
             tmp="$(mktemp -d)"
             dest="content/docs/${proj}"
             cache="$cache_root/$proj"
-            if git clone --depth 1 --filter=blob:none --sparse \
+            if git clone --depth 1 --filter=blob:none --sparse --branch "$ref" \
                  "https://github.com/continew-org/${repo}.git" "$tmp"; then
-              if git -C "$tmp" sparse-checkout set docs 2>/dev/null \
-                 && [ -d "$tmp/docs" ]; then
+              if ! git -C "$tmp" sparse-checkout set docs; then
+                echo "❌ ${proj} 文档稀疏检出失败；停止部署以保留现有站点" >&2
+                exit 1
+              fi
+              if [ -d "$tmp/docs" ]; then
                 rm -rf "$dest" "$cache"
                 mkdir -p "$dest" "$cache"
                 cp -r "$tmp/docs/." "$dest/"
                 cp -r "$tmp/docs/." "$cache/"
                 echo "✅ 已同步 ${proj} 文档（来自 continew-org/${repo}）"
               else
-                # 克隆成功而源仓库确实没有 docs/：保留官网分区骨架，并清掉过期缓存
+                # 克隆成功且源仓库确实没有 docs/：保留官网分区骨架，并清掉过期缓存
                 rm -rf "$cache"
                 echo "ℹ️  ${proj} 仓库无 docs/ 目录，使用官网分区骨架"
               fi
@@ -77,7 +90,7 @@ jobs:
               exit 1
             fi
             rm -rf "$tmp"
-          done
+          done < "$sources_file"
 
       # 3、容器内静态导出（pnpm install 会运行依赖与仓库生命周期脚本，容器隔离其触达范围——
       #    不挂 docker.sock、不注入 job secrets；pnpm 版本由 packageManager 经 corepack 解析）

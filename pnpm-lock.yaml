@@ -164,6 +164,12 @@ settings:
 
 catalogs:
   default:
+    '@types/hast':
+      specifier: 3.0.5
+      version: 3.0.5
+    '@types/mdast':
+      specifier: 4.0.4
+      version: 4.0.4
     '@types/node':
       specifier: 26.6.4
       version: 26.6.4
@@ -194,6 +200,9 @@ catalogs:
     typescript:
       specifier: 5.9.2
       version: 5.9.2
+    unist-util-visit:
+      specifier: 5.1.0
+      version: 5.1.0
     zod:
       specifier: 4.6.5
       version: 4.6.5
@@ -230,6 +239,12 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
+      '@types/hast':
+        specifier: 'catalog:'
+        version: 3.0.5
+      '@types/mdast':
+        specifier: 'catalog:'
+        version: 4.0.4
       '@types/mdx':
         specifier: ^2.0.14
         version: 2.0.14
@@ -257,6 +272,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.2
+      unist-util-visit:
+        specifier: 'catalog:'
+        version: 5.1.0
 
 packages:
 

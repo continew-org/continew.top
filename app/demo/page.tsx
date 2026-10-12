@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { AlertTriangle, Server } from 'lucide-react';
 import { getCurrentResourcePartners } from '@/lib/sponsors';
-import { demoUrl } from '@/lib/shared';
+import { currentDocsUrl, demoUrl } from '@/lib/shared';
 import { ActionLink } from '@/components/site-actions';
 import {
   PageContainer,
@@ -53,7 +53,7 @@ export default function DemoPage() {
             <ActionLink href={demoUrl} variant="primary">
               前往演示环境
             </ActionLink>
-            <ActionLink href="/docs/admin">本地部署指南</ActionLink>
+            <ActionLink href={`${currentDocsUrl}/reference/deployment`}>本地部署指南</ActionLink>
           </>
         }
       />
@@ -164,7 +164,7 @@ export default function DemoPage() {
       <PageNextLinks
         links={[
           {
-            href: '/docs/admin',
+            href: currentDocsUrl,
             title: '快速开始',
             description: '在本机跑起 ContiNew Admin，完整体验不受限制的功能。',
           },
