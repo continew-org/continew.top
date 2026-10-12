@@ -1,6 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import Image from 'next/image';
-import Link from 'next/link';
 import { appName } from './shared';
 import type { StarSummary } from './site-stats';
 import { NavAboutMenu } from '@/components/nav-about-menu';
@@ -94,33 +93,6 @@ export function baseOptions(
        */
       ...(options?.docs
         ? [
-            {
-              type: 'custom' as const,
-              on: 'menu' as const,
-              children: (
-                <div className="cn-mobile-menu-link flex flex-col gap-1 pb-3 mb-2 border-b border-fd-border text-sm">
-                  <span className="px-2.5 py-1 text-xs font-medium text-fd-muted-foreground">全站频道</span>
-                  <Link
-                    href="/blog"
-                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground transition-colors"
-                  >
-                    博客
-                  </Link>
-                  <Link
-                    href="/sponsor"
-                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground transition-colors"
-                  >
-                    赞助支持
-                  </Link>
-                  <Link
-                    href="/team"
-                    className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground transition-colors"
-                  >
-                    关于团队
-                  </Link>
-                </div>
-              ),
-            },
             {
               type: 'icon' as const,
               icon: (
