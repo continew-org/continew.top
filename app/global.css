@@ -392,8 +392,3 @@ html > body[data-scroll-locked] {
   }
 }
 
-/* 桌面端隐藏移动端专用抽屉菜单项 */
-#nd-sidebar .cn-mobile-menu-link {
-  display: none !important;
-}
-
