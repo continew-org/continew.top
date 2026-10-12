@@ -5,10 +5,23 @@ import { DocsBody } from 'fumadocs-ui/page';
 import { TOCProvider } from 'fumadocs-ui/components/toc';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import { BlogToc } from '@/components/blog-toc';
-import { blogSource, excerptOf } from '@/lib/blog-source';
+import { DocsSponsorSlot } from '@/components/docs-sponsor-slot';
+import { blogSource, excerptOf, getBlogPostContext, type BlogPost } from '@/lib/blog-source';
 import { tocTitle } from '@/lib/i18n';
 import { getMDXComponents } from '@/components/mdx';
 import { siteUrl } from '@/lib/shared';
+import { cardHover } from '@/components/site-primitives';
+import { cn } from '@/lib/cn';
+
+function NeighbourLink({ post, label, align = 'left' }: { post?: BlogPost; label: string; align?: 'left' | 'right' }) {
+  if (!post) return null;
+  return (
+    <Link href={post.url} className={cn('block min-w-0 rounded-xl border border-fd-border p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50', cardHover, align === 'right' && 'sm:text-right')}>
+      <span className="text-xs text-fd-muted-foreground">{label}</span>
+      <span className="mt-2 block text-sm font-medium leading-snug">{post.title}</span>
+    </Link>
+  );
+}
 
 export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) {
   const params = await props.params;
@@ -17,6 +30,8 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
 
   const MDX = page.data.body;
   const date = page.data.datetime.slice(0, 10);
+  const { previous, next, related } = await getBlogPostContext(page.url);
+  const authoredDescription = page.data.description?.trim();
   /*
    * 大纲只收章节（H2 及以下）：文章标题已由页面头渲染，再进大纲就成了
    * 一个点了没反应的重复项（旧站迁移的正文首行本就带着一条与 title 重复的 H1）。
@@ -68,6 +83,11 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
                   </a>
                 )}
               </div>
+              {authoredDescription && (
+                <p className="max-w-2xl text-base leading-relaxed text-fd-muted-foreground">
+                  {authoredDescription}
+                </p>
+              )}
             </header>
 
             <div className="mt-6 lg:hidden">
@@ -78,17 +98,39 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
               <MDX components={getMDXComponents()} />
             </DocsBody>
 
-            <footer className="mt-16 border-t border-fd-border pt-8 text-center text-sm">
-              <Link href="/blog" className="text-fd-primary hover:underline">
-                ← 返回博客列表
+            <footer className="mt-16 border-t border-fd-border pt-8">
+              {(previous || next) && (
+                <nav aria-label="文章导航" className="grid gap-3 sm:grid-cols-2">
+                  <NeighbourLink post={previous} label="上一篇" />
+                  <NeighbourLink post={next} label="下一篇" align="right" />
+                </nav>
+              )}
+              {related.length > 0 && (
+                <section aria-labelledby="related-posts-title" className="mt-12">
+                  <h2 id="related-posts-title" className="text-lg font-semibold">相关阅读</h2>
+                  <ul className="mt-4 divide-y divide-fd-border/70">
+                    {related.map((post) => (
+                      <li key={post.url}>
+                        <Link href={post.url} className="group block rounded-sm py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50">
+                          <span className="text-xs tabular-nums text-fd-muted-foreground">{post.date}</span>
+                          <span className="mt-1 block text-sm font-medium leading-snug group-hover:text-[var(--cn-brand)]">{post.title}</span>
+                          {post.description && <span className="mt-1 line-clamp-2 block text-xs leading-relaxed text-fd-muted-foreground">{post.description}</span>}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+              <Link href="/blog" className="mt-10 inline-block rounded-sm text-sm text-[var(--cn-brand)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50">
+                ← 返回全部文章
               </Link>
             </footer>
           </article>
 
-          {/* 目录列：固定宽度 224px，标题与条目样式由 components/blog-toc.tsx 对齐文档站。 */}
-          <aside className="sticky top-24 hidden w-56 shrink-0 self-start ps-12 lg:block">
+          <div className="sticky top-20 hidden max-h-[calc(100dvh-6rem)] w-72 shrink-0 flex-col self-start ps-12 lg:flex">
             <BlogToc title={tocTitle} />
-          </aside>
+            <div className="shrink-0"><DocsSponsorSlot /></div>
+          </div>
         </div>
       </TOCProvider>
     </main>
@@ -106,8 +148,7 @@ export async function generateMetadata(props: PageProps<'/blog/[...slug]'>): Pro
 
   return {
     title: page.data.title,
-    // 20 篇里 19 篇没写 description，回退到与列表页同源的正文摘要，保证分享卡片不空。
-    description: page.data.description ?? (await excerptOf(page)),
+    description: page.data.description?.trim() || (await excerptOf(page)),
     openGraph: {
       type: 'article',
       url: `${siteUrl}${page.url}`,

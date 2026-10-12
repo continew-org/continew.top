@@ -1,13 +1,10 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getBlogPostsGrouped, type BlogPost } from '@/lib/blog-source';
-import {
-  cardHover,
-  PageContainer,
-  PageHeader,
-  PageNextLinks,
-  Section,
-} from '@/components/site-primitives';
+import { ArrowUpRight } from 'lucide-react';
+import { BlogArchive } from '@/components/blog-archive';
+import { BlogWechatDialog } from '@/components/blog-wechat-dialog';
+import { PageContainer, PageNextLinks, cardHover } from '@/components/site-primitives';
+import { getBlogPosts, type BlogPost } from '@/lib/blog-source';
 import { cn } from '@/lib/cn';
 
 export const metadata: Metadata = {
@@ -15,112 +12,67 @@ export const metadata: Metadata = {
   description: 'ContiNew 版本更新、项目动态、社区故事与安全通告。',
 };
 
-/**
- * 分类配色遵守色彩预算：默认中性色，只有「安全通告」用红色（语义色，需要被一眼识别）。
- * 此前版本更新/项目动态/社区动态/头脑风暴/安全通告各用一种彩色，5 种色相把页面切碎了。
- */
-const ALERT_CATEGORY = '安全通告';
-
-function PostCard({ post }: { post: BlogPost }) {
-  const alert = post.category === ALERT_CATEGORY;
+function LatestPost({ post }: { post: BlogPost }) {
   return (
-    <li>
+    <section aria-labelledby="latest-post-title" className="mt-14 sm:mt-16">
+      <div className="mb-5 flex items-center gap-3">
+        <h2 id="latest-post-title" className="text-sm font-semibold text-[var(--cn-brand)]">最新发布</h2>
+        <span className="h-px flex-1 bg-fd-border" aria-hidden />
+      </div>
       <Link
         href={post.url}
-        /*
-         * hover 反馈此前是三重叠加：整卡 bg-fd-accent 变色 + 边框转主色 + 标题转主色，
-         * 一动全动，显得闹。这里收敛为「极淡底色 + 半强度边框」的一次性反馈，
-         * 并与全站卡片共用 cardHover（见 components/site-primitives.tsx）。
-         */
-        className={cn('block rounded-xl border border-fd-border p-5', cardHover)}
-      >
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {/*
-              卡片上不挂「置顶」胶囊：置顶文章只出现在置顶区块内（年份分组会跳过），
-              看到这张卡时区块标题已经说明了一切，再标一次属于重复表达。
-            */}
-            {/*
-              浅色主题下 --color-fd-muted(96.1%) 与 --color-fd-background(96%) 几乎同色，
-              胶囊底色看不见、只剩一行灰字。加一道中性边框把标签形状补回来（不引入新色相）。
-            */}
-            <span
-              className={cn(
-                'rounded-full border px-2.5 py-0.5 text-xs font-medium',
-                alert
-                  ? 'border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400'
-                  : 'border-fd-border bg-fd-muted text-fd-muted-foreground',
-              )}
-            >
-              {post.category}
-            </span>
-            {post.original === false && (
-              <span className="rounded-full border border-fd-border bg-fd-muted px-2.5 py-0.5 text-xs text-fd-muted-foreground">
-                转载
-              </span>
-            )}
-          </div>
-          {/*
-            不展示作者：20 篇里 19 篇作者相同，逐卡重复一个名字是纯噪音；
-            转载文章已由「转载」标签交代来源。
-          */}
-          <time className="shrink-0 text-xs tabular-nums text-fd-muted-foreground">
-            {post.date}
-          </time>
-        </div>
-        {/*
-          标题字重从 font-semibold + sm:text-lg 降到 font-medium + text-base：
-          20 张卡片逐张压着又黑又粗的标题，视觉重量盖过了分类与日期，扫读时没有层次。
-        */}
-        <h3 className="mt-2.5 text-base font-medium leading-snug">{post.title}</h3>
-        {post.description && (
-          <p className="mt-1.5 line-clamp-2 text-sm text-fd-muted-foreground">
-            {post.description}
-          </p>
+        className={cn(
+          'group block rounded-2xl border border-fd-border bg-fd-card px-6 py-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cn-brand)]/50 sm:px-9 sm:py-9',
+          cardHover,
         )}
+      >
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-fd-muted-foreground">
+          <span className="font-medium text-[var(--cn-brand)]">{post.category}</span>
+          <time dateTime={post.date} className="tabular-nums">{post.date}</time>
+        </div>
+        <h3 className="mt-5 max-w-3xl text-xl font-semibold leading-snug tracking-tight transition-colors group-hover:text-[var(--cn-brand)] sm:text-2xl">
+          {post.title}
+        </h3>
+        {post.description && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-fd-muted-foreground sm:text-base">{post.description}</p>}
+        <span className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--cn-brand)]">
+          阅读文章 <ArrowUpRight className="size-4" aria-hidden />
+        </span>
       </Link>
-    </li>
-  );
-}
-
-function PostList({ posts }: { posts: BlogPost[] }) {
-  return (
-    <ul className="flex flex-col gap-4">
-      {posts.map((post) => (
-        <PostCard key={post.url} post={post} />
-      ))}
-    </ul>
+    </section>
   );
 }
 
 export default async function BlogIndexPage() {
-  const { pinned, years } = await getBlogPostsGrouped();
-  const total = pinned.length + years.reduce((n, y) => n + y.posts.length, 0);
+  const posts = await getBlogPosts();
+  const latest = posts[0];
 
   return (
     <PageContainer>
-      <PageHeader
-        eyebrow="Blog"
-        title="官方博客"
-        /*
-         * 首屏统计卡片已移除（同 /users）：20 篇文章 / 5 个分类 / 一个日期当数字用，
-         * 量级撑不起三张大卡。数字降级为描述里的一句话。
-         */
-        description={`版本更新、项目动态、社区故事与安全通告，都在这里。目前共 ${total} 篇文章，按年份排列。`}
-      />
+      <header className="relative lg:flex lg:items-start lg:justify-between lg:gap-12">
+        <div className="max-w-3xl">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">ContiNew 官方博客</h1>
+          <p className="mt-5 text-base leading-relaxed text-fd-muted-foreground sm:text-lg">
+            记录版本发布、项目决策、社区进展与安全通告。
+            <br className="hidden sm:block" />
+            了解 ContiNew 正在做什么，以及为什么这样做。
+          </p>
+          <BlogWechatDialog />
+        </div>
+        <div className="hidden shrink-0 text-center lg:block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/qrcode/gzh.webp"
+            width={258}
+            height={258}
+            alt="ContiNew 公众号二维码"
+            className="mx-auto size-32 rounded-xl border border-fd-border bg-white object-contain p-1.5"
+          />
+          <p className="mt-2 text-xs text-fd-muted-foreground">微信扫码关注，获取项目更新</p>
+        </div>
+      </header>
 
-      {pinned.length > 0 && (
-        <Section title="置顶" className="mt-12">
-          <PostList posts={pinned} />
-        </Section>
-      )}
-
-      {years.map((group) => (
-        // 年份只是分组标记，用 Section 默认标题即可 —— 曾试过 text-2xl 粗体大数字，抢了文章标题的戏。
-        <Section key={group.year} title={group.year} description={`${group.posts.length} 篇`}>
-          <PostList posts={group.posts} />
-        </Section>
-      ))}
+      {latest && <LatestPost post={latest} />}
+      <BlogArchive posts={posts} />
 
       <PageNextLinks
         links={[

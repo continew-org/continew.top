@@ -2,15 +2,14 @@ import { loader } from 'fumadocs-core/source';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { pageSchema } from 'fumadocs-core/source/schema';
 import { z } from 'zod';
+import { BLOG_CATEGORIES, type BlogCategory } from '@/lib/blog-meta';
 
-// 博客文章在通用 pageSchema 之上扩展的字段（对应旧站 VitePress posts frontmatter）。
 // datetime 为本地时间字符串（如 2025-07-27 22:01），展示时只取日期部分。
 const blogFrontmatterSchema = pageSchema.extend({
   author: z.string(),
   datetime: z.string(),
-  category: z.string(),
+  category: z.enum(BLOG_CATEGORIES),
   originalLink: z.string().optional(),
-  top: z.boolean().optional(),
   original: z.boolean().optional(),
 });
 
@@ -34,9 +33,8 @@ export interface BlogPost {
   datetime: string;
   /** 展示用日期，如 2025-07-27 */
   date: string;
-  category: string;
+  category: BlogCategory;
   originalLink?: string;
-  top?: boolean;
   original?: boolean;
 }
 
@@ -50,16 +48,7 @@ type BlogPage = ReturnType<typeof blogSource.getPages>[number];
 /** 摘要最大长度（超出补省略号）。 */
 const EXCERPT_LENGTH = 110;
 
-/**
- * 从正文自动提取摘要。
- *
- * 20 篇文章里只有 1 篇（安全通告）在 frontmatter 写了 description，
- * 其余 19 篇在列表页只剩一个标题，读者无法判断要不要点进去。
- * 逐篇补写会随时间腐烂（新文章照样忘写），故改为构建期从正文提取，一劳永逸。
- *
- * 导出给详情页复用：generateMetadata 同样需要一段摘要（SEO 与分享卡片），
- * 否则 19 篇文章的 OG description 为空。
- */
+/** 从正文自动提取摘要，供未填写 description 的历史文章展示和 SEO 使用。 */
 export async function excerptOf(page: BlogPage): Promise<string> {
   const raw = await page.data.getText('processed');
   const text = raw
@@ -75,61 +64,55 @@ export async function excerptOf(page: BlogPage): Promise<string> {
   return text.length > EXCERPT_LENGTH ? `${text.slice(0, EXCERPT_LENGTH)}…` : text;
 }
 
-/** 全部博客文章，按置顶优先、发布时间倒序排列。 */
+function sortableDatetime(datetime: string): string {
+  const [date, time = ''] = datetime.split(' ');
+  const [hour = '', minute = ''] = time.split(':');
+  return `${date} ${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+}
+
+/** 全部博客文章，按发布时间倒序排列。 */
 export async function getBlogPosts(): Promise<BlogPost[]> {
   const posts = await Promise.all(
-    blogSource.getPages().map(async (page) => ({
-      url: page.url,
-      slugs: page.slugs,
-      title: page.data.title,
-      // frontmatter 有 description 时优先用它（人工撰写通常比首段更贴题）。
-      description: page.data.description || (await excerptOf(page)),
-      author: page.data.author,
-      datetime: page.data.datetime,
-      date: page.data.datetime.slice(0, 10),
-      category: page.data.category,
-      originalLink: page.data.originalLink,
-      top: page.data.top,
-      original: page.data.original,
-    })),
+    blogSource.getPages().map(async (page) => {
+      const authoredDescription = page.data.description?.trim() || undefined;
+      return {
+        url: page.url,
+        slugs: page.slugs,
+        title: page.data.title,
+        description: authoredDescription || (await excerptOf(page)),
+        author: page.data.author,
+        datetime: page.data.datetime,
+        date: page.data.datetime.slice(0, 10),
+        category: page.data.category,
+        originalLink: page.data.originalLink,
+        original: page.data.original,
+      };
+    }),
   );
 
-  return posts.sort((a, b) => {
-    if (!!a.top !== !!b.top) return a.top ? -1 : 1;
-    return b.datetime.localeCompare(a.datetime);
-  });
+  return posts.sort(
+    (a, b) =>
+      sortableDatetime(b.datetime).localeCompare(sortableDatetime(a.datetime)) ||
+      a.url.localeCompare(b.url),
+  );
 }
 
-/** 按年份分组后的博客文章。 */
-export interface BlogYearGroup {
-  year: string;
-  posts: BlogPost[];
-}
-
-/**
- * 置顶文章单独提出，其余按年份倒序分组。
- *
- * 暂不做页码分页：20 篇的量级下分页会把一半文章藏起来，而博客文章本就希望被读到；
- * 年份分组既能拆短页面、又保留全部曝光。将来篇数超过 30 再引入 /blog/page/[page] 真分页。
- */
-export async function getBlogPostsGrouped(): Promise<{
-  pinned: BlogPost[];
-  years: BlogYearGroup[];
+export async function getBlogPostContext(url: string): Promise<{
+  previous?: BlogPost;
+  next?: BlogPost;
+  related: BlogPost[];
 }> {
   const posts = await getBlogPosts();
-  const pinned = posts.filter((p) => p.top);
-  const years = new Map<string, BlogPost[]>();
-  for (const post of posts) {
-    if (post.top) continue;
-    const year = post.date.slice(0, 4);
-    const list = years.get(year);
-    if (list) list.push(post);
-    else years.set(year, [post]);
-  }
-  return {
-    pinned,
-    years: [...years.entries()]
-      .map(([year, list]) => ({ year, posts: list }))
-      .sort((a, b) => b.year.localeCompare(a.year)),
-  };
+  const index = posts.findIndex((post) => post.url === url);
+  if (index < 0) return { related: [] };
+
+  const current = posts[index];
+  const previous = posts[index + 1];
+  const next = posts[index - 1];
+  const excluded = new Set([url, previous?.url, next?.url]);
+  const related = posts
+    .filter((post) => post.category === current.category && !excluded.has(post.url))
+    .slice(0, 3);
+
+  return { previous, next, related };
 }
