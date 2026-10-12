@@ -5,7 +5,7 @@
 
 @theme {
   --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-mono: var(--font-mono), 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 }
 
 code,
@@ -356,3 +356,44 @@ html > body[data-scroll-locked] {
     animation: none;
   }
 }
+
+/*
+ * 移动端文档模块样式适配：
+ * 消除 Spacious 布局在移动端产生的「双层外嵌卡片 + 伪边框阴影」导致的逼仄割裂感，
+ * 恢复贴合视口的高效阅读体验。
+ */
+@media (max-width: 47.999rem) {
+  /* 移除文档正文外层卡片两侧的 mx-2 与圆角边框，恢复全宽自然排版 */
+  #nd-page-panel {
+    margin-inline: 0 !important;
+    border-radius: 0 !important;
+    border-inline: 0 !important;
+  }
+
+  /* 统一移动端背景色，消除外卡片灰色底衬的突兀割裂感 */
+  #fd-spacious-layout {
+    background-color: var(--color-fd-background) !important;
+  }
+
+  /* 移除移动端 TOC popover 下方那层生硬的伪边框遮罩 */
+  [grid-area='toc-popover'] > div:nth-child(2) {
+    display: none !important;
+  }
+
+  /* 移动端顶栏与目录吸顶栏底色与边框微调 */
+  #nd-subnav {
+    background-color: var(--color-fd-background) !important;
+    border-bottom: 1px solid var(--color-fd-border);
+  }
+
+  [grid-area='toc-popover'] header {
+    background-color: var(--color-fd-background) !important;
+    border-bottom: 1px solid var(--color-fd-border);
+  }
+}
+
+/* 桌面端隐藏移动端专用抽屉菜单项 */
+#nd-sidebar .cn-mobile-menu-link {
+  display: none !important;
+}
+

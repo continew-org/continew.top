@@ -1,6 +1,6 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import './global.css';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Geist, JetBrains_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { appName, appDescription, siteUrl } from '@/lib/shared';
@@ -19,7 +19,7 @@ import StaticSearchDialog from '@/components/search-dialog';
  */
 const BAIDU_TONGJI_ID = 'ac0c6ebdc48b8f9e479a33b477e39447';
 
-const inter = Inter({
+const geist = Geist({
   subsets: ['latin'],
   variable: '--font-sans',
 });
@@ -42,7 +42,7 @@ export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="zh-CN"
-      className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}
+      className={`${geist.variable} ${jetbrainsMono.variable} font-sans`}
       suppressHydrationWarning
     >
       <body className="flex flex-col min-h-screen">

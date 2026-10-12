@@ -6,6 +6,7 @@ import {
   DocsTitle,
   MarkdownCopyButton,
 } from 'fumadocs-ui/layouts/spacious/page';
+import { DocsPageBreadcrumb } from '@/components/docs-page-breadcrumb';
 import { ViewOptionsPopover } from '@/components/view-options-popover';
 import { DocsSponsorSlot } from '@/components/docs-sponsor-slot';
 import { notFound } from 'next/navigation';
@@ -40,6 +41,10 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
     <DocsPage
       toc={page.data.toc}
       full={page.data.full}
+      className="wrap-break-word"
+      slots={{
+        breadcrumb: DocsPageBreadcrumb,
+      }}
       /*
        * 支持入口挂在右侧目录底部：不在阅读流里、不滚动、不弹窗，
        * 是文档页里对读者打扰最小、又能自然说明维护来源的位置。
@@ -50,7 +55,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         footer: <DocsSponsorSlot />,
       }}
       tableOfContentPopover={{
-        style: 'clerk',
+        style: 'normal',
       }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
