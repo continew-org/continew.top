@@ -38,5 +38,5 @@ jobs:
       - name: 构建
         run: pnpm build
 
-      - name: 检查站内链接
-        run: pnpm links:check
+      # 不在此处跑 links:check：CI 不拉取各项目 docs/，分区只剩骨架，真实文档路由不存在，
+      # 该步骤会结构性必挂。站内链接校验留在 Deploy（文档汇聚后、rsync 前）执行。

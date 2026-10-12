@@ -82,10 +82,9 @@ pnpm types:check      # TypeScript 类型检查
 
 1. `pnpm lint` —— ESLint 无报错；
 2. `pnpm types:check` —— TypeScript 类型检查通过；
-3. `pnpm build` —— 静态导出构建成功；
-4. `pnpm links:check` —— 按浏览器 URL 语义解析最终 `out/**/*.html`，站内路由与锚点全部可达（反斜杠 URL、目录假页面和缺失 fragment 均失败）。
+3. `pnpm build` —— 静态导出构建成功。
 
-仅改动文案、文档占位（`content/docs/**/*.mdx` 的占位内容）或非源码文件时，仍建议至少跑 `pnpm build && pnpm links:check`。真实项目文档需按部署流程汇聚后再执行，官网骨架构建不能代替全站验证。
+`pnpm links:check`（按浏览器 URL 语义解析最终 `out/**/*.html`，校验站内路由与锚点可达，反斜杠 URL、目录假页面和缺失 fragment 均失败）**只在 Deploy 中执行**，位于各项目 `docs/` 汇聚之后、`rsync` 之前。CI 不跑这一步：CI 不汇聚文档，分区只剩骨架，真实文档路由不存在，跑它会结构性必挂。本地同样如此——未汇聚真实文档时跑 `links:check` 必然报死链，需先把各项目仓库的 `docs/` 复制进 `content/docs/<project>/` 再执行，官网骨架构建不能代替全站验证。
 
 ## 代码风格
 
