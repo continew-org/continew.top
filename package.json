@@ -6,16 +6,16 @@
   "license": "Apache-2.0",
   "packageManager": "pnpm@12.9.1",
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=22.18.0",
     "pnpm": ">=10.0.0"
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/gen-legacy-doc-redirects.mjs out",
     "types:check": "next typegen && tsc --noEmit",
     "lint": "eslint",
     "links:check": "node scripts/check-internal-links.mjs out",
-    "ui:check": "node --test tests/design-system.test.mjs"
+    "ui:check": "node --test tests/design-system.test.mjs tests/docs-versioning.test.mjs"
   },
   "dependencies": {
     "fumadocs-core": "catalog:",
@@ -29,6 +29,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@types/hast": "catalog:",
+    "@types/mdast": "catalog:",
     "@types/mdx": "^2.0.14",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
@@ -37,6 +39,7 @@
     "eslint-config-next": "catalog:",
     "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "unist-util-visit": "catalog:"
   }
 }

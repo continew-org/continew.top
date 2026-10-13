@@ -1,5 +1,8 @@
 import { createMDX } from 'fumadocs-mdx/next';
 
+// MDX 的 remark/rehype 插件登记在本仓库的 source.config.ts，不在这里——
+// createMDX() 只认 configPath / macro / index，其余键会被忽略且不报错。
+// 归档文档的链接校准说明见该文件。
 const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */

@@ -5,6 +5,7 @@ import { BlogArchive } from '@/components/blog-archive';
 import { BlogWechatDialog } from '@/components/blog-wechat-dialog';
 import { PageContainer, PageIntro, PageNextLinks, cardHover } from '@/components/site-primitives';
 import { getBlogPosts, type BlogPost } from '@/lib/blog-source';
+import { currentDocsUrl } from '@/lib/shared';
 import { cn } from '@/lib/cn';
 import { focusRing, siteMotion, siteType } from '@/lib/site-design';
 
@@ -84,7 +85,7 @@ export default async function BlogIndexPage() {
       <PageNextLinks
         links={[
           {
-            href: '/docs/admin',
+            href: currentDocsUrl,
             title: '项目文档',
             description: '想上手？ContiNew Admin 的完整文档在这里。',
           },

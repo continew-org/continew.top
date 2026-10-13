@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { ActionLink, Button, FilterChip } from '@/components/site-actions';
 import { JoinGroupDialog } from '@/components/home/join-group-dialog';
+import { currentDocsUrl } from '@/lib/shared';
 
 export function DesignSystemExamples() {
   const [category, setCategory] = useState('全部');
@@ -29,7 +30,7 @@ export function DesignSystemExamples() {
         <ActionLink href="/blog" variant="primary">站内导航</ActionLink>
         <ActionLink href="#motion">页内导航</ActionLink>
         <ActionLink href="https://github.com/continew-org">外部导航</ActionLink>
-        <ActionLink href="/docs/admin" variant="text">文字链接</ActionLink>
+        <ActionLink href={currentDocsUrl} variant="text">文字链接</ActionLink>
       </div>
       <div role="group" aria-label="样例分类" className="flex flex-wrap gap-2">
         {['全部', '版本更新', '社区动态'].map((item) => (

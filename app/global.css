@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/generated/spacious.css';
 @import 'fumadocs-ui/css/preset.css';
 
 @theme {
@@ -165,20 +164,6 @@ html > body[data-scroll-locked] {
   color: var(--cn-brand);
 }
 
-/* Spacious 桌面导航放宽「支持」图标项，小屏菜单已有文字，不重复显示。 */
-@media (min-width: 64rem) {
-  a:has(> .cn-doc-support-link) {
-    width: auto;
-    padding-inline: 0.5rem;
-  }
-}
-
-@media (max-width: 63.999rem) {
-  .cn-doc-support-text {
-    display: none;
-  }
-}
-
 /* 跑马灯每份内容的末项仍保留 margin，平移半个轨道时接缝间距一致。 */
 @keyframes cn-marquee-left {
   from {
@@ -311,32 +296,5 @@ html > body[data-scroll-locked] {
   :is([class*='hover:scale-'], [class*='hover:-scale-']) {
     scale: 1 !important;
     transform: none !important;
-  }
-}
-
-/* 移动端文档：移除双层外嵌卡片，恢复全宽正文与清晰的吸顶栏。 */
-@media (max-width: 47.999rem) {
-  #nd-page-panel {
-    margin-inline: 0 !important;
-    border-radius: 0 !important;
-    border-inline: 0 !important;
-  }
-
-  #fd-spacious-layout {
-    background-color: var(--color-fd-background) !important;
-  }
-
-  [grid-area='toc-popover'] > div:nth-child(2) {
-    display: none !important;
-  }
-
-  #nd-subnav {
-    background-color: var(--color-fd-background) !important;
-    border-bottom: 1px solid var(--color-fd-border);
-  }
-
-  [grid-area='toc-popover'] header {
-    background-color: var(--color-fd-background) !important;
-    border-bottom: 1px solid var(--color-fd-border);
   }
 }

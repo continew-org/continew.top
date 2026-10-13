@@ -5,7 +5,7 @@ import {
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
-} from 'fumadocs-ui/layouts/spacious/page';
+} from 'fumadocs-ui/layouts/docs/page';
 import { DocsPageBreadcrumb } from '@/components/docs-page-breadcrumb';
 import { ViewOptionsPopover } from '@/components/view-options-popover';
 import { DocsSponsorSlot } from '@/components/docs-sponsor-slot';
@@ -14,19 +14,21 @@ import Link from 'next/link';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getPageImageUrl, getPageMarkdownUrl, siteUrl } from '@/lib/shared';
+import { getPageImageUrl, getPageMarkdownUrl, currentDocsUrl, siteUrl } from '@/lib/shared';
+import { ArchiveNotice } from '@/components/archive-notice';
+import { getDocVersion, docSections } from '@/lib/docs-sections';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
   // /docs 根路径（slug 为空）：静态导出无法用服务端 redirect，
-  // 用 <meta refresh> 客户端重定向到默认项目（Admin 为首要项目）。
+  // 用 <meta refresh> 客户端重定向到当前版本文档。
   // 不 return <html> 骨架（由根 layout 提供），只注入 meta 与降级文案，避免非法嵌套 HTML。
   if (!params.slug || params.slug.length === 0) {
     return (
       <>
-        <meta httpEquiv="refresh" content="0; url=/docs/admin" />
+        <meta httpEquiv="refresh" content={`0; url=${currentDocsUrl}`} />
         <p>
-          正在跳转到 <Link href="/docs/admin">ContiNew Admin 文档</Link>…
+          正在跳转到 <Link href={currentDocsUrl}>{docSections[0]?.title} 文档</Link>…
         </p>
       </>
     );
@@ -36,6 +38,14 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
 
   const MDX = page.data.body;
   const markdownUrl = getPageMarkdownUrl(page).url;
+  // 归档版本自动挂载升级提示（见 components/archive-notice.tsx 的取舍说明）。
+  // 按「分区/版本」判定而非逐页标注，故不会漏也不会随文档改版失效。
+  const [sectionKey, versionKey] = page.slugs;
+  const archiveVersion = getDocVersion(sectionKey, versionKey);
+  const archiveNotice =
+    archiveVersion?.archived && sectionKey ? (
+      <ArchiveNotice sectionKey={sectionKey} version={archiveVersion} />
+    ) : null;
 
   return (
     <DocsPage
@@ -60,6 +70,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription className="mb-0">{page.data.description}</DocsDescription>
+      {archiveNotice}
       <div className="flex flex-row gap-2 items-center border-b pb-6">
         <MarkdownCopyButton markdownUrl={markdownUrl} />
         <ViewOptionsPopover

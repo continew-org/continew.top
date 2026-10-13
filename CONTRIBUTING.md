@@ -25,7 +25,7 @@
 
 | 要求 | 说明 |
 |:-----|:-----|
-| Node.js | >= 22 |
+| Node.js | >= 22.18 |
 | pnpm | >= 10（推荐 `npm install -g pnpm@latest`） |
 
 ```bash
