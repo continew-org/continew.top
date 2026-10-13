@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { usePathname } from 'fumadocs-core/framework';
-import { Check, ChevronDown, Copy, ExternalLinkIcon, TextIcon } from 'lucide-react';
+import { ChevronDown, ExternalLinkIcon, TextIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { getEditOnHostUrl } from '@/lib/shared';
@@ -20,38 +20,40 @@ function cn(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-// AI 工具入口。支持 URL 带 prompt 参数的（如 DeepSeek 的 ?q=）直接跳转；
-// 不支持的（Cursor、ChatGPT 无公开标准带参接口）复制中文提示词到剪贴板并打开首页。
+/**
+ * AI 工具入口。
+ *
+ * 三家都提供了公开的带参入口，把提示词拼进 URL 直接跳转即可，**不需要**「复制提示词、
+ * 再打开首页」那种折中做法：
+ *
+ * - DeepSeek：`?q=`
+ * - ChatGPT：`?prompt=&hints=search`（与 fumadocs 官方 page-actions 的写法一致）
+ * - Cursor：`link/prompt?text=`（Cursor 官方的 prompt deeplink，同上）
+ */
 interface AiTarget {
   /** 显示名。 */
   label: string;
   /** 图标。 */
   icon: React.ReactNode;
-  /** 打开方式：url 带参直接跳转，或 copy 复制提示词后打开首页。 */
-  mode: 'url' | 'copy';
-  /** mode=url 时的带参地址生成器；mode=copy 时的首页地址。 */
-  url?: (prompt: string) => string;
-  home?: string;
+  /** 该工具的官方带参入口：把提示词拼进去即可直接跳转。 */
+  href: (prompt: string) => string;
 }
 
 const AI_TARGETS: AiTarget[] = [
   {
     label: '在 DeepSeek 中打开',
     icon: <DeepSeekIcon />,
-    mode: 'url',
-    url: (prompt) => `https://chat.deepseek.com/?q=${encodeURIComponent(prompt)}`,
+    href: (prompt) => `https://chat.deepseek.com/?${new URLSearchParams({ q: prompt })}`,
   },
   {
     label: '在 Cursor 中打开',
     icon: <CursorIcon />,
-    mode: 'copy',
-    home: 'https://cursor.com/',
+    href: (prompt) => `https://cursor.com/link/prompt?${new URLSearchParams({ text: prompt })}`,
   },
   {
     label: '在 ChatGPT 中打开',
     icon: <ChatGptIcon />,
-    mode: 'copy',
-    home: 'https://chatgpt.com/',
+    href: (prompt) => `https://chatgpt.com/?${new URLSearchParams({ prompt, hints: 'search' })}`,
   },
 ];
 
@@ -60,7 +62,7 @@ interface ViewOptionsPopoverProps {
   markdownUrl?: string;
   /** 文档页信息（用于生成各代码托管平台的打开链接）。 */
   page: { slugs: string[]; path: string };
-  /** 站点基础地址，用于拼接给 AI 阅读的正文 URL。 */
+  /** 站点基础地址，用于拼接给 AI 阅读的页面 URL。 */
   siteUrl?: string;
   /** 触发按钮的额外 class。 */
   className?: string;
@@ -76,34 +78,20 @@ export function ViewOptionsPopover({
   children,
 }: ViewOptionsPopoverProps) {
   const pathname = usePathname();
-  const [copied, setCopied] = useState<string | null>(null);
 
   const githubUrl = useMemo(() => getEditOnHostUrl(page, 'github'), [page]);
   const atomgitUrl = useMemo(() => getEditOnHostUrl(page, 'atomgit'), [page]);
   const giteeUrl = useMemo(() => getEditOnHostUrl(page, 'gitee'), [page]);
 
-  // 给 AI 的中文提示词：请其阅读当前文档页（正文 Markdown 地址）并回答相关问题。
+  /*
+   * 给 AI 的提示词指向**页面 URL**，不指向 /llms.mdx 的 Markdown 路由：后者按
+   * application/octet-stream 下发，AI 抓取时可能当成下载而读不到正文；页面是 HTML，
+   * 任何抓取方都能读。fumadocs 官方的 page-actions 同样用页面 URL。
+   */
   const prompt = useMemo(() => {
     const pageUrl = `${siteUrl}${pathname}`;
-    const docUrl = markdownUrl ? `${siteUrl}${markdownUrl}` : pageUrl;
-    return `请阅读以下文档内容，并回答我接下来提出的问题：\n\n${docUrl}`;
-  }, [pathname, markdownUrl, siteUrl]);
-
-  const handleOpenAi = async (target: AiTarget) => {
-    if (target.mode === 'url' && target.url) {
-      window.open(target.url(prompt), '_blank', 'noopener,noreferrer');
-      return;
-    }
-    // copy 模式：复制中文提示词到剪贴板并打开首页
-    try {
-      await navigator.clipboard.writeText(prompt);
-      setCopied(target.label);
-      setTimeout(() => setCopied(null), 1600);
-    } catch {
-      // 剪贴板不可用时仍打开首页
-    }
-    if (target.home) window.open(target.home, '_blank', 'noopener,noreferrer');
-  };
+    return `请阅读以下文档内容，并回答我接下来提出的问题：\n\n${pageUrl}`;
+  }, [pathname, siteUrl]);
 
   const linkItems = useMemo(() => {
     const items: { label: string; href: string; icon?: React.ReactNode }[] = [];
@@ -113,6 +101,9 @@ export function ViewOptionsPopover({
     if (giteeUrl) items.push({ label: '在 Gitee 中打开', href: giteeUrl, icon: <GiteeIcon /> });
     return items;
   }, [markdownUrl, githubUrl, atomgitUrl, giteeUrl]);
+
+  const itemClass =
+    'text-sm p-2 rounded-lg inline-flex items-center gap-2 hover:text-fd-accent-foreground hover:bg-fd-accent [&_svg]:size-4';
 
   return (
     <Popover>
@@ -124,37 +115,29 @@ export function ViewOptionsPopover({
         )}
       >
         {children ?? '打开'}
-        <ChevronDown className="size-3.5 text-fd-muted-foreground" />
+        <ChevronDown className="size-3.5 text-fd-muted-foreground" aria-hidden />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">
-        {linkItems.map((item) => (
+        {[
+          ...linkItems.map((item) => ({ label: item.label, href: item.href, icon: item.icon })),
+          ...AI_TARGETS.map((target) => ({
+            label: target.label,
+            href: target.href(prompt),
+            icon: target.icon,
+          })),
+        ].map((item) => (
           <a
-            key={item.href}
+            key={item.label}
             href={item.href}
             rel="noreferrer noopener"
             target="_blank"
-            className="text-sm p-2 rounded-lg inline-flex items-center gap-2 hover:text-fd-accent-foreground hover:bg-fd-accent [&_svg]:size-4"
+            className={cn(itemClass, 'text-start')}
           >
             {item.icon}
             {item.label}
-            <ExternalLinkIcon className="text-fd-muted-foreground size-3.5 ms-auto" />
+            <span className="sr-only">（在新窗口打开）</span>
+            <ExternalLinkIcon className="text-fd-muted-foreground size-3.5 ms-auto" aria-hidden />
           </a>
-        ))}
-        {AI_TARGETS.map((target) => (
-          <button
-            key={target.label}
-            type="button"
-            onClick={() => handleOpenAi(target)}
-            className="text-sm p-2 rounded-lg inline-flex items-center gap-2 text-start hover:text-fd-accent-foreground hover:bg-fd-accent [&_svg]:size-4"
-          >
-            {copied === target.label ? <Check className="text-green-500" /> : target.icon}
-            {copied === target.label ? '已复制提示词' : target.label}
-            {target.mode === 'copy' ? (
-              <Copy className="text-fd-muted-foreground size-3.5 ms-auto" />
-            ) : (
-              <ExternalLinkIcon className="text-fd-muted-foreground size-3.5 ms-auto" />
-            )}
-          </button>
         ))}
       </PopoverContent>
     </Popover>
