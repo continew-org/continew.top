@@ -32,7 +32,7 @@ export function rewriteDocUrl(rawUrl: string, unit: SourceUnit): string {
   }
   if (!CONTINEW_HOSTS.has(url.hostname)) return rawUrl;
   if (KEEP_FLOATING_REF.has(url.pathname.split('/').pop() ?? '')) return rawUrl;
-  const match = url.pathname.match(/^\/[^/]+\/([^/]+)\/(blob|tree)\/dev(?=\/|$)/);
+  const match = /^\/[^/]+\/([^/]+)\/(blob|tree)\/dev(?=\/|$)/.exec(url.pathname);
   const tag = match && getVersionTags(version)[match[1]];
   if (!tag) return rawUrl;
   url.pathname = url.pathname.replace(/\/(blob|tree)\/dev(?=\/|$)/, `/$1/${tag}`);

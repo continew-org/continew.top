@@ -9,7 +9,7 @@ import type { ComponentProps } from 'react';
 /**
  * 文档页面包屑插槽增强：桌面端折叠侧边栏后补充搜索按钮。
  */
-export function DocsPageBreadcrumb(props: ComponentProps<typeof PageBreadcrumb>) {
+export function DocsPageBreadcrumb(props: Readonly<ComponentProps<typeof PageBreadcrumb>>) {
   const { collapsed } = useSidebar();
   const { setOpenSearch } = useSearchContext();
 

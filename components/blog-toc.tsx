@@ -18,7 +18,7 @@ import { AlignLeft } from 'lucide-react';
  * 目录标题由父级（服务端组件）传入：取自 @/lib/i18n 的文案表，
  * 与文档站侧边目录同源，避免两处各写一份。
  */
-export function BlogToc({ title }: { title: string }) {
+export function BlogToc({ title }: Readonly<{ title: string }>) {
   const items = useTOCItems();
 
   return (

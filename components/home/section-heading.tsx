@@ -16,12 +16,12 @@ export function SectionHeading({
   title,
   description,
   className,
-}: {
+}: Readonly<{
   eyebrow?: string;
   title: string;
   description?: ReactNode;
   className?: string;
-}) {
+}>) {
   return (
     <div className={cn('cn-reveal mx-auto max-w-2xl text-center', className)}>
       {/* cn-reveal：滚进视口时淡入上移，纯 CSS，不支持的浏览器直接静态显示 */}

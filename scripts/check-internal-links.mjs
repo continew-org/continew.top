@@ -3,17 +3,9 @@ import { extname, join, relative, sep } from 'node:path';
 import process from 'node:process';
 
 const root = process.argv[2] ?? 'out';
-const htmlFiles = [];
-
-async function walk(dir) {
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) await walk(path);
-    else if (entry.isFile() && extname(entry.name) === '.html') htmlFiles.push(path);
-  }
-}
-
-await walk(root);
+const htmlFiles = (await readdir(root, { recursive: true, withFileTypes: true }))
+  .filter((entry) => entry.isFile() && extname(entry.name) === '.html')
+  .map((entry) => join(entry.parentPath, entry.name));
 
 const toPosix = (value) => value.split(sep).join('/');
 const routeOf = (file) => {
@@ -24,21 +16,25 @@ const routeOf = (file) => {
 };
 
 const routeFiles = new Map(htmlFiles.map((file) => [routeOf(file), file]));
-const anchors = new Map();
-const links = [];
 const hrefPattern = /<a\b[^>]*\bhref=(?:"([^"]*)"|'([^']*)')[^>]*>/giu;
 const idPattern = /\bid=(?:"([^"]+)"|'([^']+)')/giu;
 
-for (const file of htmlFiles) {
-  const html = await readFile(file, 'utf8');
-  const route = routeOf(file);
-  const ids = new Set();
-  for (const match of html.matchAll(idPattern)) ids.add(match[1] ?? match[2]);
-  anchors.set(route, ids);
-  for (const match of html.matchAll(hrefPattern)) {
-    links.push({ source: route, href: match[1] ?? match[2] });
-  }
-}
+// 各页面互不依赖，并行读取；逐页解析出锚点与出链后再合并。
+const pages = await Promise.all(
+  [...routeFiles].map(async ([route, file]) => {
+    const html = await readFile(file, 'utf8');
+    const ids = new Set();
+    for (const match of html.matchAll(idPattern)) ids.add(match[1] ?? match[2]);
+    const pageLinks = [...html.matchAll(hrefPattern)].map((match) => ({
+      source: route,
+      href: match[1] ?? match[2],
+    }));
+    return { route, ids, pageLinks };
+  }),
+);
+
+const anchors = new Map(pages.map((page) => [page.route, page.ids]));
+const links = pages.flatMap((page) => page.pageLinks);
 
 const errors = [];
 for (const { source, href } of links) {

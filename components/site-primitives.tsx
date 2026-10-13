@@ -11,11 +11,11 @@ export function PageContainer({
   children,
   variant = 'standard',
   className,
-}: {
+}: Readonly<{
   children: ReactNode;
   variant?: 'standard' | 'reading';
   className?: string;
-}) {
+}>) {
   return (
     <main
       data-cn-page={variant}
@@ -45,7 +45,7 @@ export function PageIntro({
   actions,
   children,
   className,
-}: {
+}: Readonly<{
   eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
@@ -54,7 +54,7 @@ export function PageIntro({
   actions?: ReactNode;
   children?: ReactNode;
   className?: string;
-}) {
+}>) {
   return (
     <div className={cn('relative min-w-0', align === 'center' && 'text-center', className)}>
       {eyebrow && <p className="text-sm font-medium text-[var(--cn-brand)]">{eyebrow}</p>}
@@ -88,7 +88,7 @@ export function PageHeader({
   stats,
   children,
   ...intro
-}: Omit<Parameters<typeof PageIntro>[0], 'children'> & { stats?: PageStat[]; children?: ReactNode }) {
+}: Readonly<Omit<Parameters<typeof PageIntro>[0], 'children'> & { stats?: PageStat[]; children?: ReactNode }>) {
   return (
     <header className="relative">
       <PageIntro {...intro} />
@@ -115,14 +115,14 @@ export function Section({
   action,
   children,
   className,
-}: {
+}: Readonly<{
   id?: string;
   title?: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
-}) {
+}>) {
   return (
     <section id={id} className={cn('mt-16', className)}>
       {(title || action) && (
@@ -145,7 +145,7 @@ export interface NextLinkItem {
   description: string;
 }
 
-export function PageNextLinks({ links }: { links: NextLinkItem[] }) {
+export function PageNextLinks({ links }: Readonly<{ links: NextLinkItem[] }>) {
   if (links.length === 0) return null;
   return (
     <nav aria-label="继续浏览" className="mt-20 border-t border-fd-border pt-10">

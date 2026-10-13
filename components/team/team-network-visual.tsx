@@ -5,10 +5,10 @@ import { cn } from '@/lib/cn';
 function AvatarStack({
   members,
   align = 'left',
-}: {
+}: Readonly<{
   members: TeamMember[];
   align?: 'left' | 'right';
-}) {
+}>) {
   return (
     <div className={cn('flex -space-x-2', align === 'right' && 'justify-end')} aria-hidden>
       {members.slice(0, 4).map((member) => (
@@ -34,11 +34,11 @@ export function TeamNetworkVisual({
   core,
   resonators,
   emeriti,
-}: {
+}: Readonly<{
   core: TeamMember[];
   resonators: TeamMember[];
   emeriti: TeamMember[];
-}) {
+}>) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-fd-border/80 bg-fd-background/80 p-5 shadow-sm backdrop-blur sm:p-6">
       <div

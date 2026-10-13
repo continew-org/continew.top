@@ -6,7 +6,7 @@ import { focusRing } from '@/lib/site-design';
  * 登记用户跑马灯：纯 CSS 双行循环，每行拥有独立的键盘滚动区。
  * 减弱动效或聚焦时只保留第一份内容，无客户端脚本依赖。
  */
-function UserChip({ user }: { user: RegisteredUser }) {
+function UserChip({ user }: Readonly<{ user: RegisteredUser }>) {
   return (
     <span className="inline-flex shrink-0 items-center gap-2.5 rounded-full border border-fd-border bg-fd-card px-4 py-2 text-sm font-medium text-fd-muted-foreground">
       {user.logo ? (
@@ -29,15 +29,16 @@ function MarqueeRow({
   users,
   reverse,
   label,
-}: {
+}: Readonly<{
   users: RegisteredUser[];
   reverse?: boolean;
   label: string;
-}) {
+}>) {
   return (
-    <div
-      role="region"
+    <section
       aria-label={`${label}，聚焦后可用左右方向键横向浏览`}
+      // NOSONAR: 横向滚动区必须可聚焦，键盘才能用方向键浏览并让动画停住（WCAG 2.2.2 的暂停机制），
+      // 「可聚焦的滚动区域」本就带 tabIndex，这里的非交互元素属有意为之。
       tabIndex={0}
       className={cn('cn-marquee-viewport cn-marquee-fade rounded-lg p-1', focusRing)}
     >
@@ -47,23 +48,24 @@ function MarqueeRow({
           reverse && 'cn-marquee-reverse',
         )}
       >
-        {users.map((user, index) => (
-          <li key={`a-${user.name}-${index}`} className="mr-3">
+        {/* key 取用户名：登记名录内名字唯一（data/users.json 人工审核），不必退化为数组下标。 */}
+        {users.map((user) => (
+          <li key={`a-${user.name}`} className="mr-3">
             <UserChip user={user} />
           </li>
         ))}
         {/* 视觉副本同时 inert 和 aria-hidden；将来 chip 添加链接也不会产生隐藏焦点。 */}
-        {users.map((user, index) => (
-          <li key={`b-${user.name}-${index}`} aria-hidden inert className="cn-marquee-copy mr-3">
+        {users.map((user) => (
+          <li key={`b-${user.name}`} aria-hidden inert className="cn-marquee-copy mr-3">
             <UserChip user={user} />
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }
 
-export function UsersMarquee({ users }: { users: RegisteredUser[] }) {
+export function UsersMarquee({ users }: Readonly<{ users: RegisteredUser[] }>) {
   if (users.length === 0) return null;
 
   const half = Math.ceil(users.length / 2);

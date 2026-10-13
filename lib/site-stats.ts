@@ -90,9 +90,10 @@ const SNAPSHOT: Record<PlatformStar['key'], number> = {
  * 统计贡献者也要用，两个入口互不感知就会把同一个 URL 请求两遍。
  * 缓存的是 Promise 而不是结果，并发调用共享同一次请求，不会有人拿到「还没回来」的 null。
  */
-const inflight = new Map<string, Promise<unknown | null>>();
+// unknown 已含 null，写成 `unknown | null` 属冗余联合成员（Sonar typescript:S6571）
+const inflight = new Map<string, Promise<unknown>>();
 
-export async function fetchJson(url: string): Promise<unknown | null> {
+export async function fetchJson(url: string): Promise<unknown> {
   let pending = inflight.get(url);
   if (!pending) {
     pending = requestJson(url);
@@ -101,7 +102,7 @@ export async function fetchJson(url: string): Promise<unknown | null> {
   return pending;
 }
 
-async function requestJson(url: string): Promise<unknown | null> {
+async function requestJson(url: string): Promise<unknown> {
   try {
     const headers: Record<string, string> = {
       Accept: 'application/json',
@@ -262,6 +263,9 @@ export interface Contributor {
  *
  * 组织下仓库可能有二十来个：一次性 Promise.all 全打出去容易触发平台限流；
  * 而逐个 await 又太慢（构建期累计可达数十秒）。折中取并发 5。
+ *
+ * 每个 worker 领一个下标、跑完再领下一个：用递归续跑代替 while + await，
+ * 并发上限仍由 worker 数封顶，行为与逐个领取完全一致。
  */
 async function mapLimit<T, R>(
   items: readonly T[],
@@ -270,11 +274,11 @@ async function mapLimit<T, R>(
 ): Promise<R[]> {
   const results = new Array<R>(items.length);
   let cursor = 0;
-  const worker = async () => {
-    while (cursor < items.length) {
-      const index = cursor++;
-      results[index] = await fn(items[index]);
-    }
+  const worker = async (): Promise<void> => {
+    const index = cursor++;
+    if (index >= items.length) return;
+    results[index] = await fn(items[index]);
+    await worker();
   };
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return results;

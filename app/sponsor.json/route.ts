@@ -23,7 +23,7 @@ export const revalidate = false;
  * 演示站 4.x 的 Carousel 读 `[...data.special, ...data.platinum]`，直接输出新结构会抛错。
  * 把当前有横幅的伙伴映射到 special，演示站不改代码即可继续工作；5.x 重做后可删。
  */
-export async function GET() {
+export function GET() {
   /*
    * img / logo 在数据里存相对 partners 目录的路径，这里统一转成完整 URL。
    * 演示站 4.x 用 isHttp 判断，给完整 URL 才会直接使用、不拼旧前缀。

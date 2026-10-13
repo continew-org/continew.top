@@ -15,7 +15,7 @@ import { PageContainer, cardHover } from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
 import { focusRing, siteType } from '@/lib/site-design';
 
-function NeighbourLink({ post, label, align = 'left' }: { post?: BlogPost; label: string; align?: 'left' | 'right' }) {
+function NeighbourLink({ post, label, align = 'left' }: Readonly<{ post?: BlogPost; label: string; align?: 'left' | 'right' }>) {
   if (!post) return null;
   return (
     <Link href={post.url} className={cn('block min-w-0 rounded-xl border border-fd-border p-4', cardHover, focusRing, align === 'right' && 'sm:text-right')}>
@@ -25,12 +25,13 @@ function NeighbourLink({ post, label, align = 'left' }: { post?: BlogPost; label
   );
 }
 
-export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) {
+export default async function BlogPostPage(props: Readonly<PageProps<'/blog/[...slug]'>>) {
   const params = await props.params;
   const page = blogSource.getPage(params.slug);
   if (!page) notFound();
 
-  const MDX = page.data.body;
+  // 变量名须为常规 PascalCase：全大写（MDX）会被 jsx-pascal-case（S6770）判为非 PascalCase。
+  const MdxContent = page.data.body;
   const date = page.data.datetime.slice(0, 10);
   const { previous, next, related } = await getBlogPostContext(page.url);
   const authoredDescription = page.data.description?.trim();
@@ -92,7 +93,7 @@ export default async function BlogPostPage(props: PageProps<'/blog/[...slug]'>) 
             </div>
 
             <DocsBody className="mx-0 max-w-none pt-8">
-              <MDX components={getMDXComponents()} />
+              <MdxContent components={getMDXComponents()} />
             </DocsBody>
 
             <footer className="mt-16 border-t border-fd-border pt-8">

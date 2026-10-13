@@ -76,7 +76,7 @@ export function ViewOptionsPopover({
   siteUrl = 'https://continew.top',
   className,
   children,
-}: ViewOptionsPopoverProps) {
+}: Readonly<ViewOptionsPopoverProps>) {
   const pathname = usePathname();
 
   const githubUrl = useMemo(() => getEditOnHostUrl(page, 'github'), [page]);

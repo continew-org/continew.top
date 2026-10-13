@@ -33,10 +33,10 @@ import { getDefaultVersion, type DocVersion } from '@/lib/docs-sections';
 export function ArchiveNotice({
   sectionKey,
   version,
-}: {
+}: Readonly<{
   sectionKey: string;
   version: DocVersion;
-}) {
+}>) {
   const currentKey = getDefaultVersion(sectionKey);
   const line = version.key;
   const versionLabel = version.versionLabel ?? version.ref;

@@ -6,7 +6,7 @@ import { buildDefaultDocsUrl } from '@/lib/shared';
 import { hasVersions } from '@/lib/docs-sections';
 import { getStarSummary } from '@/lib/site-stats';
 
-export default async function Layout({ children }: LayoutProps<'/docs'>) {
+export default async function Layout({ children }: Readonly<LayoutProps<'/docs'>>) {
   const tree = source.getPageTree();
   const tabs = getLayoutTabs(tree);
   // 没有直属页面的版本化项目不会被 getLayoutTabs 自动收录。

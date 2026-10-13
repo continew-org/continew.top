@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import { Button, type ActionSize } from '@/components/site-actions';
+import { useBackdropDismiss } from '@/components/use-dialog-events';
 
 /**
  * 「加入交流群」弹层。
@@ -18,12 +19,13 @@ import { Button, type ActionSize } from '@/components/site-actions';
 export function JoinGroupDialog({
   className,
   size = 'md',
-}: {
+}: Readonly<{
   className?: string;
   size?: Extract<ActionSize, 'md' | 'lg'>;
-}) {
+}>) {
   const ref = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
+  useBackdropDismiss(ref, () => setOpen(false));
 
   useEffect(() => {
     const dialog = ref.current;
@@ -43,10 +45,6 @@ export function JoinGroupDialog({
         ref={ref}
         onClose={() => setOpen(false)}
         aria-label="加入 ContiNew 交流群"
-        // dialog 自身即遮罩层，点它就关闭；点内容区不冒泡到这里
-        onClick={(event) => {
-          if (event.target === ref.current) setOpen(false);
-        }}
         // text-left：showModal() 只提升层级、不改 CSS 继承，父级若有 text-center 会带歪弹层排版
         className="m-auto w-[min(92vw,520px)] rounded-2xl border border-fd-border bg-fd-card p-6 text-left text-fd-foreground backdrop:bg-black/60"
       >

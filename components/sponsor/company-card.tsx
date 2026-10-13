@@ -7,26 +7,33 @@ import { cn } from '@/lib/cn';
  * 与资源行、支持者胶囊同一套视觉量级——标识都是一枚小图，
  * 企业多一句业务介绍，所以用卡片而不是行。有链接整卡可点。
  */
-export function CompanyCard({ sponsor, className }: { sponsor: Sponsor; className?: string }) {
-  const visual = sponsor.logo ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={sponsorLogoUrl(sponsor.logo)}
-      alt=""
-      aria-hidden
-      loading="lazy"
-      className="size-8 object-contain"
-    />
-  ) : sponsor.avatar ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={sponsor.avatar}
-      alt=""
-      aria-hidden
-      loading="lazy"
-      className="size-8 rounded-full object-cover"
-    />
-  ) : (
+/** 标识：企业 Logo 优先，其次平台头像，都没有时退化为首字方块。 */
+function SponsorVisual({ sponsor }: Readonly<{ sponsor: Sponsor }>) {
+  if (sponsor.logo) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={sponsorLogoUrl(sponsor.logo)}
+        alt=""
+        aria-hidden
+        loading="lazy"
+        className="size-8 object-contain"
+      />
+    );
+  }
+  if (sponsor.avatar) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={sponsor.avatar}
+        alt=""
+        aria-hidden
+        loading="lazy"
+        className="size-8 rounded-full object-cover"
+      />
+    );
+  }
+  return (
     <span
       aria-hidden
       className="flex size-8 items-center justify-center rounded-full bg-fd-muted text-xs font-semibold text-fd-muted-foreground"
@@ -34,10 +41,12 @@ export function CompanyCard({ sponsor, className }: { sponsor: Sponsor; classNam
       {sponsor.name.slice(0, 1)}
     </span>
   );
+}
 
+export function CompanyCard({ sponsor, className }: { sponsor: Sponsor; className?: string }) {
   const inner = (
     <>
-      {visual}
+      <SponsorVisual sponsor={sponsor} />
       <span className="min-w-0">
         <span className="block truncate text-sm font-medium text-fd-foreground">
           {sponsor.name}

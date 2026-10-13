@@ -13,6 +13,8 @@ const relationMeta: Record<
     waveOuterClass: string;
     waveInnerClass: string;
     hoverClass: string;
+    /** 无头像时代替首字的底色（与关系主题一致）。 */
+    initialClass: string;
   }
 > = {
   strategic: {
@@ -22,6 +24,7 @@ const relationMeta: Record<
     waveOuterClass: 'border-[var(--cn-brand-line)]',
     waveInnerClass: 'border-blue-400/20',
     hoverClass: 'hover:border-[var(--cn-brand-line)]',
+    initialClass: 'bg-[var(--cn-brand-soft)] text-[var(--cn-brand)]',
   },
   infrastructure: {
     label: '资源合作伙伴',
@@ -30,6 +33,7 @@ const relationMeta: Record<
     waveOuterClass: 'border-teal-400/30',
     waveInnerClass: 'border-[var(--cn-brand-line)]',
     hoverClass: 'hover:border-teal-500/40',
+    initialClass: 'bg-teal-500/10 text-teal-700 dark:text-teal-300',
   },
   supporter: {
     label: '个人支持者',
@@ -38,6 +42,7 @@ const relationMeta: Record<
     waveOuterClass: 'border-amber-400/35',
     waveInnerClass: 'border-amber-300/25',
     hoverClass: 'hover:border-amber-400/50',
+    initialClass: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
   },
 };
 
@@ -47,7 +52,7 @@ function getPrimaryRelation(companion: Companion): TierKey {
   return 'supporter';
 }
 
-function CompanionVisual({ companion }: { companion: Companion }) {
+function CompanionVisual({ companion }: Readonly<{ companion: Companion }>) {
   const className = 'size-11 shrink-0 rounded-xl';
 
   if (companion.logo) {
@@ -79,12 +84,7 @@ function CompanionVisual({ companion }: { companion: Companion }) {
   }
 
   const primaryRelation = getPrimaryRelation(companion);
-  const fallbackClass =
-    primaryRelation === 'supporter'
-      ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300'
-      : primaryRelation === 'infrastructure'
-        ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300'
-        : 'bg-[var(--cn-brand-soft)] text-[var(--cn-brand)]';
+  const fallbackClass = relationMeta[primaryRelation].initialClass;
 
   return (
     <span
@@ -96,7 +96,7 @@ function CompanionVisual({ companion }: { companion: Companion }) {
   );
 }
 
-function CompanionCardContent({ companion }: { companion: Companion }) {
+function CompanionCardContent({ companion }: Readonly<{ companion: Companion }>) {
   const primaryRelation = getPrimaryRelation(companion);
   const accent = relationMeta[primaryRelation];
 

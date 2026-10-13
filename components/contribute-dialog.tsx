@@ -5,6 +5,7 @@ import { GitPullRequestArrow, X } from 'lucide-react';
 import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 import { contributePlatforms } from '@/lib/shared';
 import { ActionLink, Button } from '@/components/site-actions';
+import { useBackdropDismiss } from '@/components/use-dialog-events';
 
 const PLATFORM_ICON = {
   github: GitHubIcon,
@@ -32,12 +33,13 @@ const PLATFORM_ICON = {
 export function ContributeDialog({
   className,
   label = '参与贡献',
-}: {
+}: Readonly<{
   className?: string;
   label?: string;
-}) {
+}>) {
   const ref = useRef<HTMLDialogElement>(null);
   const [open, setOpen] = useState(false);
+  useBackdropDismiss(ref, () => setOpen(false));
 
   useEffect(() => {
     const dialog = ref.current;
@@ -57,10 +59,6 @@ export function ContributeDialog({
         ref={ref}
         onClose={() => setOpen(false)}
         aria-label="选择平台参与贡献"
-        // dialog 自身即遮罩层，点它就关闭；点内容区不冒泡到这里
-        onClick={(event) => {
-          if (event.target === ref.current) setOpen(false);
-        }}
         className="m-auto w-[min(92vw,440px)] rounded-2xl border border-fd-border bg-fd-card p-6 text-left text-fd-foreground backdrop:bg-black/60"
       >
         <div className="flex items-start justify-between gap-4">

@@ -1,6 +1,5 @@
 import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
-import { ImageResponse } from 'next/og';
 import { generateOGImage } from 'fumadocs-ui/og';
 import { appName, getPageImageUrl } from '@/lib/shared';
 
@@ -21,7 +20,8 @@ const PLACEHOLDER_PNG = Buffer.from(
   'base64',
 );
 
-async function renderOg(title: string, description: string | undefined): Promise<Response> {
+// 返回类型同时覆盖 CI 的异步渲染与离线占位，故不是 async 函数（无需 await）。
+function renderOg(title: string, description: string | undefined): Response | Promise<Response> {
   if (IS_CI || FORCE_OG) {
     return generateOGImage({ title, description, site: appName });
   }

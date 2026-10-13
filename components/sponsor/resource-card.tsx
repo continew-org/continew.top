@@ -15,10 +15,10 @@ import { cn } from '@/lib/cn';
 export function MiniVisual({
   partner,
   sizeClass = 'size-5',
-}: {
+}: Readonly<{
   partner: ResourcePartner;
   sizeClass?: string;
-}) {
+}>) {
   if (partner.logo) {
     return (
       // 本地素材，静态导出不经过图片优化，用原生 img
@@ -73,12 +73,12 @@ function ProviderRow({
   entry,
   showPeriod,
   highlightCurrent,
-}: {
+}: Readonly<{
   entry: ResourcePartner;
   showPeriod: boolean;
   /** 是否给当前在用的提供者加「在用」标记与高亮底色（赞助页区分历史用，首页不需要）。 */
   highlightCurrent: boolean;
-}) {
+}>) {
   // 标记「在用」（徽章 + 底色）只在赞助页开启；往期条目才收轻字色。
   // 首页不区分时，所有条目都按正常字色呈现，不标记也不压暗。
   const marked = highlightCurrent && entry.current === true;
@@ -146,13 +146,13 @@ export function ResourceNeedCard({
   showPeriod = true,
   showQty = true,
   highlightCurrent = true,
-}: {
+}: Readonly<{
   group: ResourceNeedGroup;
   showPeriod?: boolean;
   /** 是否显示数量徽章（×1 / 不限）。首页只表达「谁在支持」，不展示数量。 */
   showQty?: boolean;
   highlightCurrent?: boolean;
-}) {
+}>) {
   const Icon = NEED_ICONS[group.need] ?? Server;
   // 「不限」是真正有分量的承诺，用青色徽章点出来；普通数量走中性灰徽章。
   const unlimited = /不限/.test(group.qty);

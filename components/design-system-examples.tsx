@@ -25,19 +25,20 @@ export function DesignSystemExamples() {
         </Button>
         <JoinGroupDialog />
       </div>
-      <p role="status" className="text-sm text-fd-muted-foreground">{confirmed ? '操作已确认。' : '尚未确认操作。'}</p>
+      <p role="status" aria-live="polite" aria-atomic="true" className="text-sm text-fd-muted-foreground">{confirmed ? '操作已确认。' : '尚未确认操作。'}</p>
       <div className="flex flex-wrap items-center gap-3">
         <ActionLink href="/blog" variant="primary">站内导航</ActionLink>
         <ActionLink href="#motion">页内导航</ActionLink>
         <ActionLink href="https://github.com/continew-org">外部导航</ActionLink>
         <ActionLink href={currentDocsUrl} variant="text">文字链接</ActionLink>
       </div>
-      <div role="group" aria-label="样例分类" className="flex flex-wrap gap-2">
+      <fieldset className="flex flex-wrap gap-2">
+        <legend className="sr-only">样例分类</legend>
         {['全部', '版本更新', '社区动态'].map((item) => (
           <FilterChip key={item} selected={category === item} onClick={() => setCategory(item)}>{item}</FilterChip>
         ))}
-      </div>
-      <p role="status" className="text-sm text-fd-muted-foreground">当前分类：{category}</p>
+      </fieldset>
+      <p role="status" aria-live="polite" aria-atomic="true" className="text-sm text-fd-muted-foreground">当前分类：{category}</p>
     </div>
   );
 }

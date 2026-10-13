@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from 'react';
  *
  * 【reduced-motion】直接保持终值不动画——计数对读屏用户本来就该是终值。
  */
-export function AnimatedNumber({ value }: { value: number }) {
+export function AnimatedNumber({ value }: Readonly<{ value: number }>) {
   const [display, setDisplay] = useState(value);
   const ref = useRef<HTMLSpanElement>(null);
 

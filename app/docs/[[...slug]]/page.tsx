@@ -18,7 +18,7 @@ import { getPageImageUrl, getPageMarkdownUrl, currentDocsUrl, siteUrl } from '@/
 import { ArchiveNotice } from '@/components/archive-notice';
 import { getDocVersion, docSections } from '@/lib/docs-sections';
 
-export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
+export default async function Page(props: Readonly<PageProps<'/docs/[[...slug]]'>>) {
   const params = await props.params;
   // /docs 根路径（slug 为空）：静态导出无法用服务端 redirect，
   // 用 <meta refresh> 客户端重定向到当前版本文档。
@@ -36,7 +36,8 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  const MDX = page.data.body;
+  // 变量名须为常规 PascalCase：全大写（MDX）会被 jsx-pascal-case（S6770）判为非 PascalCase。
+  const MdxContent = page.data.body;
   const markdownUrl = getPageMarkdownUrl(page).url;
   // 归档版本自动挂载升级提示（见 components/archive-notice.tsx 的取舍说明）。
   // 按「分区/版本」判定而非逐页标注，故不会漏也不会随文档改版失效。
@@ -80,7 +81,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
         />
       </div>
       <DocsBody>
-        <MDX
+        <MdxContent
           components={getMDXComponents({
             // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
@@ -91,7 +92,7 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   );
 }
 
-export async function generateStaticParams() {
+export function generateStaticParams() {
   // 空 slug 对应 /docs 根路径（重定向到默认项目），静态导出需显式包含
   return [{ slug: [] }, ...source.generateParams()];
 }

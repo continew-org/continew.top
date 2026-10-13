@@ -7,7 +7,14 @@ import { registrationTemplate } from '@/lib/user-registration';
 
 type CopyState = 'idle' | 'copied' | 'error';
 
-export function UserRegistrationActions({ registerUrl }: { registerUrl: string }) {
+/** 复制按钮的状态播报文案：写成语义到文案的映射，避免多层三元。 */
+const COPY_STATE_MESSAGES: Record<CopyState, string> = {
+  idle: '',
+  copied: '登记模板已复制到剪贴板。',
+  error: '复制失败，请手动选择下方模板内容。',
+};
+
+export function UserRegistrationActions({ registerUrl }: Readonly<{ registerUrl: string }>) {
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -23,12 +30,7 @@ export function UserRegistrationActions({ registerUrl }: { registerUrl: string }
     }
   };
 
-  const statusMessage =
-    copyState === 'copied'
-      ? '登记模板已复制到剪贴板。'
-      : copyState === 'error'
-        ? '复制失败，请手动选择下方模板内容。'
-        : '';
+  const statusMessage = COPY_STATE_MESSAGES[copyState];
 
   return (
     <div>

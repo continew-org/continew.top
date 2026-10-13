@@ -23,16 +23,17 @@ const root = process.argv[2] ?? 'out';
 const BOM = '\uFEFF';
 const targets = ['llms.txt', 'llms-full.txt'];
 
-for (const relative of targets) {
+// 两个目标文件互不依赖，并行处理即可（也让「循环内 await」的告警不再成立）。
+await Promise.all(targets.map(async (relative) => {
   const file = join(root, relative);
   let text;
   try {
     text = await readFile(file, 'utf8');
   } catch (error) {
-    if (error.code === 'ENOENT') continue;
+    if (error.code === 'ENOENT') return;
     throw error;
   }
-  if (text.startsWith(BOM)) continue;
+  if (text.startsWith(BOM)) return;
   await writeFile(file, BOM + text);
   console.log(`Added UTF-8 BOM: ${relative}`);
-}
+}));

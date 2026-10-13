@@ -35,13 +35,13 @@ export function ContributorWall({
   contributors,
   className,
   celebrate = true,
-}: {
+}: Readonly<{
   contributors: Contributor[];
   /** 追加到列表容器的类。首页需要居中（`justify-center`），团队页保持左对齐。 */
   className?: string;
   /** 是否渲染 hover 礼花。团队页完整名单关闭，首页精选展示保留。 */
   celebrate?: boolean;
-}) {
+}>) {
   if (contributors.length === 0) return null;
 
   return (
@@ -87,7 +87,8 @@ export function ContributorWall({
             {celebrate &&
               CONFETTI.map((piece, index) => (
                 <span
-                  key={index}
+                  // 礼花是固定 8 片的静态数据，位移组合唯一，用它作 key 而不退化为数组下标。
+                  key={`${piece.dx}-${piece.dy}`}
                   aria-hidden
                   className="cn-confetti-piece"
                   style={

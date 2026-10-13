@@ -1,6 +1,5 @@
 import { createGetUrl } from 'fumadocs-core/source';
-import { docSourceRepos, getDefaultVersion, hasVersions } from './docs-sections';
-import { docSections } from './docs-sections';
+import { docSections, docSourceRepos, getDefaultVersion, hasVersions } from './docs-sections';
 
 export const appName = 'ContiNew';
 export const appDescription =
