@@ -90,7 +90,9 @@ export function baseOptions(
         ? [
             {
               type: 'icon' as const,
-              icon: <HeartHandshake />,
+              // 琥珀色沿用个人支持者的关系色（见 DESIGN_SYSTEM.md「品牌与原则」）：
+              // 文字工具行里只有它带颜色，醒目但不动用主行动色。
+              icon: <HeartHandshake className="text-amber-600 dark:text-amber-400" />,
               text: '支持',
               label: '支持 ContiNew',
               url: '/sponsor',

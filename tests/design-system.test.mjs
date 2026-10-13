@@ -143,6 +143,13 @@ test('component examples are noindex and excluded from discovery surfaces', () =
   for (const file of ['llms.txt', 'llms-full.txt']) assert.doesNotMatch(exported(file), /\/design-system/);
 });
 
+test('exported plain-text routes declare UTF-8 so browsers cannot mis-decode them', () => {
+  // 静态导出不带响应头，text/plain 无 charset 时浏览器按本地编码猜，中文会乱码
+  for (const file of ['llms.txt', 'llms-full.txt']) {
+    assert.ok(exported(file).startsWith('\uFEFF'), `${file} must start with a UTF-8 BOM`);
+  }
+});
+
 test('exported CSS preserves the reduced-motion and keyboard marquee contracts', () => {
   const postcss = require('postcss');
   const sheets = [];

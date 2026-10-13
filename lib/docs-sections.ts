@@ -96,6 +96,13 @@ export interface DocVersion {
 export interface DocSection {
   key: string;
   title: string;
+  /**
+   * 分区说明，仅供人读注册表用。
+   *
+   * **不是展示文案的来源**：非版本分区（starter / app）的名称、描述与图标由各自仓库的
+   * `docs/meta.json` 决定，版本分区（admin）的版本行文案由下方 `versions` 决定。
+   * 官网不覆盖分区层文案——上游改一句就该在站点生效，两处各写一份必然漂移。
+   */
   description: string;
   /** 顶部项目切换器使用的 Lucide 图标名，同时决定其在 lib/source.ts 中的品牌配色。 */
   icon: string;
@@ -218,17 +225,6 @@ export function getDocVersion(sectionKey: string | undefined, versionKey: string
   return docSections
     .find((section) => section.key === sectionKey)
     ?.versions?.find((version) => version.key === versionKey);
-}
-
-/**
- * 按目录路径取分区注册项（如 `starter`）。
- *
- * 与 `hasVersions` 等同样以分区 key 为入口，供 lib/source.ts 把下拉里的项目名称与
- * 描述固定在本仓库——源仓库 meta.json 每次部署都会覆盖回来，不能当作事实源。
- */
-export function getDocSection(sectionKey: string | undefined): DocSection | undefined {
-  if (!sectionKey) return undefined;
-  return docSections.find((section) => section.key === sectionKey);
 }
 
 /** 仅版本目录本身是 Root Type，不能把其下的普通目录标成版本根。 */
