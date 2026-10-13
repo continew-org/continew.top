@@ -133,7 +133,8 @@ export const docSections: readonly DocSection[] = [
       {
         key: '4.x',
         title: '4.x',
-        description: '仅接收勘误',
+        // 描述行说明「这条线停在哪」：系列名 + 归档时的发布 tag
+        description: '4.x 系列，冻结于 v4.2.0',
         repo: 'continew-admin',
         ref: '4.2.x',
         archived: true,

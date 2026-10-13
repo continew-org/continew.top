@@ -111,8 +111,10 @@ const renderLlmsPage = async (page: ReturnType<typeof source.getPages>[number]) 
   const [sectionKey, versionKey] = page.slugs;
   const version = getDocVersion(sectionKey, versionKey);
   const currentKey = sectionKey ? getDefaultVersion(sectionKey) : undefined;
+  // 与页内归档提示（components/archive-notice.tsx）口径一致：线（key）进「本文是…」，
+  // 发布 tag 进「冻结于…」。此处是给 AI/纯文本读的，写短句不加粗。
   const notice = version?.archived
-    ? `> 本文是 ${version.versionLabel ?? version.ref} 的归档文档，不建议在新项目中使用。${currentKey ? `最新版本：${docsRoute}/${sectionKey}/${currentKey}` : ''}\n\n`
+    ? `> 本文是 ${version.key} 的归档文档（冻结于 ${version.versionTag ?? version.versionLabel ?? version.ref}），不建议用于新项目。${currentKey ? `最新文档：${docsRoute}/${sectionKey}/${currentKey}` : ''}\n\n`
     : '';
   return `# ${page.data.title} (${page.url})\n\n${notice}${await page.data.getText('processed')}`;
 };

@@ -91,6 +91,6 @@ test('export contains both version routes and legacy static redirect when snapsh
   const latest = await readFile(join(dir, '5.x.html'), 'utf8');
   assert.match(latest, /href="\/docs\/admin\/5\.x\/reference\/faq"/);
   const archivedMarkdown = await readFile(join(process.cwd(), 'out', 'llms.mdx', 'docs', 'admin', '4.x', 'content.md'), 'utf8');
-  assert.match(archivedMarkdown, /本文是 4\.2\.x 的归档文档/);
+  assert.match(archivedMarkdown, /本文是 4\.x 的归档文档（冻结于 v4\.2\.0）/);
   assert.match(archivedMarkdown, /\/docs\/admin\/5\.x/);
 });
