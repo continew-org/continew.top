@@ -98,10 +98,10 @@ export const contributePlatforms = [
 ] as const;
 
 /**
- * 文档页「在 GitHub 编辑」链接指向的源仓库与 git 引用，key 形如 `admin/4.2`。
+ * 文档页「在 GitHub 编辑」链接指向的源仓库与 git 引用，key 形如 `admin/4.x`。
  * 由唯一事实源派生，此处不再单独维护——见 lib/docs-sections.ts。
  *
- * 启用版本的分区按「分区/版本」二级 key 索引：admin/5.0 与 admin/4.2 指向
+ * 启用版本的分区按「分区/版本」二级 key 索引：admin/5.x 与 admin/4.x 指向
  * 同一仓库的不同 git 引用，单看分区名无法分辨。
  */
 export { docSourceRepos } from './docs-sections';
@@ -111,7 +111,7 @@ export { docSourceRepos } from './docs-sections';
  *
  * ## 为什么按「分区/版本」二级匹配
  *
- * 同一个分区的多个版本指向同一仓库的不同 git 引用（admin/5.0→dev、admin/4.2→4.2.x），
+ * 同一个分区的多个版本指向同一仓库的不同 git 引用（admin/5.x→dev、admin/4.x→4.2.x），
  * 单看分区名无法分辨。启用版本的分区取前两段作 key，未启用的取第一段。
  */
 function resolveSource(page: { slugs: string[]; path: string }) {
@@ -125,7 +125,7 @@ function resolveSource(page: { slugs: string[]; path: string }) {
   const source = docSourceRepos[key];
   if (!source) return undefined;
 
-  // page.path 形如 admin/4.2/guide/upgrade.mdx，去掉分区/版本前缀即源仓库 docs/ 内相对路径。
+  // page.path 形如 admin/4.x/guide/upgrade.mdx，去掉分区/版本前缀即源仓库 docs/ 内相对路径。
   // 版本段的存在与否随分区而异，这里统一按「已消耗的 slug 数」截取，不在分区路径上做假设。
   const consumed = [section, versioned ? rest[0] : undefined].filter(Boolean).join('/');
   return { source, pathInRepo: page.path.slice(consumed.length + 1) };

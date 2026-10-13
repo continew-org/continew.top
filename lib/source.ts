@@ -174,11 +174,11 @@ function isArchivedPage(page: { slugs: string[] }): boolean {
 /**
  * 从 llms.txt 的页面树递归剔除归档版本目录及其子页。
  *
- * 版本目录位于 `admin` 分区之下，只筛顶层会漏掉 4.2；父分区剪空后一并去掉，
+ * 版本目录位于 `admin` 分区之下，只筛顶层会漏掉 4.x；父分区剪空后一并去掉，
  * 避免留下无内容的标题。llms.txt / llms-full.txt 面向当前文档检索，
- * 同时收录 4.2 与 5.0 会让 AI 混用两个版本的配置说明；仅在聚合入口标注「归档」
+ * 同时收录 4.x 与 5.x 会让 AI 混用两个版本的配置说明；仅在聚合入口标注「归档」
  * 也不能保证模型读取正文时仍保留该上下文。旧版文档仍可按页从
- * `/llms.mdx/docs/admin/4.2/...` 读取。
+ * `/llms.mdx/docs/admin/4.x/...` 读取。
  */
 function filterArchived<T extends { type: string }>(nodes: T[]): T[] {
   const out: T[] = [];

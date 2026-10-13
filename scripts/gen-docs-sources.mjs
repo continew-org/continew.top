@@ -4,8 +4,8 @@
  * 输出形式（每行一条，可直接 `IFS='=' read`）：
  *
  * ```
- * admin/5.0=continew-admin@dev
- * admin/4.2=continew-admin@4.2.x
+ * admin/5.x=continew-admin@dev
+ * admin/4.x=continew-admin@4.2.x
  * starter=continew-starter@dev
  * app=continew-app@dev
  * ```

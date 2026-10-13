@@ -8,20 +8,20 @@ import { docSections, getSourceUnitForFile, getVersionForFolderPath, getVersionT
 import { rewriteDocUrl } from '../lib/mdx-plugins/remark-archive-doc-links.ts';
 
 const admin = docSections.find(({ key }) => key === 'admin');
-const archive = getSourceUnitForFile('/project/content/docs/admin/4.2/index.mdx');
-const current = getSourceUnitForFile('D:\\project\\content\\docs\\admin\\5.0\\index.mdx');
+const archive = getSourceUnitForFile('/project/content/docs/admin/4.x/index.mdx');
+const current = getSourceUnitForFile('D:\\project\\content\\docs\\admin\\5.x\\index.mdx');
 
 test('source unit matching distinguishes versions and leaves the section landing alone', () => {
-  assert.equal(archive?.dir, 'admin/4.2');
-  assert.equal(current?.dir, 'admin/5.0');
+  assert.equal(archive?.dir, 'admin/4.x');
+  assert.equal(current?.dir, 'admin/5.x');
   assert.equal(getSourceUnitForFile('/project/content/docs/admin/meta.json'), undefined);
 });
 
 test('only configured version folders become version roots', () => {
-  assert.equal(getVersionForFolderPath('admin/5.0')?.key, '5.0');
-  assert.equal(getVersionForFolderPath('admin/4.2')?.key, '4.2');
-  assert.equal(getVersionForFolderPath('admin/5.0/manual'), undefined);
-  assert.equal(getVersionForFolderPath('admin/4.2/manual/system'), undefined);
+  assert.equal(getVersionForFolderPath('admin/5.x')?.key, '5.x');
+  assert.equal(getVersionForFolderPath('admin/4.x')?.key, '4.x');
+  assert.equal(getVersionForFolderPath('admin/5.x/manual'), undefined);
+  assert.equal(getVersionForFolderPath('admin/4.x/manual/system'), undefined);
   assert.equal(getVersionForFolderPath('starter'), undefined);
 });
 
@@ -31,9 +31,9 @@ test('legacy self links stay within the compiling version and explicit cross-ver
     assert.equal(rewriteDocUrl('/docs/admin', unit), root);
     assert.equal(rewriteDocUrl('/docs/admin/configuration#hello', unit), `${root}/configuration#hello`);
     assert.equal(rewriteDocUrl('/docs/admin?search=roles#intro', unit), `${root}?search=roles#intro`);
-    assert.equal(rewriteDocUrl('/docs/admin/4.2/configuration', unit), '/docs/admin/4.2/configuration');
-    assert.equal(rewriteDocUrl('/docs/admin/5.0?search=roles', unit), '/docs/admin/5.0?search=roles');
-    assert.equal(rewriteDocUrl('/docs/admin/5.0/configuration', unit), '/docs/admin/5.0/configuration');
+    assert.equal(rewriteDocUrl('/docs/admin/4.x/configuration', unit), '/docs/admin/4.x/configuration');
+    assert.equal(rewriteDocUrl('/docs/admin/5.x?search=roles', unit), '/docs/admin/5.x?search=roles');
+    assert.equal(rewriteDocUrl('/docs/admin/5.x/configuration', unit), '/docs/admin/5.x/configuration');
     assert.equal(rewriteDocUrl('/docs/starter', unit), '/docs/starter');
   }
 });
@@ -50,26 +50,26 @@ test('archived source links pin only dev refs for their own version', () => {
 });
 
 test('a second archive keeps version-specific tags and does not change legacy owner', () => {
-  const another = { ...archive, version: { ...archive.version, key: '5.0', versionTag: 'v5.0.0' } };
+  const another = { ...archive, version: { ...archive.version, key: '5.x', versionTag: 'v5.0.0' } };
   const link = 'https://github.com/continew-org/continew-admin/tree/dev';
   assert.equal(rewriteDocUrl(link, another), link.replace('/dev', '/v5.0.0'));
   assert.equal(rewriteDocUrl(link, archive), link.replace('/dev', '/v4.2.0'));
-  assert.equal(admin.legacyVersion, '4.2');
+  assert.equal(admin.legacyVersion, '4.x');
   assert.equal(getVersionTags(archive.version)['continew-admin-ui'], 'v4.2.0');
 });
 
 test('legacy redirect generator preserves query and anchor and refuses to overwrite routes', async () => {
   const output = await mkdtemp(join(tmpdir(), 'docs-redirects-'));
   try {
-    const archiveDir = join(output, 'docs', 'admin', '4.2');
+    const archiveDir = join(output, 'docs', 'admin', '4.x');
     await mkdir(archiveDir, { recursive: true });
     await writeFile(join(archiveDir, 'configuration.html'), '<html></html>');
     const script = join(process.cwd(), 'scripts', 'gen-legacy-doc-redirects.mjs');
     execFileSync(process.execPath, [script, output]);
     const redirect = await readFile(join(output, 'docs', 'admin', 'configuration.html'), 'utf8');
-    assert.match(redirect, /location\.replace\("\/docs\/admin\/4\.2\/configuration" \+ location\.search \+ location\.hash\)/);
+    assert.match(redirect, /location\.replace\("\/docs\/admin\/4\.x\/configuration" \+ location\.search \+ location\.hash\)/);
     const projectRedirect = await readFile(join(output, 'docs', 'admin.html'), 'utf8');
-    assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.2" \+ location\.search \+ location\.hash\)/);
+    assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.x" \+ location\.search \+ location\.hash\)/);
     assert.throws(() => execFileSync(process.execPath, [script, output], { stdio: 'pipe' }));
   } finally {
     await rm(output, { recursive: true, force: true });
@@ -79,18 +79,18 @@ test('legacy redirect generator preserves query and anchor and refuses to overwr
 test('export contains both version routes and legacy static redirect when snapshots are present', async (t) => {
   const dir = join(process.cwd(), 'out', 'docs', 'admin');
   try {
-    await access(join(dir, '4.2.html'));
+    await access(join(dir, '4.x.html'));
   } catch {
     t.skip('requires an exported build with upstream Admin snapshots');
     return;
   }
   const projectRedirect = await readFile(join(process.cwd(), 'out', 'docs', 'admin.html'), 'utf8');
-  assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.2" \+ location\.search \+ location\.hash\)/);
+  assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.x" \+ location\.search \+ location\.hash\)/);
   const legacy = await readFile(join(dir, 'reference', 'security.html'), 'utf8');
-  assert.match(legacy, /location\.replace\("\/docs\/admin\/4\.2\/reference\/security" \+ location\.search \+ location\.hash\)/);
-  const latest = await readFile(join(dir, '5.0.html'), 'utf8');
-  assert.match(latest, /href="\/docs\/admin\/5\.0\/reference\/faq"/);
-  const archivedMarkdown = await readFile(join(process.cwd(), 'out', 'llms.mdx', 'docs', 'admin', '4.2', 'content.md'), 'utf8');
+  assert.match(legacy, /location\.replace\("\/docs\/admin\/4\.x\/reference\/security" \+ location\.search \+ location\.hash\)/);
+  const latest = await readFile(join(dir, '5.x.html'), 'utf8');
+  assert.match(latest, /href="\/docs\/admin\/5\.x\/reference\/faq"/);
+  const archivedMarkdown = await readFile(join(process.cwd(), 'out', 'llms.mdx', 'docs', 'admin', '4.x', 'content.md'), 'utf8');
   assert.match(archivedMarkdown, /本文是 4\.2\.x 的归档文档/);
-  assert.match(archivedMarkdown, /\/docs\/admin\/5\.0/);
+  assert.match(archivedMarkdown, /\/docs\/admin\/5\.x/);
 });

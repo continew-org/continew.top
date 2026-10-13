@@ -37,11 +37,11 @@
 | 分区目录 | URL | 文档源仓库 |
 |:---------|:----|:-----------|
 | `content/docs/starter/` | `/docs/starter/*` | `continew-org/continew-starter` 的 `docs/` |
-| `content/docs/admin/5.0/` | `/docs/admin/5.0/*` | `continew-org/continew-admin` 的 `dev` 分支 `docs/` |
-| `content/docs/admin/4.2/` | `/docs/admin/4.2/*` | `continew-org/continew-admin` 的 `4.2.x` 分支 `docs/`（归档） |
+| `content/docs/admin/5.x/` | `/docs/admin/5.x/*` | `continew-org/continew-admin` 的 `dev` 分支 `docs/` |
+| `content/docs/admin/4.x/` | `/docs/admin/4.x/*` | `continew-org/continew-admin` 的 `4.2.x` 分支 `docs/`（归档） |
 | `content/docs/app/` | `/docs/app/*` | `continew-org/continew-app` 的 `docs/` |
 
-项目分区的 `meta.json` 标记 `root: true`；Admin 不单设版本选择页。其下各版本的文档（含 `meta.json` 和 `index.mdx`）由对应项目仓库的 `docs/` 汇聚，不提交。`lib/source.ts` 将 Admin 版本目录的 Root Type 统一设为 `"version"`，Fumadocs 标准 Docs 布局在侧边栏（手机端为侧栏抽屉）自动渲染项目与版本下拉；切换时优先投影到另一版本的对应页面，缺页则回到版本入口。旧 `/docs/admin/<页面>` 地址由构建后静态跳转页固定指向 4.2；`/docs/admin` 同样保留为指向 4.2 的旧地址跳转，不是新增的导航页。
+项目分区的 `meta.json` 标记 `root: true`；Admin 不单设版本选择页。其下各版本的文档（含 `meta.json` 和 `index.mdx`）由对应项目仓库的 `docs/` 汇聚，不提交。版本段的命名口径是「维护线」：`5.x` 为开发中的下一代、`4.x` 为 4 系列的冻结线（发布号 `4.2.x` / `v4.2.0` 只出现在 `ref` 与 `versionTag`，不进 URL）。`lib/source.ts` 将 Admin 版本目录的 Root Type 统一设为 `"version"`，Fumadocs 标准 Docs 布局在侧边栏（手机端为侧栏抽屉）自动渲染项目与版本下拉；切换时优先投影到另一版本的对应页面，缺页则回到版本入口。旧 `/docs/admin/<页面>` 地址由构建后静态跳转页固定指向 4.x；`/docs/admin` 同样保留为指向 4.x 的旧地址跳转，不是新增的导航页。
 
 文档拉取目录、仓库和 git 引用统一注册在 `lib/docs-sections.ts`，`scripts/gen-docs-sources.mjs` 据此生成部署映射；新增版本需在注册表中声明；站点会按注册表把对应版本目录设为 `root: "version"`，不依赖上游 `docs/meta.json` 的取值。
 
@@ -76,7 +76,7 @@ pnpm types:check      # TypeScript 类型检查
 pnpm ui:check         # 构建后检查设计契约与静态产物
 ```
 
-本地预览真实文档：将对应项目仓库的 `docs/` 复制进注册表声明的目录即可（如 `cp -r ../continew-starter/docs/. content/docs/starter/`；Admin 的 `dev` 和 `4.2.x` 分别复制到 `content/docs/admin/5.0/`、`content/docs/admin/4.2/`）。复制内容属构建期汇聚产物，不提交。
+本地预览真实文档：将对应项目仓库的 `docs/` 复制进注册表声明的目录即可（如 `cp -r ../continew-starter/docs/. content/docs/starter/`；Admin 的 `dev` 和 `4.2.x` 分别复制到 `content/docs/admin/5.x/`、`content/docs/admin/4.x/`）。复制内容属构建期汇聚产物，不提交。
 
 ### 提交前检查（必须通过）
 

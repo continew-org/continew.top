@@ -4,14 +4,24 @@
  * 目录形态与 URL 严格对应（`/docs/<分区>/<版本>/<页面>`）：
  *
  * ```
- * content/docs/admin/5.0/…  →  /docs/admin/5.0/…
- * content/docs/admin/4.2/…  →  /docs/admin/4.2/…
+ * content/docs/admin/5.x/…  →  /docs/admin/5.x/…
+ * content/docs/admin/4.x/…  →  /docs/admin/4.x/…
  * content/docs/starter/…    →  /docs/starter/…
  * ```
  *
+ * ## 版本段怎么命名：key 是「线」，发布号是上游事实
+ *
+ * key 同时是目录名与 URL 路径段，所以它**一旦上线就不要改**（书签、外链、搜索结果都指着它）。
+ * 按维护线命名：`5.x` 是正在开发的下一代，`4.x` 是 4 系列的冻结线——封存时 5.x 只是
+ * 标签变成「已归档」，再新增一条 `6.x`，不存在「重命名目录」这一步。
+ *
+ * 具体发布号（4.2.x 分支、v4.2.0 tag）属于上游事实，写在 ref / versionTag / versionLabel 上，
+ * 不参与 URL。两者不要互相顶替：key 写成发布号会把「一条线一份文档」的 URL 钉死在某个
+ * 小版本上，后续每个小版本都得改链接；ref 写成 key 则会指到一个不存在的分支。
+ *
  * ## 版本机制：为什么采用 Fumadocs 的 Root Type
  *
- * Admin 存在多个并存版本（开发中的 5.0、已归档的 4.2），版本之间的关系是
+ * Admin 存在多个并存版本（开发中的 5.x、已归档的 4.x），版本之间的关系是
  * **同一份文档的不同快照**——读者读到一半切过去，应当落在另一个版本的同一页，
  * 而不是被丢回首页。
  *
@@ -21,7 +31,7 @@
  * 官方说明见 docs navigation » Versioning » Root Type。
  *
  * 代价：同类型的版本目录必须位于同一个父文件夹之下，故 Admin 的 URL 多出版本段
- * （`/docs/admin/manual/system` → `/docs/admin/5.0/manual/system`）。
+ * （`/docs/admin/manual/system` → `/docs/admin/5.x/manual/system`）。
  * 这是官方机制的约束，换来的是「真正的版本切换」而非「伪装的并列分区」。
  *
  * ## 如何封存一个新版本
@@ -32,15 +42,27 @@
  * ```ts
  * versions: [
  *   …,
- *   { key: '4.2', repo: 'continew-admin', ref: '4.2.x', archived: true, versionTag: 'v4.2.0' },
+ *   { key: '4.x', repo: 'continew-admin', ref: '4.2.x', archived: true, versionTag: 'v4.2.0' },
  * ]
  * ```
+ *
+ * 两处目录名必须同步，改名时容易漏（漏了不会报错，只会静默丢内容）：
+ *
+ * 1. `content/docs/<分区>/meta.json` 的 `pages` 列出各版本目录名——名单与实际目录
+ *    不一致时该分区会被剪成空目录，进而从导航与 llms.txt 里整段消失；
+ * 2. 各版本目录下的 `index.mdx`——`/docs/<分区>/<版本>` 这个入口 URL 由它承载，
+ *    导航与首页「快速上手」都指向它。
  */
 
-/** 一个版本的文档。key 同时是目录名与 URL 路径段。 */
+/**
+ * 一个版本的文档。
+ *
+ * key 同时是目录名与 URL 路径段，按维护线命名（`5.x`），改它等于改线上 URL——
+ * 发布号（`4.2.x` / `v4.2.0`）走 ref 与 versionTag，不要写进 key。
+ */
 export interface DocVersion {
   key: string;
-  /** 侧边栏版本下拉中显示的名称。 */
+  /** 侧边栏版本下拉中显示的名称，可含「最新」这类状态词。 */
   title: string;
   description: string;
   /** 内容所在 GitHub 仓库。 */
@@ -54,7 +76,7 @@ export interface DocVersion {
    * 搜索索引仍收录——仍在用旧版本的人要靠它查资料，落地页有升级提示兜底。
    */
   archived?: boolean;
-  /** 版本名（如 4.2.x），用于提示文案。缺省时用 ref。 */
+  /** 冻结点的版本名（如 4.2.x），用于归档提示文案；缺省时用 ref。 */
   versionLabel?: string;
   /** 稳定发版 tag，用于把文中指向流动分支的外链钉到固定版本。 */
   versionTag?: string;
@@ -92,19 +114,21 @@ export const docSections: readonly DocSection[] = [
     title: 'ContiNew Admin',
     description: '多租户中后台管理系统框架',
     icon: 'LayoutDashboard',
-    legacyVersion: '4.2',
+    legacyVersion: '4.x',
     versions: [
       {
-        key: '5.0',
-        title: '5.0',
+        key: '5.x',
+        // 显示名里保留版本号：桌面端下拉只渲染 title（描述行是 md:hidden），
+        // 写成纯「最新版」会让桌面读者看不出自己在这条线的哪一档
+        title: '最新版 5.x',
         description: '开发中的下一代版本',
         repo: 'continew-admin',
         ref: 'dev',
       },
       {
-        key: '4.2',
-        title: '4.2',
-        description: 'v4.2.0 发布的版本',
+        key: '4.x',
+        title: '4.x',
+        description: '4.x 系列，冻结于 v4.2.0',
         repo: 'continew-admin',
         ref: '4.2.x',
         archived: true,
@@ -141,7 +165,7 @@ export const docSections: readonly DocSection[] = [
 interface SourceUnit {
   /** `content/docs` 下的相对路径，同时也是 URL 去掉 `/docs/` 后的部分。 */
   dir: string;
-  /** URL 上的 slug 段，如 ['admin', '5.0']。 */
+  /** URL 上的 slug 段，如 ['admin', '5.x']。 */
   slugs: string[];
   section: DocSection;
   version?: DocVersion;
@@ -171,7 +195,7 @@ export const sourceUnits: readonly SourceUnit[] = docSections.flatMap(
 /**
  * 内容目录 -> 拉取源（`repo@ref`），供 CI 组装 content/docs 使用。
  *
- * key 是 `content/docs` 下的相对路径（如 `admin/4.2`），不是分区名——
+ * key 是 `content/docs` 下的相对路径（如 `admin/4.x`），不是分区名——
  * 同一仓库的不同版本会拉取到不同目录。
  */
 export function getSourceTargets(): Array<{ dir: string; repo: string; ref: string }> {
@@ -182,7 +206,7 @@ export function getSourceTargets(): Array<{ dir: string; repo: string; ref: stri
   }));
 }
 
-/** 按 slug 取版本配置。命中版本分区（如 admin/4.2）则返回该版本，否则 undefined。 */
+/** 按 slug 取版本配置。命中版本分区（如 admin/4.x）则返回该版本，否则 undefined。 */
 export function getDocVersion(sectionKey: string | undefined, versionKey: string | undefined) {
   if (!sectionKey) return undefined;
   return docSections
@@ -220,7 +244,7 @@ export function getDefaultVersion(sectionKey: string): string | undefined {
 /**
  * 「在 GitHub 编辑」链接指向的仓库与 git 引用，按「分区/版本」二级 key 索引。
  *
- * 单一 key 不足以区分：admin/5.0 与 admin/4.2 指向同一仓库的不同分支。
+ * 单一 key 不足以区分：admin/5.x 与 admin/4.x 指向同一仓库的不同分支。
  */
 export const docSourceRepos: Record<
   string,
