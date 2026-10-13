@@ -243,6 +243,15 @@ export interface Companion extends Backer {
   resourceEntries: ResourcePartner[];
 }
 
+/** 已有的非空值不被后来的记录覆盖：同一个人先后提供多项资源时，首份信息保持权威。 */
+function fillMissing<K extends keyof Companion>(
+  target: Companion,
+  key: K,
+  value: Companion[K] | undefined,
+): void {
+  if (value && !target[key]) target[key] = value;
+}
+
 /** 聚合全部公开支持者，保留数据中的首次出现顺序。 */
 export function getCompanions(): Companion[] {
   const companions = new Map<string, Companion>();
@@ -258,11 +267,11 @@ export function getCompanions(): Companion[] {
     if (existing) {
       if (!existing.relations.includes(relation)) existing.relations.push(relation);
       existing.active ||= active;
-      if (!existing.url && backer.url) existing.url = backer.url;
-      if (!existing.logo && backer.logo) existing.logo = backer.logo;
-      if (!existing.avatar && backer.avatar) existing.avatar = backer.avatar;
-      if (!existing.supportMode && backer.supportMode) existing.supportMode = backer.supportMode;
-      if (!existing.description && description) existing.description = description;
+      fillMissing(existing, 'url', backer.url);
+      fillMissing(existing, 'logo', backer.logo);
+      fillMissing(existing, 'avatar', backer.avatar);
+      fillMissing(existing, 'supportMode', backer.supportMode);
+      fillMissing(existing, 'description', description);
       if (resourceEntry) existing.resourceEntries.push(resourceEntry);
       return;
     }

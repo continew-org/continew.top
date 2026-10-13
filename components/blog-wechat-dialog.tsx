@@ -3,11 +3,13 @@
 import { useRef } from 'react';
 import { QrCode, X } from 'lucide-react';
 import { Button } from '@/components/site-actions';
+import { useBackdropDismiss } from '@/components/use-dialog-events';
 import { cn } from '@/lib/cn';
 import { siteType } from '@/lib/site-design';
 
 export function BlogWechatDialog() {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useBackdropDismiss(dialogRef, () => dialogRef.current?.close());
 
   return (
     <>
@@ -24,9 +26,6 @@ export function BlogWechatDialog() {
         id="blog-wechat-dialog"
         ref={dialogRef}
         aria-labelledby="blog-wechat-title"
-        onClick={(event) => {
-          if (event.target === dialogRef.current) dialogRef.current.close();
-        }}
         className="m-auto w-[min(92vw,360px)] rounded-2xl border border-fd-border bg-fd-card p-6 text-left text-fd-foreground backdrop:bg-black/60"
       >
         <div className="flex items-start justify-between gap-4">

@@ -264,7 +264,7 @@ export const docSourceRepos: Record<
 
 /** 按正在编译的文档目录选择版本，避免不同归档版本共享同一套改写规则。 */
 export function getSourceUnitForFile(filePath: string) {
-  const normalized = filePath.replace(/\\/g, '/');
+  const normalized = filePath.replaceAll('\\', '/');
   const marker = '/content/docs/';
   const index = normalized.lastIndexOf(marker);
   if (index < 0) return undefined;

@@ -23,7 +23,7 @@ const docsProjects = [
   { name: 'App', repo: 'continew-app' },
 ] as const;
 
-function ExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
+function ExternalLink({ href, children }: Readonly<{ href: string; children: React.ReactNode }>) {
   return <ActionLink href={href} variant="ghost">{children}</ActionLink>;
 }
 
@@ -33,13 +33,13 @@ function PathCard({
   description,
   children,
   tone = 'brand',
-}: {
+}: Readonly<{
   icon: LucideIcon;
   title: string;
   description: string;
   children: React.ReactNode;
   tone?: 'brand' | 'teal' | 'amber' | 'red';
-}) {
+}>) {
   const toneClass = {
     brand: 'bg-[var(--cn-brand-soft)] text-[var(--cn-brand)]',
     teal: 'bg-teal-500/10 text-teal-700 dark:text-teal-300',

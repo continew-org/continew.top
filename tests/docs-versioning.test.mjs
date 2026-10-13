@@ -65,12 +65,14 @@ test('legacy redirect generator preserves query and anchor and refuses to overwr
     await mkdir(archiveDir, { recursive: true });
     await writeFile(join(archiveDir, 'configuration.html'), '<html></html>');
     const script = join(process.cwd(), 'scripts', 'gen-legacy-doc-redirects.mjs');
-    execFileSync(process.execPath, [script, output]);
+    // 脚本只接受「工作目录内」的输出目录（Sonar jssecurity:S8707 的路径注入防护），
+    // 故在临时目录里执行、把输出目录传成当前位置。
+    execFileSync(process.execPath, [script, '.'], { cwd: output });
     const redirect = await readFile(join(output, 'docs', 'admin', 'configuration.html'), 'utf8');
     assert.match(redirect, /location\.replace\("\/docs\/admin\/4\.x\/configuration" \+ location\.search \+ location\.hash\)/);
     const projectRedirect = await readFile(join(output, 'docs', 'admin.html'), 'utf8');
     assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.x" \+ location\.search \+ location\.hash\)/);
-    assert.throws(() => execFileSync(process.execPath, [script, output], { stdio: 'pipe' }));
+    assert.throws(() => execFileSync(process.execPath, [script, '.'], { cwd: output, stdio: 'pipe' }));
   } finally {
     await rm(output, { recursive: true, force: true });
   }

@@ -10,7 +10,7 @@ import {
 } from '@/lib/user-registration';
 import type { RegisteredUser } from '@/lib/users';
 
-function UserLogo({ user }: { user: RegisteredUser }) {
+function UserLogo({ user }: Readonly<{ user: RegisteredUser }>) {
   if (user.logo) {
     const src = user.logo.startsWith('http') ? user.logo : `/images/about/users/${user.logo}`;
     return (
@@ -62,11 +62,11 @@ export function UserDirectory({
   users,
   topCities,
   registerUrl,
-}: {
+}: Readonly<{
   users: RegisteredUser[];
   topCities: Array<{ city: string; count: number }>;
   registerUrl?: string;
-}) {
+}>) {
   const [keyword, setKeyword] = useState('');
   const [city, setCity] = useState<string | null>(null);
 
@@ -119,7 +119,8 @@ export function UserDirectory({
       </div>
 
       {topCities.length > 0 && (
-        <div role="group" className="mt-4 hidden flex-wrap items-center gap-2 sm:flex" aria-label="按城市筛选">
+        <fieldset className="mt-4 hidden min-w-0 flex-wrap items-center gap-2 sm:flex">
+          <legend className="sr-only">按城市筛选</legend>
           <FilterChip selected={city === null} onClick={() => setCity(null)}>全部</FilterChip>
           {topCities.map((item) => (
             <FilterChip
@@ -130,7 +131,7 @@ export function UserDirectory({
               {item.city} ({item.count})
             </FilterChip>
           ))}
-        </div>
+        </fieldset>
       )}
 
       <p

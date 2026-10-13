@@ -137,7 +137,7 @@ function TimelineHero({
   totalDays,
   honorCount,
   startYear,
-}: Pick<TimelineContentProps, 'stars' | 'totalDays' | 'honorCount' | 'startYear'>) {
+}: Readonly<Pick<TimelineContentProps, 'stars' | 'totalDays' | 'honorCount' | 'startYear'>>) {
   const stats = [
     { value: `${stars.total.toLocaleString()}+`, label: '累计 Star' },
     { value: totalDays.toLocaleString(), label: '持续维护（天）' },
@@ -187,7 +187,7 @@ function TimelineHero({
   );
 }
 
-function YearNavigation({ groups }: { groups: TimelineYearGroup[] }) {
+function YearNavigation({ groups }: Readonly<{ groups: TimelineYearGroup[] }>) {
   return (
     <nav
       aria-label="按年份浏览"
@@ -210,7 +210,7 @@ function YearNavigation({ groups }: { groups: TimelineYearGroup[] }) {
   );
 }
 
-function TypeBadge({ type }: { type: TimelineType }) {
+function TypeBadge({ type }: Readonly<{ type: TimelineType }>) {
   const meta = eventTypeMeta[type];
   const Icon = meta.icon;
   return (
@@ -226,7 +226,7 @@ function TypeBadge({ type }: { type: TimelineType }) {
   );
 }
 
-function TimelineEntry({ item }: { item: TimelineItem }) {
+function TimelineEntry({ item }: Readonly<{ item: TimelineItem }>) {
   const meta = item.type ? eventTypeMeta[item.type] : undefined;
   const featured = meta?.featured ?? false;
 
@@ -296,7 +296,7 @@ function TimelineEntry({ item }: { item: TimelineItem }) {
   );
 }
 
-function TimelineYear({ year, items }: TimelineYearGroup) {
+function TimelineYear({ year, items }: Readonly<TimelineYearGroup>) {
   return (
     <section
       id={year}
@@ -323,7 +323,7 @@ export function TimelineContent({
   totalDays,
   honorCount,
   startYear,
-}: TimelineContentProps) {
+}: Readonly<TimelineContentProps>) {
   return (
     <>
       <TimelineHero

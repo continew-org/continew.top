@@ -13,7 +13,7 @@ export interface FaqItem {
   answer: string;
 }
 
-export function Faq({ items, className }: { items: FaqItem[]; className?: string }) {
+export function Faq({ items, className }: Readonly<{ items: FaqItem[]; className?: string }>) {
   if (items.length === 0) return null;
 
   return (

@@ -16,7 +16,7 @@ function breadcrumbs(tree: Root, url: string, rootName?: string): string[] | und
   return names.length > 0 ? names : undefined;
 }
 
-async function indexPage(page: SearchPage, tree: Root, rootName?: string): Promise<AdvancedIndex> {
+function indexPage(page: SearchPage, tree: Root, rootName?: string): AdvancedIndex {
   const structuredData = page.data.structuredData;
   if (!structuredData) throw new Error(`Missing search data: ${page.url}`);
 

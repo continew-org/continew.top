@@ -5,6 +5,7 @@ import { Coffee } from 'lucide-react';
 import type { TeamMember } from '@/lib/team';
 import { AfdianIcon, AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 import { ActionLink, Button } from '@/components/site-actions';
+import { useBackdropDismiss } from '@/components/use-dialog-events';
 import { siteType } from '@/lib/site-design';
 import { cn } from '@/lib/cn';
 
@@ -16,21 +17,19 @@ const kindLabel: Record<TeamMemberKind, string> = {
   emeritus: '名誉核心团队成员',
 };
 
-function SponsorDialog({ member, onClose }: { member: TeamMember; onClose: () => void }) {
+function SponsorDialog({ member, onClose }: Readonly<{ member: TeamMember; onClose: () => void }>) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     ref.current?.showModal();
   }, []);
+  useBackdropDismiss(ref, () => ref.current?.close());
 
   return (
     <dialog
       ref={ref}
       onClose={onClose}
       aria-label={member.sponsorTitle ?? '赞赏支持'}
-      onClick={(event) => {
-        if (event.target === ref.current) ref.current.close();
-      }}
       // Preflight 重置了原生 dialog 的 margin，必须显式恢复居中。
       className="m-auto max-h-[90vh] w-[calc(100%_-_2rem)] max-w-xl overflow-y-auto rounded-2xl bg-fd-background p-6 shadow-2xl backdrop:bg-black/60"
     >
@@ -97,7 +96,7 @@ function socialLinks(member: TeamMember) {
   );
 }
 
-export function TeamMemberCard({ member, kind }: { member: TeamMember; kind: TeamMemberKind }) {
+export function TeamMemberCard({ member, kind }: Readonly<{ member: TeamMember; kind: TeamMemberKind }>) {
   const [showSponsor, setShowSponsor] = useState(false);
   const socials = socialLinks(member);
   const hasActions = Boolean(socials || member.sponsor || member.afdian);

@@ -5,7 +5,7 @@ interface IconProps {
 }
 
 // GitHub 矢量图标（fumadocs 官方 page-actions 使用的同款 path）。
-export function GitHubIcon({ className }: IconProps) {
+export function GitHubIcon({ className }: Readonly<IconProps>) {
   return (
     <svg fill="currentColor" role="img" viewBox="0 0 24 24" className={className} aria-hidden>
       <title>GitHub</title>
@@ -15,7 +15,7 @@ export function GitHubIcon({ className }: IconProps) {
 }
 
 // Gitee 矢量图标（simple-icons 标准版）。
-export function GiteeIcon({ className }: IconProps) {
+export function GiteeIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" role="img" className={className} aria-hidden>
       <title>Gitee</title>
@@ -25,7 +25,7 @@ export function GiteeIcon({ className }: IconProps) {
 }
 
 // DeepSeek 矢量图标（simple-icons 标准版）。
-export function DeepSeekIcon({ className }: IconProps) {
+export function DeepSeekIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" role="img" className={className} aria-hidden>
       <title>DeepSeek</title>
@@ -35,7 +35,7 @@ export function DeepSeekIcon({ className }: IconProps) {
 }
 
 // Cursor 矢量图标（simple-icons 标准版）。
-export function CursorIcon({ className }: IconProps) {
+export function CursorIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" role="img" className={className} aria-hidden>
       <title>Cursor</title>
@@ -45,7 +45,7 @@ export function CursorIcon({ className }: IconProps) {
 }
 
 // ChatGPT（OpenAI）矢量图标（fumadocs 官方 page-actions 使用的同款 path）。
-export function ChatGptIcon({ className }: IconProps) {
+export function ChatGptIcon({ className }: Readonly<IconProps>) {
   return (
     <svg role="img" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
       <title>OpenAI</title>
@@ -55,7 +55,7 @@ export function ChatGptIcon({ className }: IconProps) {
 }
 
 // AtomGit 图标（官方 logo 为位图，用图片渲染）。
-export function AtomGitIcon({ className }: IconProps) {
+export function AtomGitIcon({ className }: Readonly<IconProps>) {
   return (
     <Image src="/atomgit.svg" alt="AtomGit" width={16} height={16} className={className} aria-hidden />
   );
@@ -67,7 +67,7 @@ export function AtomGitIcon({ className }: IconProps) {
  * 用实心而不是描边，是为了在小尺寸（按钮里 14px）下还能认出来——
  * 描边闪电缩到那么小就只剩几根线。颜色继承 currentColor，由按钮自己的配色决定。
  */
-export function AfdianIcon({ className }: IconProps) {
+export function AfdianIcon({ className }: Readonly<IconProps>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" role="img" className={className} aria-hidden>
       <title>爱发电</title>

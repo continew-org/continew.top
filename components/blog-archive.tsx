@@ -20,7 +20,7 @@ function groupByYear(posts: BlogPost[]) {
   return [...years.entries()].map(([year, yearPosts]) => ({ year, posts: yearPosts }));
 }
 
-function CategoryLabel({ category }: { category: BlogCategory }) {
+function CategoryLabel({ category }: Readonly<{ category: BlogCategory }>) {
   return (
     <span
       className={cn(
@@ -34,7 +34,7 @@ function CategoryLabel({ category }: { category: BlogCategory }) {
   );
 }
 
-export function BlogArchive({ posts }: { posts: BlogPost[] }) {
+export function BlogArchive({ posts }: Readonly<{ posts: BlogPost[] }>) {
   const [category, setCategory] = useState<BlogCategory | null>(null);
   const filtered = useMemo(
     () => (category ? posts.filter((post) => post.category === category) : posts),
@@ -56,8 +56,9 @@ export function BlogArchive({ posts }: { posts: BlogPost[] }) {
         </p>
       </div>
 
-      <div role="group" aria-label="按文章分类筛选" className="-mx-6 mt-7 overflow-x-auto px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex w-max items-center gap-2 py-1">
+      <div className="-mx-6 mt-7 overflow-x-auto px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <fieldset className="flex w-max items-center gap-2 py-1">
+          <legend className="sr-only">按文章分类筛选</legend>
           <FilterChip selected={category === null} onClick={() => setCategory(null)}>
             全部
           </FilterChip>
@@ -70,7 +71,7 @@ export function BlogArchive({ posts }: { posts: BlogPost[] }) {
               {item}
             </FilterChip>
           ))}
-        </div>
+        </fieldset>
       </div>
 
       <div className="mt-12 space-y-14">

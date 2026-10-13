@@ -10,6 +10,6 @@ import type { SharedProps } from 'fumadocs-ui/contexts/search';
  * 故采用构建期预生成的 Fumadocs 静态索引（客户端查询）。
  * DefaultSearchDialog 的 type: 'static' 内部即使用 fumadocs-core 的 staticClient()。
  */
-export default function StaticSearchDialog(props: SharedProps) {
+export default function StaticSearchDialog(props: Readonly<SharedProps>) {
   return <DefaultSearchDialog type="static" {...props} />;
 }

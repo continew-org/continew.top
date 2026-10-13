@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: 'ContiNew 版本更新、项目动态、社区故事与安全通告。',
 };
 
-function LatestPost({ post }: { post: BlogPost }) {
+function LatestPost({ post }: Readonly<{ post: BlogPost }>) {
   return (
     <section aria-labelledby="latest-post-title" className="mt-14 sm:mt-16">
       <div className="mb-5 flex items-center gap-3">

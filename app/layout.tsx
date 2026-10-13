@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   description: appDescription,
 };
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+export default function Layout({ children }: Readonly<LayoutProps<'/'>>) {
   return (
     <html
       lang="zh-CN"

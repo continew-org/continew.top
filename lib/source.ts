@@ -2,7 +2,7 @@ import { llms, loader } from 'fumadocs-core/source';
 import type { Folder } from 'fumadocs-core/page-tree';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
-import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
+import { docsRoute } from './shared';
 import { getDefaultVersion, getDocVersion, getVersionForFolderPath, hasVersions } from './docs-sections';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
@@ -102,8 +102,9 @@ const renderLlmsPage = async (page: ReturnType<typeof source.getPages>[number]) 
   const currentKey = sectionKey ? getDefaultVersion(sectionKey) : undefined;
   // 与页内归档提示（components/archive-notice.tsx）口径一致：线（key）进「本文是…」，
   // 发布 tag 进「冻结于…」。此处是给 AI/纯文本读的，写短句不加粗。
+  const latestDocsHint = currentKey ? `最新文档：${docsRoute}/${sectionKey}/${currentKey}` : '';
   const notice = version?.archived
-    ? `> 本文是 ${version.key} 的归档文档（冻结于 ${version.versionTag ?? version.versionLabel ?? version.ref}），不建议用于新项目。${currentKey ? `最新文档：${docsRoute}/${sectionKey}/${currentKey}` : ''}\n\n`
+    ? `> 本文是 ${version.key} 的归档文档（冻结于 ${version.versionTag ?? version.versionLabel ?? version.ref}），不建议用于新项目。${latestDocsHint}\n\n`
     : '';
   return `# ${page.data.title} (${page.url})\n\n${notice}${await page.data.getText('processed')}`;
 };

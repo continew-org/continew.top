@@ -55,14 +55,14 @@ function CompanionGroup({
   icon: Icon,
   iconClass,
   countClass,
-}: {
+}: Readonly<{
   companions: Companion[];
   label: string;
   description: string;
   icon: LucideIcon;
   iconClass: string;
   countClass: string;
-}) {
+}>) {
   const visible = companions.slice(0, initialCount);
   const remaining = companions.slice(initialCount);
 
@@ -103,7 +103,7 @@ function CompanionGroup({
 }
 
 /** 支持者名录按关系分组；关系只表达支持方式，不表示金额或荣誉高低。 */
-export function CompanionDirectory({ companions }: { companions: Companion[] }) {
+export function CompanionDirectory({ companions }: Readonly<{ companions: Companion[] }>) {
   return (
     <div className="space-y-8">
       {groups.map(({ key, ...group }) => {

@@ -40,10 +40,10 @@ const PLATFORM_ICON = {
 export function NavStarCount({
   total,
   platforms,
-}: {
+}: Readonly<{
   total: number;
   platforms: PlatformStar[];
-}) {
+}>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

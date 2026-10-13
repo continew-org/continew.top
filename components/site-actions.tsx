@@ -7,6 +7,28 @@ import { focusRing, siteMotion } from '@/lib/site-design';
 export type ActionVariant = 'primary' | 'secondary' | 'ghost' | 'text' | 'overlay';
 export type ActionSize = 'sm' | 'md' | 'lg' | 'icon' | 'media';
 
+type ActionIconOption = 'auto' | 'next' | 'down' | false;
+
+/**
+ * 行动控件的尾部图标：外链用「新窗口」，页内锚点与 icon="down" 用向下箭头，其余用右箭头。
+ *
+ * 抽成组件而不是「按条件选一个图标变量」：一是不在渲染期生成组件（React 编译器规则
+ * react-hooks/static-components），二是顺带避开嵌套三元（Sonar typescript:S3358）。
+ */
+function ActionIcon({
+  external,
+  icon,
+  href,
+}: Readonly<{ external: boolean; icon: ActionIconOption; href: string }>) {
+  if (external) {
+    return <ExternalLink className="size-4 shrink-0" aria-hidden />;
+  }
+  if (icon === 'down' || href.startsWith('#')) {
+    return <ArrowDown className="size-4 shrink-0" aria-hidden />;
+  }
+  return <ArrowRight className="size-4 shrink-0" aria-hidden />;
+}
+
 const variants: Record<ActionVariant, string> = {
   primary: 'border border-transparent bg-[var(--cn-brand)] text-[var(--cn-brand-on)] hover:bg-[var(--cn-brand-strong)]',
   secondary: 'border border-fd-border bg-fd-background hover:border-[var(--cn-brand-line)] hover:bg-fd-accent',
@@ -50,7 +72,7 @@ export function Button({
   className,
   type = 'button',
   ...props
-}: ComponentProps<'button'> & { variant?: ActionVariant; size?: ActionSize }) {
+}: Readonly<ComponentProps<'button'> & { variant?: ActionVariant; size?: ActionSize }>) {
   return (
     <button
       {...props}
@@ -73,15 +95,14 @@ export function ActionLink({
   href: string;
   variant?: ActionVariant;
   size?: ActionSize;
-  icon?: 'auto' | 'next' | 'down' | false;
+  icon?: ActionIconOption;
 }) {
   const external = /^https?:\/\//i.test(href) || href.startsWith('//');
   const native = external || /^(#|mailto:|tel:)/i.test(href);
-  const Icon = external ? ExternalLink : icon === 'down' || href.startsWith('#') ? ArrowDown : ArrowRight;
   const content = (
     <>
       {children}
-      {icon !== false && <Icon className="size-4 shrink-0" aria-hidden />}
+      {icon !== false && <ActionIcon external={external} icon={icon} href={href} />}
       {external && <span className="sr-only">（在新窗口打开）</span>}
     </>
   );
@@ -105,7 +126,7 @@ export function FilterChip({
   children,
   className,
   ...props
-}: Omit<ComponentProps<'button'>, 'aria-pressed' | 'type'> & { selected: boolean }) {
+}: Readonly<Omit<ComponentProps<'button'>, 'aria-pressed' | 'type'> & { selected: boolean }>) {
   return (
     <button
       {...props}

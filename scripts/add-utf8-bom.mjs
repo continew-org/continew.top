@@ -17,22 +17,29 @@
  * `text/plain`），那时这里的 BOM 只是冗余、不会有害。
  */
 import { readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 
-const root = process.argv[2] ?? 'out';
+// 输出目录来自命令行：解析后必须落在工作目录内，否则拒绝执行——避免「跳出去」的路径
+// 被交给读写操作（Sonar jssecurity:S8707 的路径注入）。构建脚本总是从仓库根运行。
+const workingDir = resolve('.');
+const root = resolve(process.argv[2] ?? 'out');
+if (root !== workingDir && !root.startsWith(`${workingDir}${sep}`)) {
+  throw new Error(`Refusing to operate outside the working directory: ${process.argv[2]}`);
+}
 const BOM = '\uFEFF';
 const targets = ['llms.txt', 'llms-full.txt'];
 
-for (const relative of targets) {
+// 两个目标文件互不依赖，并行处理即可（也让「循环内 await」的告警不再成立）。
+await Promise.all(targets.map(async (relative) => {
   const file = join(root, relative);
   let text;
   try {
     text = await readFile(file, 'utf8');
   } catch (error) {
-    if (error.code === 'ENOENT') continue;
+    if (error.code === 'ENOENT') return;
     throw error;
   }
-  if (text.startsWith(BOM)) continue;
+  if (text.startsWith(BOM)) return;
   await writeFile(file, BOM + text);
   console.log(`Added UTF-8 BOM: ${relative}`);
-}
+}));

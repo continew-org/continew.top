@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Button, actionStyles } from '@/components/site-actions';
+import { useBackdropDismiss, useDialogKeydown } from '@/components/use-dialog-events';
 
 interface TimelineGalleryProps {
   images: readonly string[];
@@ -29,7 +30,7 @@ function TimelineLightbox({
   activeIndex,
   onActiveIndexChange,
   onClose,
-}: TimelineLightboxProps) {
+}: Readonly<TimelineLightboxProps>) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const hasPrevious = activeIndex > 0;
@@ -44,24 +45,23 @@ function TimelineLightbox({
 
   const close = () => dialogRef.current?.close();
 
+  useBackdropDismiss(dialogRef, close);
+  useDialogKeydown(dialogRef, (event) => {
+    if (event.key === 'ArrowLeft' && hasPrevious) {
+      event.preventDefault();
+      onActiveIndexChange(activeIndex - 1);
+    }
+    if (event.key === 'ArrowRight' && hasNext) {
+      event.preventDefault();
+      onActiveIndexChange(activeIndex + 1);
+    }
+  });
+
   return (
     <dialog
       ref={dialogRef}
       aria-label={`${alt} 图片查看器`}
       onClose={onClose}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) close();
-      }}
-      onKeyDown={(event) => {
-        if (event.key === 'ArrowLeft' && hasPrevious) {
-          event.preventDefault();
-          onActiveIndexChange(activeIndex - 1);
-        }
-        if (event.key === 'ArrowRight' && hasNext) {
-          event.preventDefault();
-          onActiveIndexChange(activeIndex + 1);
-        }
-      }}
       className="fixed inset-0 m-0 h-dvh w-dvw max-h-none max-w-none place-items-center bg-transparent p-3 text-white backdrop:bg-black/80 open:grid sm:p-8"
     >
       <Button
@@ -117,7 +117,7 @@ function TimelineLightbox({
   );
 }
 
-export function TimelineGallery({ images, alt, variant }: TimelineGalleryProps) {
+export function TimelineGallery({ images, alt, variant }: Readonly<TimelineGalleryProps>) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const triggerRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const featured = variant === 'featured';

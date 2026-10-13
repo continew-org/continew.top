@@ -51,13 +51,15 @@ const EXCERPT_LENGTH = 110;
 /** 从正文自动提取摘要，供未填写 description 的历史文章展示和 SEO 使用。 */
 export async function excerptOf(page: BlogPage): Promise<string> {
   const raw = await page.data.getText('processed');
+  // 各字符类刻意排除边界字符（<、[、]、括号）：避免含歧义重复的正则在大段文本上
+  // 出现超线性回溯（Sonar typescript:S8786）。行为与「直到下一个边界」的写法一致。
   const text = raw
     .replace(/```[\s\S]*?```/g, ' ') // 代码块
-    .replace(/<[^>]+>/g, ' ') // MDX / HTML 标签
+    .replace(/<[^<>]+>/g, ' ') // MDX / HTML 标签
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // 图片
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // 链接只留文字
-    .replace(/^#{1,6}\s+.*$/gm, ' ') // 标题行
-    .replace(/^\s*[-*+|]\s?.*$/gm, ' ') // 列表项与表格分隔行
+    .replace(/\[([^[\]]+)\]\([^()]*\)/g, '$1') // 链接只留文字
+    .replace(/^#{1,6}[ \t][^\n]*/gm, ' ') // 标题行
+    .replace(/^[ \t]*[-*+|][ \t]?[^\n]*/gm, ' ') // 列表项与表格分隔行
     .replace(/[`*_~>]/g, '')
     .replace(/\s+/g, ' ')
     .trim();

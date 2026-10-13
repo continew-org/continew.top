@@ -13,12 +13,12 @@ export function MemberGrid({
   kind,
   columns = 3,
   className,
-}: {
+}: Readonly<{
   members: TeamMember[];
   kind: TeamMemberKind;
   columns?: 2 | 3 | 4;
   className?: string;
-}) {
+}>) {
   return (
     <div
       className={cn(

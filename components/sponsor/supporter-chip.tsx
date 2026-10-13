@@ -41,7 +41,7 @@ function SupporterChip({ supporter }: { supporter: Supporter }) {
   );
 }
 
-export function SupporterChips({ supporters }: { supporters: Supporter[] }) {
+export function SupporterChips({ supporters }: Readonly<{ supporters: Supporter[] }>) {
   return (
     <div className="flex flex-wrap gap-2">
       {supporters.map((supporter) => (
