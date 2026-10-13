@@ -159,6 +159,13 @@ html > body[data-scroll-locked] {
   }
 }
 
+/* Tailwind 4 的 preflight 不再给按钮手形光标（沿用浏览器默认箭头），
+   与 <a> 的指向不一致；按控件语义补回，禁用态仍保持默认箭头。 */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']) {
+  cursor: pointer;
+}
+
 /* 导航只高亮文字，不波及文档侧边栏与目录中语义不同的 data-active。 */
 #nd-nav [data-active='true'] {
   color: var(--cn-brand);
@@ -194,8 +201,7 @@ html > body[data-scroll-locked] {
   scroll-behavior: auto;
 }
 
-.cn-marquee-copy,
-.cn-marquee-control {
+.cn-marquee-copy {
   display: none;
 }
 
@@ -228,35 +234,28 @@ html > body[data-scroll-locked] {
     display: list-item;
   }
 
-  .cn-marquee-control {
-    display: flex;
-  }
-
   .cn-marquee-fade {
     mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
   }
 }
 
-/* 悬停只暂停当前画面；键盘进入或原生 checkbox 暂停时回到第一份，开放完整静态遍历。 */
+/* 悬停只暂停当前画面；键盘焦点进入时回到第一份，开放完整的静态横向遍历。 */
 .cn-marquee-host:hover .cn-marquee,
 .cn-marquee-host:focus-within .cn-marquee {
   animation-play-state: paused;
 }
 
-.cn-marquee-host:focus-within .cn-marquee,
-.cn-marquee-host:has(.cn-marquee-toggle:checked) .cn-marquee {
+.cn-marquee-host:focus-within .cn-marquee {
   animation: none;
   transform: none;
 }
 
-.cn-marquee-host:focus-within .cn-marquee-viewport,
-.cn-marquee-host:has(.cn-marquee-toggle:checked) .cn-marquee-viewport {
+.cn-marquee-host:focus-within .cn-marquee-viewport {
   overflow-x: auto;
   mask-image: none;
 }
 
-.cn-marquee-host:focus-within .cn-marquee-copy,
-.cn-marquee-host:has(.cn-marquee-toggle:checked) .cn-marquee-copy {
+.cn-marquee-host:focus-within .cn-marquee-copy {
   display: none;
 }
 
@@ -268,8 +267,7 @@ html > body[data-scroll-locked] {
   }
 
   .cn-confetti-piece,
-  .cn-marquee-copy,
-  .cn-marquee-control {
+  .cn-marquee-copy {
     display: none;
   }
 

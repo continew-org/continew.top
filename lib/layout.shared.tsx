@@ -49,12 +49,12 @@ export function baseOptions(
       {
         text: '文档',
         url: currentDocsUrl,
-        on: 'nav',
+        on: options?.docs ? 'nav' : 'all',
       },
       {
         text: '博客',
         url: '/blog',
-        on: 'nav',
+        on: options?.docs ? 'nav' : 'all',
       },
       /*
        * 「赞助」带一个心形图标：在纯文字导航里形成视觉重点，提示这是「支持我们」的入口。
@@ -62,7 +62,7 @@ export function baseOptions(
        */
       {
         type: 'custom',
-        on: 'nav',
+        on: options?.docs ? 'nav' : 'all',
         children: <NavSponsorLink />,
       },
       /*
@@ -72,7 +72,7 @@ export function baseOptions(
        */
       {
         type: 'custom',
-        on: 'nav',
+        on: options?.docs ? 'nav' : 'all',
         children: <NavAboutMenu />,
       },
       /*

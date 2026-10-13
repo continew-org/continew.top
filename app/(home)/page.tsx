@@ -36,6 +36,7 @@ import { getUsers } from '@/lib/users';
 import { getHomepageCompanions } from '@/lib/sponsors';
 import { HomepageSupporterCard } from '@/components/sponsor/homepage-supporter-card';
 import { ActionLink } from '@/components/site-actions';
+import { cardHover } from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
 import { focusRing, siteLayout, siteMotion, siteType } from '@/lib/site-design';
 
@@ -287,7 +288,7 @@ export default async function HomePage() {
 
       {/* 项目矩阵 */}
       <section className="px-6 py-14 sm:py-20">
-        <div className={siteLayout.content}>
+        <div className={siteLayout.home}>
           <SectionHeading
             eyebrow="项目生态"
             title="三个项目，一套方法论"
@@ -298,11 +299,7 @@ export default async function HomePage() {
               <Link
                 key={project.name}
                 href={project.href}
-                // 抬升只在未要求减少动态效果时启用；边框与底色反馈不依赖位移。
-                className={cn(
-                  'cn-reveal group flex flex-col rounded-xl border border-fd-border bg-fd-card p-6 transition-[border-color,background-color,translate,box-shadow] duration-[var(--cn-motion-duration-fast)] motion-safe:hover:-translate-y-0.5 hover:border-[var(--cn-brand-line)] hover:bg-fd-accent/30 hover:shadow-lg hover:shadow-fd-border/40',
-                  focusRing,
-                )}
+                className={cn('cn-reveal group flex flex-col rounded-xl border border-fd-border bg-fd-card p-6', cardHover, focusRing)}
               >
                 {/*
                  * 图标与项目名同行、标签退到右上角。
@@ -323,7 +320,7 @@ export default async function HomePage() {
                     {project.tag}
                   </span>
                 </div>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-fd-muted-foreground">
+                <p className="mt-2 flex-1 text-pretty text-sm leading-relaxed text-fd-muted-foreground">
                   {project.description}
                 </p>
                 <span className="mt-4 text-xs text-fd-muted-foreground">
@@ -337,7 +334,7 @@ export default async function HomePage() {
 
       {/* 为什么选我们 */}
       <section className="bg-fd-muted/40 px-6 py-14 sm:py-20">
-        <div className={siteLayout.content}>
+        <div className={siteLayout.home}>
           <SectionHeading
             eyebrow="核心能力"
             title="不只是脚手架，是一套能直接落地的工程实践"
@@ -364,17 +361,21 @@ export default async function HomePage() {
 
       {/* 登记用户滚动 */}
       <section className="px-6 py-14 sm:py-20">
-        <div className={siteLayout.content}>
+        <div className={siteLayout.home}>
           <SectionHeading
             eyebrow="谁在使用"
             title="他们正在用 ContiNew"
             description="如您使用了 ContiNew 系列项目进行开发，我们诚挚邀请您抽出宝贵时间完成用户登记。"
           />
         </div>
-        <div className={cn(siteLayout.content, 'mt-10 sm:mt-12')}>
+        {/*
+          跑马灯通栏：它是「还在滚动的长名单」这条视觉信息，收进正文宽度就变成一只
+          被裁掉两头的盒子。标题与下方入口仍对齐正文，只有这两条滚动带铺满。
+        */}
+        <div className="mt-10 sm:mt-12">
           <UsersMarquee users={users} />
         </div>
-        <div className={cn(siteLayout.content, 'mt-10 flex flex-wrap items-center justify-center gap-3')}>
+        <div className={cn(siteLayout.home, 'mt-10 flex flex-wrap items-center justify-center gap-3')}>
           {/* ActionLink 为登记帖保留原生外链和新窗口提示，站内名单使用 Next Link。 */}
           <ActionLink href={registerUrl} variant="primary">
             我也是使用者，立即登记
@@ -394,7 +395,7 @@ export default async function HomePage() {
        * 它就是这块区域唯一的内容，必须照样立得住。
        */}
       <section className="bg-fd-muted/40 px-6 py-14 sm:py-20">
-        <div className={siteLayout.content}>
+        <div className={siteLayout.home}>
           <SectionHeading
             eyebrow="社区声音"
             title="用过的人怎么说"
@@ -402,7 +403,7 @@ export default async function HomePage() {
           />
         </div>
         {messages.length > 0 ? (
-          <div className={cn(siteLayout.content, 'mt-10 sm:mt-12')}>
+          <div className="mt-10 sm:mt-12">
             <MessagesMarquee messages={messages} />
           </div>
         ) : (
@@ -410,7 +411,7 @@ export default async function HomePage() {
             还没有可展示的留言——第一条由你来开。
           </p>
         )}
-        <div className={cn(siteLayout.content, 'mt-10 flex flex-col items-center gap-3 sm:mt-12')}>
+        <div className={cn(siteLayout.home, 'mt-10 flex flex-col items-center gap-3 sm:mt-12')}>
           {/*
            * 用描边按钮而非品牌实底：上方「登记用户」已经有一个实底主按钮，
            * 隔一屏再来一个同权重的按钮会互相抢。征集留言是次级动作，
@@ -432,7 +433,7 @@ export default async function HomePage() {
        * 它同时也是这条首页上最硬的一条社会证明。
        */}
       <section className="px-6 py-14 sm:py-20">
-        <div className={siteLayout.content}>
+        <div className={siteLayout.home}>
           <SectionHeading
             eyebrow="社区贡献者"
             title={`${contributorSummary.total} 位贡献者，把它打磨到现在`}
@@ -464,7 +465,7 @@ export default async function HomePage() {
         底色使用极淡品牌色，承接前一段白底与后一段中性灰，同时给致谢区保留独立语义。
       */}
       <section className="bg-[color-mix(in_oklab,var(--cn-brand)_6%,transparent)] px-6 py-14 sm:py-16">
-        <div className={siteLayout.content}>
+        <div className={siteLayout.home}>
           <SectionHeading
             eyebrow="赞助支持"
             title={
@@ -501,7 +502,7 @@ export default async function HomePage() {
 
       {/* 常见问题 */}
       <section className="bg-fd-muted/40 px-6 py-14 sm:py-20">
-        <div className={siteLayout.content}>
+        <div className={siteLayout.home}>
           <SectionHeading eyebrow="常见问题" title="先解决你的顾虑" />
           <Faq items={faqItems} className="mt-10 sm:mt-12" />
         </div>

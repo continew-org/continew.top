@@ -1,5 +1,6 @@
 import { ExternalLink, Handshake, Heart, Server, type LucideIcon } from 'lucide-react';
 import { sponsorLogoUrl, type Companion, type TierKey } from '@/lib/sponsors';
+import { cardHover } from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
 import { focusRing } from '@/lib/site-design';
 
@@ -11,7 +12,6 @@ const relationMeta: Record<
     iconClass: string;
     waveOuterClass: string;
     waveInnerClass: string;
-    hoverClass: string;
   }
 > = {
   strategic: {
@@ -20,7 +20,6 @@ const relationMeta: Record<
     iconClass: 'text-[var(--cn-brand)]',
     waveOuterClass: 'border-[var(--cn-brand-line)]',
     waveInnerClass: 'border-blue-400/15',
-    hoverClass: 'hover:border-[var(--cn-brand-line)]',
   },
   infrastructure: {
     label: '资源合作伙伴',
@@ -28,7 +27,6 @@ const relationMeta: Record<
     iconClass: 'text-teal-600 dark:text-teal-400',
     waveOuterClass: 'border-teal-400/25',
     waveInnerClass: 'border-teal-300/15',
-    hoverClass: 'hover:border-teal-500/40',
   },
   supporter: {
     label: '个人支持者',
@@ -36,7 +34,6 @@ const relationMeta: Record<
     iconClass: 'text-amber-600 dark:text-amber-400',
     waveOuterClass: 'border-amber-400/30',
     waveInnerClass: 'border-amber-300/20',
-    hoverClass: 'hover:border-amber-400/50',
   },
 };
 
@@ -191,20 +188,14 @@ function CardContent({ companion }: { companion: Companion }) {
 }
 
 export function HomepageSupporterCard({ companion }: { companion: Companion }) {
-  const accent = relationMeta[getPrimaryRelation(companion)];
-  const className = 'relative block h-full min-h-32 overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4 text-left';
+  const className = 'group relative block h-full min-h-32 overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4 text-left';
 
   return companion.url ? (
     <a
       href={companion.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={cn(
-        className,
-        'group transition-[border-color,background-color,translate,box-shadow] duration-[var(--cn-motion-duration-fast)] motion-safe:hover:-translate-y-px hover:bg-fd-accent/20 hover:shadow-md hover:shadow-fd-border/25',
-        accent.hoverClass,
-        focusRing,
-      )}
+      className={cn(className, cardHover, focusRing)}
     >
       <CardContent companion={companion} />
       <span className="sr-only">（在新窗口打开）</span>

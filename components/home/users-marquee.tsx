@@ -3,8 +3,8 @@ import { cn } from '@/lib/cn';
 import { focusRing } from '@/lib/site-design';
 
 /**
- * 登记用户跑马灯：纯 CSS 双行循环，无 JS 时内容与暂停入口仍可用。
- * 每行拥有独立的键盘滚动区；reduce / 聚焦 / 手动暂停时只保留第一份内容。
+ * 登记用户跑马灯：纯 CSS 双行循环，每行拥有独立的键盘滚动区。
+ * 减弱动效或聚焦时只保留第一份内容，无客户端脚本依赖。
  */
 function UserChip({ user }: { user: RegisteredUser }) {
   return (
@@ -74,13 +74,6 @@ export function UsersMarquee({ users }: { users: RegisteredUser[] }) {
       {users.length > half && (
         <MarqueeRow users={users.slice(half)} label="登记用户第二行" reverse />
       )}
-      <div className="cn-marquee-control flex justify-center">
-        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-fd-border px-4 py-2 text-sm text-fd-muted-foreground hover:bg-fd-accent">
-          <input type="checkbox" className={cn('cn-marquee-toggle size-4 accent-[var(--cn-brand)]', focusRing)} />
-          暂停自动滚动
-          <span className="sr-only">，勾选后可横向浏览全部登记用户；取消勾选恢复自动滚动</span>
-        </label>
-      </div>
     </div>
   );
 }

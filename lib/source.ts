@@ -3,7 +3,7 @@ import type { Folder } from 'fumadocs-core/page-tree';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
-import { getDefaultVersion, getDocVersion, getVersionForFolderPath, hasVersions } from './docs-sections';
+import { getDefaultVersion, getDocSection, getDocVersion, getVersionForFolderPath, hasVersions } from './docs-sections';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 
@@ -41,11 +41,12 @@ const coloredIconsPlugin = () => ({
 });
 
 /**
- * 版本机制校正插件：把版本目录的 root type、标题由配置强制设定。
+ * 分区导航文案校正插件：把版本目录的 root type，以及各分区的名称与描述，
+ * 由 lib/docs-sections.ts（唯一事实源）强制设定。
  *
  * ## 为什么必须在代码里兜
  *
- * 版本目录里的 meta.json 是 CI 从各仓库拉取的产物，每次同步都会被源仓库的版本
+ * 分区与版本目录里的 meta.json 是 CI 从各仓库拉取的产物，每次同步都会被源仓库的版本
  * 原样覆盖。而 `root: "version"`（版本互斥的关键）写在官网页的配置文件里，
  * 源仓库那份写的是 `root: true`——下一次同步后统治天下的就是被覆盖后的值，
  * 版本下拉消失、各版本退化为互不相关的并列分区。
@@ -53,20 +54,34 @@ const coloredIconsPlugin = () => ({
  * 这类回归格外隐蔽：构建照过、页面照出，只是「切换版本」悄悄没了。
  * 故在此按 lib/docs-sections.ts（唯一事实源）强制重写 root type，
  * 无论源仓库那份 meta.json 写什么都不受影响。
+ *
+ * 名称与描述同理：它们直接渲染成导航下拉里的文字，源仓库改一句就会静默改变导航
+ * （例如一句过长的描述在侧栏宽度下折成两行，末行只剩一个字）。
  */
-const versionedSectionsPlugin = () => ({
-  name: 'continew:versioned-sections',
+const sectionPresentationPlugin = () => ({
+  name: 'continew:section-presentation',
   transformPageTree: {
     folder(node: Folder, folderPath: string): Folder {
       const version = getVersionForFolderPath(folderPath);
-      if (!version) return node;
+      if (version) {
+        return {
+          ...node,
+          // 同一 root type 是版本互斥的前提：同类型的 Root Folder 才能互换
+          root: 'version',
+          name: version.archived ? `${version.title}（已归档）` : version.title,
+          description: version.description,
+          // 版本是同一份文档的不同快照：带上项目图标，两个下拉看起来像同一个控件
+          icon: undefined,
+        };
+      }
+
+      const section = getDocSection(folderPath);
+      if (!section) return node;
 
       return {
         ...node,
-        // 同一 root type 是版本互斥的前提：同类型的 Root Folder 才能互换
-        root: 'version',
-        name: version.archived ? `${version.title}（已归档）` : version.title,
-        description: version.description,
+        name: section.title,
+        description: section.description,
       };
     },
   },
@@ -89,7 +104,7 @@ const docs = defineDocs({
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
-  plugins: [coloredIconsPlugin(), versionedSectionsPlugin()],
+  plugins: [coloredIconsPlugin(), sectionPresentationPlugin()],
 });
 
 const renderLlmsPage = async (page: ReturnType<typeof source.getPages>[number]) => {

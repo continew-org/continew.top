@@ -1,7 +1,7 @@
 export const siteLayout = {
   standard: 'mx-auto w-full max-w-6xl px-6',
   reading: 'mx-auto w-full max-w-5xl px-6',
-  content: 'mx-auto w-full max-w-[69rem]',
+  home: 'mx-auto w-full max-w-6xl',
 } as const;
 
 export const siteType = {
