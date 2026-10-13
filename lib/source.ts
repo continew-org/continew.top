@@ -132,11 +132,7 @@ function createFilteredLlms() {
 }
 
 /**
- * 归档分版本 key 集合（形如 `admin/4.2`）：llms.txt / llms-full.txt 要排除它们。
- *
- * 这里不用 page.url 反推——侧边栏 URL 形态可能被 meta.json 改写，
- * 而 pageTree 的 folder 节点带 `$ref.folder`（形如 `admin/4.2`），
- * 是构建期生成的目录名，与实际 disk 结构天然一致，更可靠。
+ * 读取页面树目录的源文件路径，避免从可能被 meta.json 改写的 URL 反推归档版本。
  */
 function folderKey(node: unknown): string | undefined {
   const ref = (node as { $ref?: { folder?: string } } | undefined)?.$ref;
@@ -161,34 +157,13 @@ function isArchivedPage(page: { slugs: string[] }): boolean {
 }
 
 /**
- * 需要排除出 llms.txt 的 page tree 节点集合。
+ * 从 llms.txt 的页面树递归剔除归档版本目录及其子页。
  *
- * ## 为什么排除
- *
- * llms.txt / llms-full.txt 是给 AI 工具读的整站文档包。归档版本一旦被收录，
- * AI 等同于同时拿到了 4.2 与 5.0 两份配置说明——它无从分辨哪份适用于今天，
- * 于是把 deprecated 的写法和当前写法拌在一起回答。这不是理论风险：
- * 两个版本的同一配置项正是最容易混淆的部分。
- *
- * ## 为什么整份排除而不是标注
- *
- * 「归档」二字写在 index 里没用——llms-full.txt 是把全文拼成一坨 Markdown，
- * AI 读到某段时上下文里未必还留着那份标题。**不进去才是唯一的止损方式。**
- *
- * 代价是仍在用旧版本的人没法直接把整包喂给 AI，但可以按页取
- * （/llms.mdx/docs/admin/4.2/... 仍可访问），该有的能力没丢。
- */
-/**
- * 按归档版本过滤 page tree：剔除已归档的版本目录。
- *
- * ## 为什么必须递归
- *
- * 版本目录不是顶层节点——`admin` 分区之下才是 `5.0` / `4.2` 两层
- * （`/docs/admin/4.2/...`）。只在顶层筛一遍，命中不了藏在第二层的 4.2，
- * 于是整份归档文档照样进了 llms.txt。
- *
- * 归档目录整棵剪掉（连它的子页一起），保留下来的父分区若因此变空则一并去掉，
- * 免得 llms.txt 里留一个没有内容的标题。
+ * 版本目录位于 `admin` 分区之下，只筛顶层会漏掉 4.2；父分区剪空后一并去掉，
+ * 避免留下无内容的标题。llms.txt / llms-full.txt 面向当前文档检索，
+ * 同时收录 4.2 与 5.0 会让 AI 混用两个版本的配置说明；仅在聚合入口标注「归档」
+ * 也不能保证模型读取正文时仍保留该上下文。旧版文档仍可按页从
+ * `/llms.mdx/docs/admin/4.2/...` 读取。
  */
 function filterArchived<T extends { type: string }>(nodes: T[]): T[] {
   const out: T[] = [];

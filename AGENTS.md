@@ -19,7 +19,7 @@
 
 本仓库是 ContiNew 开源社区的**官网与文档站**，基于 **Next.js 16（静态导出）+ Fumadocs 16 + Tailwind CSS 4** 构建，产物为纯静态文件（`out/`），由 GitHub Actions 推送至自有 Nginx 服务器托管。
 
-**当前版本**：0.1.0 | **主分支**：`main` | **Node**：>= 22 | **包管理**：pnpm >= 10（版本经 `pnpm-workspace.yaml` 的 `catalog:` 统一管理）
+**当前版本**：0.1.0 | **主分支**：`main` | **Node**：>= 22.18 | **包管理**：pnpm >= 10（版本经 `pnpm-workspace.yaml` 的 `catalog:` 统一管理）
 
 ## 核心架构
 

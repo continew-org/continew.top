@@ -2,20 +2,25 @@ import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { getLayoutTabs } from 'fumadocs-ui/layouts/shared';
 import { baseOptions } from '@/lib/layout.shared';
-import { currentDocsUrl } from '@/lib/shared';
+import { buildDefaultDocsUrl } from '@/lib/shared';
+import { hasVersions } from '@/lib/docs-sections';
 import { getStarSummary } from '@/lib/site-stats';
 
 export default async function Layout({ children }: LayoutProps<'/docs'>) {
   const tree = source.getPageTree();
   const tabs = getLayoutTabs(tree);
-  const admin = tree.children.find((node) => node.type === 'folder' && node.$ref?.folder === 'admin');
-  if (admin?.type === 'folder') {
+  // 没有直属页面的版本化项目不会被 getLayoutTabs 自动收录。
+  for (const node of tree.children) {
+    if (node.type !== 'folder' || !node.root || !node.$ref?.folder) continue;
+    if (tabs.some((tab) => tab.$folder === node)) continue;
+    if (!hasVersions(node.$ref.folder)) continue;
+    const url = buildDefaultDocsUrl(node.$ref.folder);
     tabs.unshift({
-      title: admin.name,
-      icon: admin.icon,
-      description: admin.description,
-      url: currentDocsUrl,
-      $folder: admin,
+      title: node.name,
+      icon: node.icon,
+      description: node.description,
+      url,
+      $folder: node,
     });
   }
 

@@ -33,10 +33,10 @@ export function baseOptions(
      *
      * 【`on: 'nav'` 不能省——这一条是侧边栏不再重复导航的关键】
      * Fumadocs 的 useLinkItems() 按 `on` 把链接分给两处：
-     *   on: 'nav'  → 只进顶部导航栏
-     *   on: 'menu' → 只进侧边栏
-     *   不写      → 两处都进（默认分支同时 push 进 navItems 和 menuItems）
-     * 而 spacious 布局的 SidebarItems 会把 menuItems 渲染在**文档树上方**，
+     *   on: 'nav'  → 只进入站点导航
+     *   on: 'menu' → 只进入文档侧栏
+     *   不写      → 两处都进（默认分支同时进入 navItems 和 menuItems）
+     * 而 docs 布局的侧栏会把 menuItems 渲染在**文档树上方**，
      * 所以不声明就会变成：顶栏一排「文档/博客/赞助/关于」，侧栏再来一遍，
      * 文档树被压到下面——这正是 Fumadocs 官网侧栏比我们干净的原因。
      *
@@ -76,30 +76,21 @@ export function baseOptions(
         children: <NavAboutMenu />,
       },
       /*
-       * 三个代码托管平台的入口：右上角一排图标按钮。
+       * 三个代码托管平台的入口：文档桌面侧栏底部、手机抽屉顶部的图标按钮。
        *
        * 【为什么必须是 icon，而不是文字链接】
-       * spacious 布局的 HeaderActions 只渲染 `menuItems` 里 `type === 'icon'` 的项
-       * （源码 IconLinks 组件），顶栏没有自定义插槽——文字链接塞不进去，
-       * 非 icon 的项只会落到侧边栏。Fumadocs 官网右上方那个 GitHub 图标就是这么来的。
+       * docs 布局把 `menuItems` 中的 icon 项放在侧栏底部（手机端放在抽屉顶部），
+       * 普通文字项则排在文档树上方。Fumadocs 官网的 GitHub 图标也是这种入口。
        *
        * 【因此这类项不能声明 `on`】
-       * IconLinks 读的是 menuItems，声明 `on: 'nav'` 会让它不进 menuItems，
-       * 结果就是图标整个消失。上面四个导航项要 `on: 'nav'`，这里三个不能要，
-       * 区别只在于「文字项要躲开侧栏、图标项要留在顶栏」。
-       *
-       * 小屏（lg 以下）Fumadocs 会自动把它们收进「⋯」菜单，不用额外适配。
+       * 侧栏图标区读的是 menuItems；声明 `on: 'nav'` 会让图标无法进入该区域。
+       * 上面四个导航项只属于站点导航，这些图标项则属于文档侧栏。
        */
       ...(options?.docs
         ? [
             {
               type: 'icon' as const,
-              icon: (
-                <span className="cn-doc-support-link inline-flex items-center gap-1.5">
-                  <HeartHandshake />
-                  <span className="cn-doc-support-text">支持</span>
-                </span>
-              ),
+              icon: <HeartHandshake />,
               text: '支持',
               label: '支持 ContiNew',
               url: '/sponsor',
@@ -138,9 +129,8 @@ export function baseOptions(
        * 默认只有 `type === 'icon'` 靠右，custom 项不显式声明会混进左侧文字链接里，
        * 所以这里两个都要写。数据由各 layout await getStarSummary() 后注入。
        *
-       * 注意 spacious 布局（/docs 文档页）不消费 navItems —— 该布局的顶栏
-       * 只渲染 menuItems 里的 icon 项（右上角三个平台图标），侧栏只留文档树。
-       * 因此 Star 胶囊与文字导航只在官网页面出现，文档页没有，这是布局的既定行为。
+       * docs 布局的桌面侧栏使用 menuItems，移动端顶栏也不渲染 navItems；
+       * 因此 Star 胶囊与文字导航只在官网页面出现。
        */
       ...(stars
         ? [

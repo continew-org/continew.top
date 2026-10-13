@@ -9,7 +9,7 @@
  * 这类「配了没反应」的失败很难察觉，因为构建照常通过、页面照常出来，
  * 只是该被改写的链接都留着原样。
  *
- * 这里不作 سبب MDX 相关的其它配置：业务侧数据与既有事实源都在 lib/docs-sections.ts。
+ * 这里不登记 MDX 以外的其它配置：业务侧数据与既有事实源都在 lib/docs-sections.ts。
  */
 
 import { defineConfig } from 'fumadocs-mdx/config';

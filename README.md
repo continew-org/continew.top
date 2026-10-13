@@ -40,7 +40,7 @@ continew.top  (Next.js + Fumadocs)  →  静态导出 out/  →  Nginx
 ## 本地开发
 
 ```bash
-# 环境要求：Node.js >= 22，pnpm >= 10
+# 环境要求：Node.js >= 22.18，pnpm >= 10
 pnpm install
 
 # 启动开发服务器（默认渲染分区占位骨架）

@@ -27,13 +27,12 @@ export const siteUrl = 'https://continew.top';
  *
  * 版本段不可省：`/docs/admin` 保留为旧地址兼容跳转，导航应直达版本目录。
  */
-export const currentDocsUrl = buildDefaultDocsUrl();
+export const currentDocsUrl = buildDefaultDocsUrl(docSections[0]?.key);
 
-function buildDefaultDocsUrl(): string {
-  const first = docSections[0];
-  if (!first) return docsRoute;
-  const version = getDefaultVersion(first.key);
-  return version ? `${docsRoute}/${first.key}/${version}` : `${docsRoute}/${first.key}`;
+export function buildDefaultDocsUrl(sectionKey: string | undefined): string {
+  if (!sectionKey) return docsRoute;
+  const version = getDefaultVersion(sectionKey);
+  return version ? `${docsRoute}/${sectionKey}/${version}` : `${docsRoute}/${sectionKey}`;
 }
 
 /**

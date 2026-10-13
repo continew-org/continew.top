@@ -164,20 +164,6 @@ html > body[data-scroll-locked] {
   color: var(--cn-brand);
 }
 
-/* Spacious 桌面导航放宽「支持」图标项，小屏菜单已有文字，不重复显示。 */
-@media (min-width: 64rem) {
-  a:has(> .cn-doc-support-link) {
-    width: auto;
-    padding-inline: 0.5rem;
-  }
-}
-
-@media (max-width: 63.999rem) {
-  .cn-doc-support-text {
-    display: none;
-  }
-}
-
 /* 跑马灯每份内容的末项仍保留 margin，平移半个轨道时接缝间距一致。 */
 @keyframes cn-marquee-left {
   from {

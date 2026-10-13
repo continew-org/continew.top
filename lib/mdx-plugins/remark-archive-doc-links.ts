@@ -8,7 +8,7 @@ const KEEP_FLOATING_REF = new Set(['CHANGELOG.md']);
 
 type SourceUnit = NonNullable<ReturnType<typeof getSourceUnitForFile>>;
 
-/** Existing upstream self-links predate versioned URLs; resolve them in the compiling page's version. */
+/** 上游文档的自链接早于版本化路径，按当前编译页面所属版本解析。 */
 export function rewriteDocUrl(rawUrl: string, unit: SourceUnit): string {
   const { section, version } = unit;
   const prefix = `/docs/${section.key}`;
