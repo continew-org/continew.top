@@ -12,8 +12,11 @@
  * ## 版本段怎么命名：key 是「线」，发布号是上游事实
  *
  * key 同时是目录名与 URL 路径段，所以它**一旦上线就不要改**（书签、外链、搜索结果都指着它）。
- * 按维护线命名：`5.x` 是正在开发的下一代，`4.x` 是 4 系列的冻结线——封存时 5.x 只是
+ * 按维护线命名：`5.x` 是正在开发的下一代，`4.x` 是已归档的 4 系列——封存时 5.x 只是
  * 标签变成「已归档」，再新增一条 `6.x`，不存在「重命名目录」这一步。
+ *
+ * 显示名（`title`）走另一套：「版本号（状态）」，`5.0（开发中）` / `4.x（已归档）`。
+ * 其中开发中的版本号需要跟着上游发版手动更新，URL 段不动。
  *
  * 具体发布号（4.2.x 分支、v4.2.0 tag）属于上游事实，写在 ref / versionTag / versionLabel 上，
  * 不参与 URL。两者不要互相顶替：key 写成发布号会把「一条线一份文档」的 URL 钉死在某个
@@ -62,7 +65,7 @@
  */
 export interface DocVersion {
   key: string;
-  /** 侧边栏版本下拉中显示的名称，可含「最新」这类状态词。 */
+  /** 侧边栏版本下拉中显示的名称。约定「版本号（状态）」：`5.0（开发中）`、`4.x（已归档）`。 */
   title: string;
   description: string;
   /** 内容所在 GitHub 仓库。 */
@@ -76,7 +79,7 @@ export interface DocVersion {
    * 搜索索引仍收录——仍在用旧版本的人要靠它查资料，落地页有升级提示兜底。
    */
   archived?: boolean;
-  /** 冻结点的版本名（如 4.2.x），用于归档提示文案；缺省时用 ref。 */
+  /** 归档时的版本名（如 4.2.x），用于归档提示文案；缺省时用 ref。 */
   versionLabel?: string;
   /** 稳定发版 tag，用于把文中指向流动分支的外链钉到固定版本。 */
   versionTag?: string;
@@ -118,17 +121,19 @@ export const docSections: readonly DocSection[] = [
     versions: [
       {
         key: '5.x',
-        // 显示名里保留版本号：桌面端下拉只渲染 title（描述行是 md:hidden），
-        // 写成纯「最新版」会让桌面读者看不出自己在这条线的哪一档
-        title: '最新版 5.x',
-        description: '开发中的下一代版本',
+        // 显示名约定「版本号（状态）」，与归档那档同构。开发中的版本号随上游推进手动更新
+        // （5.0 → 5.1 …）——它是唯一需要跟着发版走的字段，URL 段始终是 5.x，不必同步改。
+        title: '5.0（开发中）',
+        // 描述行只说明「内容怎么维护」，不重复 title 里的状态词；长度按侧栏下拉一行取
+        // （实测约 11 个汉字 / 114px 宽），见「版本段怎么命名」一节
+        description: '文档随开发进度更新',
         repo: 'continew-admin',
         ref: 'dev',
       },
       {
         key: '4.x',
         title: '4.x',
-        description: '4.x 系列，冻结于 v4.2.0',
+        description: '仅接收勘误',
         repo: 'continew-admin',
         ref: '4.2.x',
         archived: true,
@@ -145,8 +150,8 @@ export const docSections: readonly DocSection[] = [
   {
     key: 'starter',
     title: 'ContiNew Starter',
-    // 侧栏项目下拉里的一行描述：长度按侧栏宽度取，过长会折行且末行只剩一个字
-    description: '企业级 Starter 库',
+    // 侧栏项目下拉里的一行描述：长度按侧栏宽度取（实测 114px 宽约 11 个汉字），按「是什么」写，不用空泛定语
+    description: 'Spring Boot Starter 库',
     icon: 'Rocket',
     repo: 'continew-starter',
     ref: 'dev',
