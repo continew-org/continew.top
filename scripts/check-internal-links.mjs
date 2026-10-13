@@ -1,8 +1,14 @@
 import { readFile, readdir } from 'node:fs/promises';
-import { extname, join, relative, sep } from 'node:path';
+import { extname, join, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
 
-const root = process.argv[2] ?? 'out';
+// 待检查目录来自命令行：解析后必须落在工作目录内，否则拒绝执行——避免「跳出去」的路径
+// 被交给读写操作（Sonar jssecurity:S8707 的路径注入）。该脚本总是从仓库根运行。
+const workingDir = resolve('.');
+const root = resolve(process.argv[2] ?? 'out');
+if (root !== workingDir && !root.startsWith(`${workingDir}${sep}`)) {
+  throw new Error(`Refusing to operate outside the working directory: ${process.argv[2]}`);
+}
 const htmlFiles = (await readdir(root, { recursive: true, withFileTypes: true }))
   .filter((entry) => entry.isFile() && extname(entry.name) === '.html')
   .map((entry) => join(entry.parentPath, entry.name));
