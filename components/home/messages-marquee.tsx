@@ -77,13 +77,6 @@ export function MessagesMarquee({
           ))}
         </ul>
       </div>
-      <div className="cn-marquee-control flex justify-center">
-        <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-fd-border px-4 py-2 text-sm text-fd-muted-foreground hover:bg-fd-accent">
-          <input type="checkbox" className={cn('cn-marquee-toggle size-4 accent-[var(--cn-brand)]', focusRing)} />
-          暂停自动滚动
-          <span className="sr-only">，勾选后可横向浏览全部留言；取消勾选恢复自动滚动</span>
-        </label>
-      </div>
     </div>
   );
 }

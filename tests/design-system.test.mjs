@@ -48,7 +48,7 @@ test('standard and reading shells keep explicit width and padding contracts', ()
   assert.match(siteLayout.standard, /max-w-6xl/);
   assert.match(siteLayout.standard, /px-6/);
   assert.match(siteLayout.reading, /max-w-5xl/);
-  assert.match(siteLayout.content, /max-w-\[69rem\]/);
+  assert.match(siteLayout.home, /max-w-6xl/);
   assert.match(siteType.pageTitle, /sm:text-5xl/);
   assert.match(siteType.cardTitle, /text-base/);
 });
@@ -182,9 +182,16 @@ test('exported CSS preserves the reduced-motion and keyboard marquee contracts',
   hasDeclaration('.cn-marquee-host:focus-within .cn-marquee', null, 'animation', 'none');
   hasDeclaration('.cn-marquee-host:focus-within .cn-marquee-copy', null, 'display', 'none');
   hasDeclaration('.cn-marquee-host:focus-within .cn-marquee-viewport', null, 'overflow-x', 'auto');
-  hasDeclaration('.cn-marquee-host:has(.cn-marquee-toggle:checked) .cn-marquee', null, 'animation', 'none');
-  hasDeclaration('.cn-marquee-host:has(.cn-marquee-toggle:checked) .cn-marquee-copy', null, 'display', 'none');
-  hasDeclaration('.cn-marquee-host:has(.cn-marquee-toggle:checked) .cn-marquee-viewport', null, 'overflow-x', 'auto');
+  hasDeclaration('.cn-marquee-host:hover .cn-marquee', null, 'animation-play-state', 'paused');
+  // Tailwind 4 的 preflight 不再为按钮补手形光标，导出的样式必须自己补回来。
+  const pointerRules = [];
+  for (const sheet of sheets) sheet.walkRules((rule) => {
+    if (!/button/.test(rule.selector)) return;
+    rule.walkDecls('cursor', (declaration) => {
+      if (declaration.value === 'pointer') pointerRules.push(rule.selector);
+    });
+  });
+  assert.ok(pointerRules.length > 0, 'Enabled buttons must keep the pointer cursor');
   const html = exported('index.html');
   const regions = (html.match(/<div\b[^>]*>/g) ?? []).filter((tag) => attribute(tag, 'class')?.includes('cn-marquee-viewport'));
   assert.ok(regions.length >= 2, 'Both marquee types must expose a keyboard scroll region');
@@ -193,9 +200,6 @@ test('exported CSS preserves the reduced-motion and keyboard marquee contracts',
     assert.equal(attribute(tag, 'tabindex'), '0');
     assert.ok(attribute(tag, 'aria-label'));
   }
-  const toggles = (html.match(/<input\b[^>]*>/g) ?? []).filter((tag) => attribute(tag, 'class')?.includes('cn-marquee-toggle'));
-  assert.equal(toggles.length, 2);
-  for (const tag of toggles) assert.equal(attribute(tag, 'type'), 'checkbox');
   const copies = (html.match(/<li\b[^>]*>/g) ?? []).filter((tag) => attribute(tag, 'class')?.includes('cn-marquee-copy'));
   assert.ok(copies.length > 0, 'Marquee copies must be present in the exported homepage');
   for (const tag of copies) {

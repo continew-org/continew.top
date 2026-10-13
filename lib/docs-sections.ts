@@ -121,7 +121,8 @@ export const docSections: readonly DocSection[] = [
   {
     key: 'starter',
     title: 'ContiNew Starter',
-    description: '后端开发脚手架',
+    // 侧栏项目下拉里的一行描述：长度按侧栏宽度取，过长会折行且末行只剩一个字
+    description: '企业级 Starter 库',
     icon: 'Rocket',
     repo: 'continew-starter',
     ref: 'dev',
@@ -187,6 +188,17 @@ export function getDocVersion(sectionKey: string | undefined, versionKey: string
   return docSections
     .find((section) => section.key === sectionKey)
     ?.versions?.find((version) => version.key === versionKey);
+}
+
+/**
+ * 按目录路径取分区注册项（如 `starter`）。
+ *
+ * 与 `hasVersions` 等同样以分区 key 为入口，供 lib/source.ts 把下拉里的项目名称与
+ * 描述固定在本仓库——源仓库 meta.json 每次部署都会覆盖回来，不能当作事实源。
+ */
+export function getDocSection(sectionKey: string | undefined): DocSection | undefined {
+  if (!sectionKey) return undefined;
+  return docSections.find((section) => section.key === sectionKey);
 }
 
 /** 仅版本目录本身是 Root Type，不能把其下的普通目录标成版本根。 */
