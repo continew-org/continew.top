@@ -16,7 +16,7 @@ export function NavSponsorLink() {
       aria-current={active ? 'page' : undefined}
       data-active={active}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+        'cn-nav-sponsor inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
         'text-fd-muted-foreground hover:text-fd-foreground',
       )}
     >

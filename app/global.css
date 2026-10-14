@@ -171,6 +171,97 @@ button:not(:disabled),
   color: var(--cn-brand);
 }
 
+/* Fumadocs 小屏菜单混用内置链接与 custom 项，统一规则只作用于 HomeLayout 的折叠面板。 */
+@media (width < 40rem) {
+  #nd-nav > nav > div[id] {
+    max-height: calc(100dvh - 3.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background-color: var(--color-fd-background);
+    border-radius: 0 0 1rem 1rem;
+  }
+
+  #nd-nav > nav > div[id] a:not([aria-label]) {
+    display: flex;
+    min-height: 44px;
+    align-items: center;
+    padding: 10px 12px;
+    color: var(--color-fd-foreground);
+    font-size: 1rem;
+    line-height: 1.5rem;
+    border-radius: 0.375rem;
+  }
+
+  #nd-nav > nav > div[id] a:not([aria-label]):hover {
+    background-color: var(--color-fd-accent);
+  }
+
+  #nd-nav > nav > div[id] a:focus-visible {
+    outline: 2px solid var(--color-fd-ring);
+    outline-offset: 2px;
+  }
+
+  #nd-nav > nav > div[id] a[data-active='true'],
+  #nd-nav > nav > div[id] a[aria-current='page'] {
+    color: var(--cn-brand);
+    font-weight: 500;
+  }
+
+  #nd-nav > nav > div[id] .cn-nav-about {
+    margin-top: 16px;
+    border-top: 1px solid var(--color-fd-border);
+    padding-top: 16px;
+  }
+
+  #nd-nav > nav > div[id] .cn-nav-about-title {
+    display: block;
+    margin-bottom: 8px;
+    padding: 0 12px;
+    color: var(--color-fd-muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  #nd-nav > nav > div[id] .cn-nav-about ul {
+    margin: 0 0 0 12px;
+  }
+
+  #nd-nav > nav > div[id] .cn-nav-sponsor svg,
+  #nd-nav > nav > div[id] .cn-nav-about ul svg {
+    display: none;
+  }
+
+  #nd-nav > nav > div[id] [role='separator'] {
+    display: none;
+  }
+
+  #nd-nav > nav > div[id] div:has(> [role='separator']) {
+    gap: 0;
+    margin: 16px 0 0;
+    border-top: 1px solid var(--color-fd-border);
+    padding-top: 12px;
+  }
+
+  #nd-nav > nav > div[id] div:has(> [role='separator']) > a {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    margin: 0;
+    padding: 12px;
+  }
+
+  #nd-nav > nav > div[id] div:has(> [role='separator']) > a > :is(svg, img) {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  #nd-nav > nav > div[id] div:has(> [role='separator']) > button {
+    margin-left: auto;
+  }
+}
+
 /* 跑马灯每份内容的末项仍保留 margin，平移半个轨道时接缝间距一致。 */
 @keyframes cn-marquee-left {
   from {

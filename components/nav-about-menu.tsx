@@ -53,7 +53,7 @@ export function NavAboutMenu() {
   }, [open]);
 
   return (
-    <div ref={ref} className="relative list-none">
+    <div ref={ref} className="cn-nav-about relative list-none">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -69,13 +69,14 @@ export function NavAboutMenu() {
           aria-hidden
         />
       </button>
+      <p className="cn-nav-about-title hidden">关于</p>
       <ul
         className={cn(
           'w-40 rounded-lg border border-fd-border bg-fd-popover p-1 text-sm shadow-md',
           'sm:absolute sm:right-0 sm:top-full sm:mt-2 sm:z-50',
           open ? 'block' : 'hidden',
           // 移动端菜单里：常显、去掉浮层外观
-          'max-sm:mt-1 max-sm:block max-sm:w-full max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:shadow-none',
+          'max-sm:block max-sm:w-full max-sm:border-0 max-sm:bg-transparent max-sm:p-0 max-sm:shadow-none',
         )}
       >
         {aboutLinks.map((link) => {

@@ -125,6 +125,44 @@ test('all primary site pages export the same standard shell and declared title v
   }
 });
 
+test('home mobile navigation keeps one typography contract without changing docs or desktop navigation', () => {
+  const css = require('postcss').parse(readFileSync(join(root, 'app/global.css'), 'utf8'));
+  const rules = new Map();
+  css.walkAtRules('media', (media) => {
+    if (media.params !== '(width < 40rem)') return;
+    media.walkRules((rule) => {
+      const declarations = {};
+      rule.walkDecls((declaration) => { declarations[declaration.prop] = declaration.value; });
+      rules.set(rule.selector, declarations);
+    });
+  });
+  const panel = '#nd-nav > nav > div[id]';
+  const links = rules.get(`${panel} a:not([aria-label])`);
+  assert.equal(links?.['min-height'], '44px');
+  assert.equal(links?.['font-size'], '1rem');
+  assert.equal(links?.color, 'var(--color-fd-foreground)');
+  assert.equal(links?.padding, '10px 12px');
+  assert.equal(rules.get(`${panel} a:not([aria-label]):hover`)?.['background-color'], 'var(--color-fd-accent)');
+  assert.equal(rules.get(`${panel} .cn-nav-about-title`)?.padding, '0 12px');
+  assert.equal(rules.get(`${panel} .cn-nav-about-title`)?.['font-size'], '0.875rem');
+  assert.equal(rules.get(`${panel} .cn-nav-about`)?.['border-top'], '1px solid var(--color-fd-border)');
+  assert.equal(rules.get(`${panel} .cn-nav-about ul`)?.margin, '0 0 0 12px');
+  const tools = `${panel} div:has(> [role='separator'])`;
+  assert.equal(rules.get(tools)?.gap, '0');
+  assert.equal(rules.get(`${tools} > a`)?.flex, '0 0 44px');
+  assert.equal(rules.get(`${tools} > a > :is(svg, img)`)?.width, '20px');
+  assert.equal(rules.get(`${tools} > a > :is(svg, img)`)?.height, '20px');
+  assert.equal(rules.get(`${tools} > button`)?.['min-height'], undefined);
+  for (const selector of rules.keys()) {
+    assert.ok(selector.startsWith(panel), `Mobile navigation rule must stay within the HomeLayout panel: ${selector}`);
+  }
+  for (const page of ['index.html', 'blog.html', 'team.html', 'users.html', 'sponsor.html', 'timeline.html', 'demo.html']) {
+    const html = exported(page);
+    assert.match(html, /cn-nav-sponsor/);
+    assert.match(html, /cn-nav-about-title hidden/);
+  }
+});
+
 test('blog detail keeps its reading shell instead of stretching long prose', () => {
   const html = exported('blog/2026/continew-dynamics-2026-10.html');
   const main = openingTag(html, 'main', 'data-cn-page="reading"');
