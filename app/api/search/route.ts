@@ -21,7 +21,7 @@ function indexPage(page: SearchPage, tree: Root, rootName?: string): AdvancedInd
   if (!structuredData) throw new Error(`Missing search data: ${page.url}`);
 
   return {
-    // Fumadocs appends "-N" for heading IDs; a sibling slug may itself end in "-N".
+    // Fumadocs 会给标题 ID 追加 "-N"；同级 slug 本身也可能以 "-N" 结尾，故结尾加冒号区分。
     id: `page:${page.url}:`,
     title: page.data.title,
     description: page.data.description,

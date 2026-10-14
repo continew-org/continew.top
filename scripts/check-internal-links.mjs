@@ -2,8 +2,8 @@ import { readFile, readdir } from 'node:fs/promises';
 import { extname, join, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
 
-// 待检查目录来自命令行：解析后必须落在工作目录内，否则拒绝执行——避免「跳出去」的路径
-// 被交给读写操作（Sonar jssecurity:S8707 的路径注入）。该脚本总是从仓库根运行。
+// 待检查目录来自命令行：解析后必须落在工作目录内，否则拒绝执行——避免路径注入。
+// 该脚本总是从仓库根运行。
 const workingDir = resolve('.');
 const root = resolve(process.argv[2] ?? 'out');
 if (root !== workingDir && !root.startsWith(`${workingDir}${sep}`)) {

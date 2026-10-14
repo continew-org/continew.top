@@ -89,7 +89,7 @@ const docs = defineDocs({
   },
 });
 
-// See https://fumadocs.dev/docs/headless/source-api for more info
+// 更多信息见 https://fumadocs.dev/docs/headless/source-api
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),

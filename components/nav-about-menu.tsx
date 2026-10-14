@@ -86,7 +86,7 @@ export function NavAboutMenu() {
               <Link
                 href={link.url}
                 aria-current={current ? 'page' : undefined}
-                // 点击后收起（不用 effect 监听 pathname：会触发 react-hooks/set-state-in-effect）
+                // 点击后收起（不用 effect 监听 pathname：会引入 effect 里的 setState）
                 onClick={() => setOpen(false)}
                 // 与全局导航同一套读法：图标辅助识别，当前项的图标与文字一同使用品牌色
                 className={cn(

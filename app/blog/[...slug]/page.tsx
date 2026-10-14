@@ -30,7 +30,7 @@ export default async function BlogPostPage(props: Readonly<PageProps<'/blog/[...
   const page = blogSource.getPage(params.slug);
   if (!page) notFound();
 
-  // 变量名须为常规 PascalCase：全大写（MDX）会被 jsx-pascal-case（S6770）判为非 PascalCase。
+  // 须为 PascalCase：全大写会被 JSX 规则判为非组件。
   const MdxContent = page.data.body;
   const date = page.data.datetime.slice(0, 10);
   const { previous, next, related } = await getBlogPostContext(page.url);

@@ -15,27 +15,18 @@ const PLATFORM_ICON = {
 /**
  * 导航栏的全平台 Star 数（GitHub 那个「★ Star | 数字」），点击展开各平台。
  *
- * 【外观：照 GitHub 的语义，但套 Fumadocs 的尺寸】
- * 形状语义照搬 GitHub——左边是动作（Star）、右边是计数，这个组合已经被训练过，
- * 不用再教一遍。但**尺寸必须跟右侧那一排走**，否则就出问题：
- * 它左边是搜索框，再往左是主题切换，两者都是 `rounded-full + border + p-1/p-1.5`
- * 的镂空胶囊、内嵌一个圆角高亮块，总高都是 36px（26px 内容 + 8px padding + 2px 边框）。
- *
- * 早先这枚胶囊是 `rounded-md` + 左右两块纯色（灰底 + 白底）+ 中间一条竖线，
- * 高 26px——比邻居矮一截、圆角小一圈、还是实心的，三种差异叠在一起就显得没对齐。
- * 现在改成同构的「镂空圆角胶囊 + 内部高亮圆角块」，只保留「动作 | 计数」的分区：
- * 计数那个块用 bg-fd-muted，正好对应主题切换里选中项的浅灰底。
- * 尺寸节奏与主题切换逐像素对齐（h-6.5 内容 + p-1 + 边框 = 36px）。
+ * 【外观：照 GitHub 的语义，套 Fumadocs 的尺寸】
+ * 左边动作（Star）、右边计数，形状照搬 GitHub。尺寸必须与右侧那排对齐：
+ * 搜索框、主题切换都是「镂空圆角胶囊 + 内部高亮块」，总高 36px，
+ * 这里同样用 bg-fd-muted 做计数块，与主题切换选中项的浅灰底一致。
  *
  * 【为什么是「一个综合数 + 下拉」而不是三个平台各显示一个数字】
- * 三个平台各挂一个数字，右侧会变成「图标 + 数字」重复三次的一排，桌面端已经偏挤，
- * 移动端更难放下。而且三个平台的数为什么不一样、加起来是多少，本身需要一句话解释——
- * 下拉里正好一并说清。综合数（全平台合计）也比任何单个平台的数字更有分量。
+ * 三个数字并排会让右侧变成重复三次的「图标 + 数字」，桌面偏挤、移动端更难放下；
+ * 而且「为什么三个数不一样」本身需要解释，下拉里正好一并说清。
  *
  * 【位置】
- * lib/layout.shared.tsx 里这一项带 `secondary: true`。
- * Fumadocs 的 `isSecondary()` 用该字段决定渲染到导航栏左侧还是右侧，
- * 默认是 `type === 'icon'` 才靠右；custom 项不显式声明会落到左侧导航链接区里。
+ * lib/layout.shared.tsx 里这一项带 `secondary: true`，Fumadocs 据此渲染到导航栏右侧；
+ * custom 项不显式声明会落到左侧导航链接区里。
  */
 export function NavStarCount({
   total,
@@ -99,7 +90,7 @@ export function NavStarCount({
                 href={platform.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                // 点击后收起（不监听 pathname：会触发 react-hooks/set-state-in-effect）
+                // 点击后收起（不监听 pathname：会引入 effect 里的 setState）
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-foreground"
               >

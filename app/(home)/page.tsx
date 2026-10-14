@@ -212,7 +212,7 @@ export default async function HomePage() {
           <Image src="/logo.svg" alt={appName} width={64} height={64} priority />
           <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-4 py-1.5 text-xs font-medium text-[var(--cn-brand)]">
             <span aria-hidden className="size-1.5 rounded-full bg-[var(--cn-brand)]" />
-            {/* 容器是 flex + gap，空白节点不参与布局；写上只为消除 JSX 空白歧义（S6772） */}
+            {/* 容器是 flex + gap，空白节点不参与布局；写上只为消除 JSX 空白歧义 */}
             {' '}
             ContiNew Admin v4.2.0 已发布
           </p>

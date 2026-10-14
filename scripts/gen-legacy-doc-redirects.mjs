@@ -2,9 +2,8 @@ import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { docSections } from '../lib/docs-sections.ts';
 
-// 输出目录来自命令行：解析后必须落在工作目录内，否则拒绝执行——避免「跳出去」的路径
-// 被交给读写操作（Sonar jssecurity:S8707 的路径注入）。构建脚本总是从仓库根运行，
-// 需要写到别处时请在那个目录里执行（见 tests/docs-versioning.test.mjs）。
+// 输出目录来自命令行：解析后必须落在工作目录内，否则拒绝执行——避免路径注入。
+// 构建脚本总是从仓库根运行，需要写到别处时请在那个目录里执行（见 tests/docs-versioning.test.mjs）。
 const workingDir = resolve('.');
 const root = resolve(process.argv[2] ?? 'out');
 if (root !== workingDir && !root.startsWith(`${workingDir}${sep}`)) {
@@ -14,8 +13,7 @@ if (root !== workingDir && !root.startsWith(`${workingDir}${sep}`)) {
 /**
  * 递归收集某个归档版本目录下的全部 HTML 旧路由，返回 [旧地址, 新地址] 列表。
  *
- * 子目录与文件互不依赖，用 Promise.all 并行下探——既避免逐个串行等待，
- * 也避开「循环内 await」（Sonar javascript:S9382）。
+ * 子目录与文件互不依赖，用 Promise.all 并行下探，避免逐个串行等待。
  */
 async function collect(dir, section, archive, segments = []) {
   const entries = await readdir(dir, { withFileTypes: true });

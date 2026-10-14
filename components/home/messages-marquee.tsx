@@ -60,7 +60,6 @@ export function MessagesMarquee({
       <section
         aria-label="社区留言，聚焦后可用左右方向键横向浏览"
         // 横向滚动区必须可聚焦：键盘才能用方向键浏览、并让动画停住（WCAG 2.2.2 的暂停机制）。
-        // NOSONAR 必须与 Sonar 的判定行同行，故写在 tabIndex 那一行末尾。
         tabIndex={0} // NOSONAR: 非交互元素带 tabIndex 在此属有意为之
         className={cn('cn-marquee-viewport cn-marquee-fade rounded-lg p-1', focusRing)}
       >

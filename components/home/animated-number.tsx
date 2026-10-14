@@ -5,19 +5,13 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * 数据带的滚动计数：进入视口后从 0 滚到真实值。
  *
- * 【为什么 SSR 直出最终值】
- * 首帧就渲染终值（而不是 0），保证：
- *   - 无 JS / 水合失败时数字照常可读（内容不赌在脚本上，与 cn-reveal 同一原则）；
- *   - SEO 与读屏拿到的是真实数字；
- *   - hydration 首帧与服务端一致，不会 mismatch。
- * 动画在水合完成后由 IntersectionObserver 触发——用户滚到数据带那一刻才起跑，
- * 起跑瞬间才落到 0，此前的「终值」用户还没来得及看清，不会感知到跳变。
+ * SSR 直出最终值而非 0：无 JS / 水合失败时数字照常可读，SEO 与读屏拿到真实数字，
+ * 且首帧与服务端一致不会 mismatch。动画在水合完成后由 IntersectionObserver 触发，
+ * 起跑瞬间才落到 0，此前的终值用户还没看清，不会感知到跳变。
  *
- * 【为什么手写 rAF 而不是引计数库】
- * 一个 easeOutCubic + requestAnimationFrame 就够，引库是为一个数字多拉一包依赖，
- * 与项目「新增依赖先看有没有同类」的约定相悖。
- *
- * 【reduced-motion】直接保持终值不动画——计数对读屏用户本来就该是终值。
+ * 手写 rAF 而非引计数库：一个 easeOutCubic + requestAnimationFrame 就够，
+ * 与项目「新增依赖先看有没有同类」的约定一致。
+ * reduced-motion 下直接保持终值不动画。
  */
 export function AnimatedNumber({ value }: Readonly<{ value: number }>) {
   const [display, setDisplay] = useState(value);

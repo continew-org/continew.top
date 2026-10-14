@@ -385,7 +385,7 @@ export default function SponsorPage() {
               </div>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-500/10 px-2.5 py-1 text-xs font-medium text-teal-700 dark:text-teal-300">
                 <span className="size-1.5 rounded-full bg-teal-500" aria-hidden />
-                {/* 容器是 flex + gap，空白节点不参与布局；写上只为消除 JSX 空白歧义（S6772） */}
+                {/* 容器是 flex + gap，空白节点不参与布局；写上只为消除 JSX 空白歧义 */}
                 {' '}
                 持续中
               </span>

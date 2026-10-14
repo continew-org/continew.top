@@ -36,7 +36,7 @@ export default async function Page(props: Readonly<PageProps<'/docs/[[...slug]]'
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
-  // 变量名须为常规 PascalCase：全大写（MDX）会被 jsx-pascal-case（S6770）判为非 PascalCase。
+  // 须为 PascalCase：全大写会被 JSX 规则判为非组件。
   const MdxContent = page.data.body;
   const markdownUrl = getPageMarkdownUrl(page).url;
   // 归档版本自动挂载升级提示（见 components/archive-notice.tsx 的取舍说明）。
@@ -83,7 +83,7 @@ export default async function Page(props: Readonly<PageProps<'/docs/[[...slug]]'
       <DocsBody>
         <MdxContent
           components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
+            // 让 MDX 里的相对路径链接能指向其他页面
             a: createRelativeLink(source, page),
           })}
         />

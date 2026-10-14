@@ -200,7 +200,7 @@ test('exported CSS preserves the reduced-motion and keyboard marquee contracts',
   });
   assert.ok(pointerRules.length > 0, 'Enabled buttons must keep the pointer cursor');
   const html = exported('index.html');
-  // 键盘滚动区改用原生 <section aria-label>（自带 region 语义，Sonar prefer-tag-over-role），
+  // 键盘滚动区改用原生 <section aria-label>（自带 region 语义），
   // 契约关心的是「可聚焦 + 有可访问名称」，不再要求手写 role="region"。
   const regions = (html.match(/<section\b[^>]*>/g) ?? []).filter((tag) => attribute(tag, 'class')?.includes('cn-marquee-viewport'));
   assert.ok(regions.length >= 2, 'Both marquee types must expose a keyboard scroll region');

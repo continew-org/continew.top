@@ -12,8 +12,8 @@ type ActionIconOption = 'auto' | 'next' | 'down' | false;
 /**
  * 行动控件的尾部图标：外链用「新窗口」，页内锚点与 icon="down" 用向下箭头，其余用右箭头。
  *
- * 抽成组件而不是「按条件选一个图标变量」：一是不在渲染期生成组件（React 编译器规则
- * react-hooks/static-components），二是顺带避开嵌套三元（Sonar typescript:S3358）。
+ * 抽成组件而不是「按条件选一个图标变量」：不在渲染期生成组件（React 编译器规则），
+ * 也免去嵌套三元。
  */
 function ActionIcon({
   external,

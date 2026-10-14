@@ -16,19 +16,12 @@ const PLATFORM_ICON = {
 /**
  * 「参与贡献」弹层：点击后选平台。
  *
- * 【为什么不再直接链到 GitHub】
- * 社区三个平台都在维护，直接链一个等于替用户做了决定，也把另外两个平台的贡献者
- * 排除在外。弹层把三个入口并列摆出来，同时标出推荐顺序。
- *
- * 【为什么不用手写 div[role=dialog]】
- * 原生 `<dialog>` + `showModal()` 自带 Esc 关闭、焦点陷阱、背景 inert。
- * 与 components/home/join-group-dialog.tsx 保持同一做法。
- *
- * 【为什么要显式 text-left】
- * `showModal()` 只把 dialog 提升到浏览器 top layer，**不改变 CSS 继承链**——
- * 它仍然继承 DOM 父节点的 text-align。本组件在 /team 页是放在 PageHeader 里的，
- * 而 PageHeader 是 `text-center`，弹层内容于是被带着居中，与首页那一份长得不一样。
- * 弹层的排版不该由调用位置决定，故在这里自己钉死。
+ * 不直接链 GitHub：三个平台都在维护，链一个等于替用户做了决定。弹层把三个入口
+ * 并列摆出并标出推荐顺序。
+ * 用原生 `<dialog>` + `showModal()`（自带 Esc 关闭、焦点陷阱、背景 inert），
+ * 与 components/home/join-group-dialog.tsx 同一做法。
+ * text-left 显式声明：`showModal()` 只提升层级、不改 CSS 继承链，本组件在 /team 页
+ * 位于 `text-center` 的 PageHeader 里，不钉死就会被带歪，与首页那份长得不一样。
  */
 export function ContributeDialog({
   className,

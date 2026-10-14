@@ -90,7 +90,6 @@ const SNAPSHOT: Record<PlatformStar['key'], number> = {
  * 统计贡献者也要用，两个入口互不感知就会把同一个 URL 请求两遍。
  * 缓存的是 Promise 而不是结果，并发调用共享同一次请求，不会有人拿到「还没回来」的 null。
  */
-// unknown 已含 null，写成 `unknown | null` 属冗余联合成员（Sonar typescript:S6571）
 const inflight = new Map<string, Promise<unknown>>();
 
 export async function fetchJson(url: string): Promise<unknown> {

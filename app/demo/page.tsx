@@ -133,7 +133,7 @@ export default function DemoPage() {
             </p>
             <div className={cn('mt-3 flex flex-wrap items-center gap-x-6 gap-y-2', siteType.compact)}>
               <span className="text-fd-muted-foreground">
-                {/* 与值之间用 ml-1.5 留白、不加空格，故与元素同行书写，消除 JSX 空白歧义（S6772） */}
+                {/* 与值之间用 ml-1.5 留白、不加空格，故与元素同行书写，消除 JSX 空白歧义 */}
                 配置<span className="ml-1.5 font-medium tabular-nums text-fd-foreground">
                   {currentEnv.spec}
                 </span>
