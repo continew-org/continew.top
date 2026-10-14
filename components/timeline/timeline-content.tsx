@@ -1,11 +1,15 @@
 import Image from 'next/image';
 import type { LucideIcon } from 'lucide-react';
 import { Award, Star, Trophy } from 'lucide-react';
+import { ActivityStats } from '@/components/activity/activity-stats';
+import { CommitActivity } from '@/components/activity/commit-activity';
+import { StarTrendChart } from '@/components/activity/star-trend-chart';
 import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 import { cn } from '@/lib/cn';
 import { PageIntro } from '@/components/site-primitives';
 import { ActionLink } from '@/components/site-actions';
-import { focusRing } from '@/lib/site-design';
+import { focusRing, siteType } from '@/lib/site-design';
+import type { ActiveContributors, CommitActivityData, StarTrend } from '@/lib/repo-activity';
 import type { PlatformStar, StarSummary } from '@/lib/site-stats';
 import type { TimelineItem } from '@/lib/timeline';
 import { TimelineGallery } from './timeline-gallery';
@@ -20,6 +24,10 @@ interface TimelineYearGroup {
 interface TimelineContentProps {
   groups: TimelineYearGroup[];
   stars: StarSummary;
+  trend: StarTrend;
+  activity: CommitActivityData;
+  active: ActiveContributors;
+  recentRegistered: number;
   totalDays: number;
   honorCount: number;
   startYear: string;
@@ -78,82 +86,50 @@ const platformIcons: Record<PlatformStar['key'], LucideIcon | typeof AtomGitIcon
   gitee: GiteeIcon,
 };
 
-function TimelineGraph() {
-  return (
-    <div
-      aria-hidden
-      className="relative hidden h-64 overflow-hidden rounded-2xl border border-fd-border/70 bg-fd-card/60 lg:block"
-    >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,color-mix(in_oklab,var(--cn-brand)_11%,transparent),transparent_58%)]" />
-      <svg viewBox="0 0 360 256" className="relative size-full text-[var(--cn-brand)]">
-        <path
-          d="M92 224 C92 190 92 168 92 143 C92 116 75 111 75 85 C75 61 92 50 92 28"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-        <path
-          d="M92 176 C138 176 128 125 177 125 C211 125 218 103 218 76"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          opacity=".42"
-        />
-        <path
-          d="M92 109 C129 109 133 72 168 72 C195 72 202 51 202 35"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          opacity=".42"
-        />
-        <g fill="var(--color-fd-background)" stroke="currentColor" strokeWidth="2">
-          <circle cx="92" cy="224" r="6" />
-          <circle cx="92" cy="176" r="6" />
-          <circle cx="92" cy="109" r="6" />
-          <circle cx="92" cy="28" r="6" />
-          <circle cx="177" cy="125" r="5" />
-          <circle cx="218" cy="76" r="5" />
-          <circle cx="168" cy="72" r="5" />
-          <circle cx="202" cy="35" r="5" />
-        </g>
-        <g fill="currentColor">
-          <circle cx="92" cy="176" r="2.5" />
-          <circle cx="92" cy="109" r="2.5" />
-          <circle cx="92" cy="28" r="2.5" />
-        </g>
-        <g className="fill-fd-muted-foreground font-mono text-xs">
-          <text x="112" y="228">2022 · first commit</text>
-          <text x="112" y="180">2023 · v1.0</text>
-          <text x="340" y="80" textAnchor="end">2024 · organization</text>
-          <text x="112" y="32">2025 · keep shipping</text>
-        </g>
-      </svg>
-    </div>
-  );
-}
-
 function TimelineHero({
   stars,
+  trend,
   totalDays,
   honorCount,
   startYear,
-}: Readonly<Pick<TimelineContentProps, 'stars' | 'totalDays' | 'honorCount' | 'startYear'>>) {
+}: Readonly<Pick<TimelineContentProps, 'stars' | 'trend' | 'totalDays' | 'honorCount' | 'startYear'>>) {
   const stats = [
     { value: `${stars.total.toLocaleString()}+`, label: '累计 Star' },
     { value: totalDays.toLocaleString(), label: '持续维护（天）' },
     { value: String(honorCount), label: '平台荣誉' },
   ];
+  const hasTrend = trend.live && trend.points.length > 1;
 
   return (
-    <header className="relative border-b border-fd-border/70 pb-12 sm:pb-16">
-      <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    /*
+     * Hero 不再自带 `border-b` 与底部内边距。
+     *
+     * 那条边线原本是 Hero 与年份列表之间唯一的分隔，但现在 Hero 之后先接「社区活跃度」
+     * 这一段，边线加上双方各留的一份间距，就在两个区块中间堆出「一条线夹着一大段空白」。
+     * 区块之间的距离统一交给各区块自己的 `mt`，Hero 只负责把自己的内容收尾。
+     */
+    <header className="relative">
+      {/*
+       * 右侧原先是一张装饰性的假曲线：硬编码的坐标与手写的「2022 / 2023 / 2024」标签。
+       * 有了真实 Star 历史之后，它就是在向读者展示一条不存在的趋势，只能换掉。
+       *
+       * 同时去掉了原来的 `hidden lg:block`：装饰图藏起来不损失任何信息，
+       * 真图藏起来等于移动端没有这个功能——而移动端才是多数访客。
+       * 拉不到数据时 `StarTrendChart` 返回 null，网格退回单列，右侧不会留一片空白。
+       */}
+      <div
+        className={cn(
+          'grid items-center gap-12',
+          hasTrend && 'lg:grid-cols-[minmax(0,1fr)_22rem]',
+        )}
+      >
         <PageIntro
           className="cn-stagger"
           eyebrow={<span className="font-mono">Since {startYear}</span>}
           title="发展历程"
           description="2022 年的冬天，一次再普通不过的项目初始化，成了这段旅程的起点。此后的每一次发版、每一个 Star、每一份来自平台和社区的认可，都被留在了这条时间线上。"
         />
-        <TimelineGraph />
+        <StarTrendChart trend={trend} />
       </div>
 
       <dl className="mt-10 grid grid-cols-3 divide-x divide-fd-border border-y border-fd-border/70 sm:mt-12">
@@ -317,9 +293,59 @@ function TimelineYear({ year, items }: Readonly<TimelineYearGroup>) {
   );
 }
 
+/**
+ * 社区活跃度：提交热力图 + 读数。
+ *
+ * 位置在 Hero 与年份导航之间——先总后分：这一块回答「这段历程现在走到哪了」，
+ * 下面的年份列表才是逐条细节。年份导航是 sticky 的，把这一块放到它后面，
+ * 它会跟着导航一起黏在顶部，和 Hero 的呼应就断了。
+ */
+function CommunityActivity({
+  trend,
+  activity,
+  active,
+  recentRegistered,
+}: Readonly<
+  Pick<TimelineContentProps, 'trend' | 'activity' | 'active' | 'recentRegistered'>
+>) {
+  /*
+   * 区块间距统一由本节的 `mt` 提供，本节不画分隔线：Hero 的边线已去掉（见 TimelineHero
+   * 的注释），这里再加一条就会在同一个位置出现第二条线。年份导航与各个年份区块各自带
+   * `border-y` / `border-t`，它们与相邻内容之间没有重复的线，所以那几处保持原样。
+   */
+  return (
+    <section className="cn-reveal mt-14 sm:mt-16">
+      <h2 className={siteType.sectionTitle}>社区活跃度</h2>
+      <p className={cn('mt-2 max-w-3xl text-fd-muted-foreground', siteType.compact)}>
+        提交节奏可以按年份回看，从 2022 年 12 月的第一次提交到现在。数据在每次构建时从 GitHub
+        公开接口读取。
+      </p>
+
+      {activity.live && (
+        <div className="mt-8">
+          <CommitActivity windows={activity.windows} />
+        </div>
+      )}
+
+      <div className="mt-10">
+        <ActivityStats
+          last30Commits={activity.live ? activity.last30 : null}
+          starTrend={trend}
+          active={active}
+          recentRegistered={recentRegistered}
+        />
+      </div>
+    </section>
+  );
+}
+
 export function TimelineContent({
   groups,
   stars,
+  trend,
+  activity,
+  active,
+  recentRegistered,
   totalDays,
   honorCount,
   startYear,
@@ -328,9 +354,16 @@ export function TimelineContent({
     <>
       <TimelineHero
         stars={stars}
+        trend={trend}
         totalDays={totalDays}
         honorCount={honorCount}
         startYear={startYear}
+      />
+      <CommunityActivity
+        trend={trend}
+        activity={activity}
+        active={active}
+        recentRegistered={recentRegistered}
       />
       <YearNavigation groups={groups} />
       <div className="mt-14 space-y-16 sm:mt-16 sm:space-y-20">

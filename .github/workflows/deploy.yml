@@ -93,14 +93,24 @@ jobs:
           done < "$sources_file"
 
       # 3、容器内静态导出（pnpm install 会运行依赖与仓库生命周期脚本，容器隔离其触达范围——
-      #    不挂 docker.sock、不注入 job secrets；pnpm 版本由 packageManager 经 corepack 解析）
+      #    不挂 docker.sock；pnpm 版本由 packageManager 经 corepack 解析）
+      #
+      # 这里注入 GITHUB_TOKEN，与「容器内不注入 job secrets」的原则是一次有意的例外：
+      # GitHub 的 stargazers 接口**要求认证**（未认证直接 401），/timeline 的 Star 趋势图
+      # 与提交热力图都靠它，而认证后限流才够用（未认证 60 次/小时，一次构建要 40 多次请求）。
+      # 注入的是 Actions 自动生成的**仓库级只读令牌**（permissions 只声明了 contents: read），
+      # 作用域仅本公开仓库，泄露面约等于零；SERVER_PATH 仍然不进容器。
+      # 用 `-e GITHUB_TOKEN`（不带值）从 runner 进程环境继承，避免令牌出现在 docker 命令行里被 ps 看到。
       - name: Build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           docker run --rm
           --memory=4g --cpus=4
           -v "$PWD":/ws -w /ws
           -v /root/.local/share/pnpm:/root/.local/share/pnpm
           -v /root/.cache:/root/.cache
+          -e GITHUB_TOKEN
           node:22
           bash -c "corepack enable && pnpm i --frozen-lockfile && pnpm build"
 

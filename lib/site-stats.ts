@@ -1,11 +1,14 @@
-import { gitConfig } from './shared';
+import { fetchJson, getOrgRepos, mapLimit, PLATFORMS } from './platform-api';
 
 /**
- * 各代码托管平台的 Star 统计。
+ * 各代码托管平台的 Star 与贡献者统计。
  *
  * 构建期（静态导出）拉取一次，结果固化进 HTML。
- * 任一平台拉取失败（CI 无外网、平台限流、超时）时回落到 `SNAPSHOT` 快照值，
+ * 任一平台拉取失败（CI 无外网、平台限流、超时）时回落到 SNAPSHOT 快照值，
  * 保证构建不失败、数字不归零。
+ *
+ * 平台注册表与 HTTP 层在 lib/platform-api.ts：社区活动统计（lib/repo-activity.ts）
+ * 打的是同一批接口，请求去重必须共用一份实现。
  */
 
 export interface PlatformStar {
@@ -22,56 +25,6 @@ export interface StarSummary {
   live: boolean;
 }
 
-interface PlatformSource {
-  key: PlatformStar['key'];
-  name: string;
-  org: string;
-  url: string;
-  /** 组织仓库列表接口，用于统计 Star。 */
-  api: (org: string) => string;
-  /** 单个仓库的贡献者列表接口，用于统计贡献者。 */
-  contributorsApi: (org: string, repo: string) => string;
-  /** 贡献者主页地址（各平台用户主页路径不同）。 */
-  profile: (login: string) => string;
-}
-
-/**
- * 平台清单。**数组顺序即全站的展示顺序**：GitHub → AtomGit → Gitee（社区的推荐顺序）。
- * 各平台组织路径不同：GitHub 为 continew-org，Gitee / AtomGit 为 continew。
- * 与 lib/shared.ts 的 getEditOnHostUrl 保持同一口径。
- */
-const PLATFORMS: PlatformSource[] = [
-  {
-    key: 'github',
-    name: 'GitHub',
-    org: gitConfig.user,
-    url: `https://github.com/${gitConfig.user}`,
-    api: (org) => `https://api.github.com/orgs/${org}/repos?per_page=100&type=public`,
-    contributorsApi: (org, repo) =>
-      `https://api.github.com/repos/${org}/${repo}/contributors?per_page=100&anon=1`,
-    profile: (login) => `https://github.com/${login}`,
-  },
-  {
-    key: 'atomgit',
-    name: 'AtomGit',
-    org: 'continew',
-    url: 'https://atomgit.com/continew',
-    api: (org) => `https://api.atomgit.com/api/v5/orgs/${org}/repos?per_page=100`,
-    contributorsApi: (org, repo) =>
-      `https://api.atomgit.com/api/v5/repos/${org}/${repo}/contributors`,
-    profile: (login) => `https://atomgit.com/${login}`,
-  },
-  {
-    key: 'gitee',
-    name: 'Gitee',
-    org: 'continew',
-    url: 'https://gitee.com/continew',
-    api: (org) => `https://gitee.com/api/v5/orgs/${org}/repos?per_page=100`,
-    contributorsApi: (org, repo) => `https://gitee.com/api/v5/repos/${org}/${repo}/contributors`,
-    profile: (login) => `https://gitee.com/${login}`,
-  },
-];
-
 /**
  * 快照兜底值（2026-10-08 实测：GitHub 2,768 / Gitee 2,044 / AtomGit 266）。
  * 仅在网络不可达时使用，建议每次发版前核对是否明显过期。
@@ -81,58 +34,6 @@ const SNAPSHOT: Record<PlatformStar['key'], number> = {
   gitee: 2044,
   atomgit: 266,
 };
-
-/**
- * 统一的构建期 JSON 请求：10 秒超时 + 24 小时缓存，失败返回 null 由调用方回落快照。
- * GitHub 未认证限流 60 次/小时，配置 GITHUB_TOKEN 可提高到 5000 次/小时。
- *
- * 同 URL 在**一次构建内只发一次**：组织仓库列表就是个典型例子——统计 Star 要用、
- * 统计贡献者也要用，两个入口互不感知就会把同一个 URL 请求两遍。
- * 缓存的是 Promise 而不是结果，并发调用共享同一次请求，不会有人拿到「还没回来」的 null。
- */
-const inflight = new Map<string, Promise<unknown>>();
-
-export async function fetchJson(url: string): Promise<unknown> {
-  let pending = inflight.get(url);
-  if (!pending) {
-    pending = requestJson(url);
-    inflight.set(url, pending);
-  }
-  return pending;
-}
-
-async function requestJson(url: string): Promise<unknown> {
-  try {
-    const headers: Record<string, string> = {
-      Accept: 'application/json',
-      'User-Agent': 'continew.top',
-    };
-    if (url.includes('api.github.com') && process.env.GITHUB_TOKEN) {
-      headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
-
-    const res = await fetch(url, {
-      headers,
-      signal: AbortSignal.timeout(10_000),
-      next: { revalidate: 86_400 },
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
-
-/**
- * 组织下的公开仓库列表。
- *
- * 「统计 Star」和「统计贡献者」都要先拿到它，是两个入口、同一份数据；
- * 同 URL 的去重统一由 fetchJson 处理，这里只做类型收敛。
- */
-async function fetchOrgRepos(platform: PlatformSource): Promise<unknown[] | null> {
-  const data = await fetchJson(platform.api(platform.org));
-  return Array.isArray(data) ? data : null;
-}
 
 /**
  * Star 汇总结果缓存。
@@ -151,7 +52,7 @@ export function getStarSummary(): Promise<StarSummary> {
 async function computeStarSummary(): Promise<StarSummary> {
   const results = await Promise.all(
     PLATFORMS.map(async (platform) => {
-      const repos = await fetchOrgRepos(platform);
+      const repos = await getOrgRepos(platform);
       const live = repos
         ? (repos as Array<{ stargazers_count?: number }>).reduce(
             (sum, repo) => sum + (repo.stargazers_count ?? 0),
@@ -258,36 +159,10 @@ export interface Contributor {
 }
 
 /**
- * 并发执行，但限制同时在飞的请求数。
- *
- * 组织下仓库可能有二十来个：一次性 Promise.all 全打出去容易触发平台限流；
- * 而逐个 await 又太慢（构建期累计可达数十秒）。折中取并发 5。
- *
- * 每个 worker 领一个下标、跑完再领下一个：用递归续跑代替 while + await，
- * 并发上限仍由 worker 数封顶，行为与逐个领取完全一致。
- */
-async function mapLimit<T, R>(
-  items: readonly T[],
-  limit: number,
-  fn: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results = new Array<R>(items.length);
-  let cursor = 0;
-  const worker = async (): Promise<void> => {
-    const index = cursor++;
-    if (index >= items.length) return;
-    results[index] = await fn(items[index]);
-    await worker();
-  };
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
-}
-
-/**
  * 拉取某平台组织下所有仓库的贡献者（平台内按用户名去重，剔除机器人与镜像账号）。
  */
-async function fetchPlatformContributors(platform: PlatformSource) {
-  const repos = await fetchOrgRepos(platform);
+async function fetchPlatformContributors(platform: (typeof PLATFORMS)[number]) {
+  const repos = await getOrgRepos(platform);
   if (!repos) {
     return { names: new Set<string>(), contributors: [] as Contributor[], ok: false, count: 0 };
   }

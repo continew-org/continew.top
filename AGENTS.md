@@ -52,6 +52,7 @@
 | `lib/source.ts` | Fumadocs 数据源（`defineDocs` 指向 `content/docs`），加载页面树 |
 | `lib/shared.ts` / `lib/docs-sections.ts` | 站点常量、文档分区与版本的源仓库映射、`getEditOnGithubUrl` 编辑链接生成 |
 | `lib/layout.shared.tsx` | 布局共享配置（导航、各分区链接） |
+| `lib/platform-api.ts` / `lib/site-stats.ts` / `lib/repo-activity.ts` | 构建期平台数据：平台注册表与 HTTP 层、Star 与贡献者统计、社区活动统计（Star 趋势、提交热力图、活跃贡献者） |
 | `app/docs/[[...slug]]/page.tsx` | 文档页渲染（MDX、TOC、Markdown 复制、按分区映射源仓库的「在 GitHub 编辑」） |
 | `app/api/search/route.ts` | 静态搜索（构建期预生成 Orama 索引，`staticGET`） |
 | `components/search-dialog.tsx` | 静态搜索对话框（客户端查询预生成索引） |
@@ -155,6 +156,7 @@ pnpm lint && pnpm types:check && pnpm build && pnpm ui:check
 - 与 continew-admin-ui 同一套模式：**self-hosted runner 与部署机同机**，构建产物经本机 `rsync` 落到 Nginx 站点目录，无跨机 SSH、无密码/密钥；
 - 推送到 `main` 或各项目仓库文档更新（`repository_dispatch`，type `docs-updated`）时，`.github/workflows/deploy.yml` 自动静态导出并同步至站点目录；
 - 仅需一个 Secret：`SERVER_PATH`（Nginx 站点根目录）。前提是部署机已注册为本仓库的 self-hosted runner（与 admin / admin-ui 共用即可）。
+- 构建容器额外注入 Actions 自动生成的 `GITHUB_TOKEN`（只读、仅限本仓库）：`/timeline` 的 Star 趋势与提交热力图在构建期读 GitHub 接口，而 stargazers 接口要求认证。这是对「容器内不注入 job secrets」的一次有意例外，理由与边界见 `deploy.yml` 中该步骤的注释。
 
 ## 安全漏洞
 

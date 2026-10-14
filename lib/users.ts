@@ -61,6 +61,19 @@ export function getCityCount(): number {
   return cities.size;
 }
 
+/**
+ * 近 n 天新增登记数。
+ *
+ * 与 `getUsers().length`（累计登记）并列才有信息量：累计数只说明「来过多少人」，
+ * 增量才说明**现在还在来人**。页面上这两个数字要挨着放，单独一个都容易被误读。
+ */
+export function getRecentRegisteredCount(days: number, now = Date.now()): number {
+  const cutoff = new Date(now - days * 86_400_000).toISOString().slice(0, 10);
+  return (usersData as RegisteredUser[]).filter(
+    (user) => user.createTime.slice(0, 10) >= cutoff,
+  ).length;
+}
+
 /** 热门城市（按登记数聚合，取前 n 个）。已剔除「未知」与纯省级地区。 */
 export function getTopCities(limit = 8): Array<{ city: string; count: number }> {
   const counts = new Map<string, number>();

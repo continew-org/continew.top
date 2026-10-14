@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runInThisContext } from 'node:vm';
 
@@ -13,6 +13,14 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 const cache = new Map();
 
+/** 把无扩展名的模块 id 解析成仓库内的实际文件：先 .tsx 再 .ts。 */
+function resolveLocal(withoutExtension) {
+  for (const extension of ['.tsx', '.ts']) {
+    if (existsSync(join(root, withoutExtension + extension))) return withoutExtension + extension;
+  }
+  throw new Error(`Cannot resolve ${withoutExtension}`);
+}
+
 function loadTs(relativePath) {
   const file = join(root, relativePath);
   if (cache.has(file)) return cache.get(file).exports;
@@ -22,7 +30,14 @@ function loadTs(relativePath) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2022 },
     fileName: file,
   });
-  const localRequire = (id) => id.startsWith('@/') ? loadTs(`${id.slice(2)}.ts`) : require(id);
+  const localRequire = (id) => {
+    if (id.startsWith('@/')) return loadTs(resolveLocal(id.slice(2)));
+    // 组件之间用相对路径互相引用（./commit-heatmap），要按「引用者所在目录」解析
+    if (id.startsWith('.')) {
+      return loadTs(resolveLocal(relative(root, resolve(dirname(file), id)).split(sep).join('/')));
+    }
+    return require(id);
+  };
   runInThisContext(`(function(require,module,exports){${outputText}\n})`, { filename: file })(localRequire, loaded, loaded.exports);
   return loaded.exports;
 }
@@ -261,4 +276,113 @@ test('exported CSS preserves the reduced-motion and keyboard marquee contracts',
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   assert.equal(pkg.dependencies['framer-motion'], undefined);
   assert.equal(pkg.dependencies.motion, undefined);
+});
+
+/*
+ * 社区活跃度图表（/timeline）的确定性契约。
+ *
+ * 这里刻意**不**断言 out/timeline.html 里有没有那两张图：它们的数据来自构建期的
+ * GitHub 请求，CI 一旦拿不到就整块不渲染，把「有没有图」写进门禁会让它随机变红。
+ * 改为直接渲染组件、喂合成数据，验的才是真正该守住的东西：拿不到数据不画假图、
+ * 拿得到时钩子与可访问性到位、几何值走 SVG 属性而不是内联样式。
+ */
+const starTrendFixture = {
+  points: [
+    { date: '2024-01-01', count: 0 },
+    { date: '2025-01-01', count: 10 },
+    { date: '2026-01-01', count: 40 },
+  ],
+  total: 40,
+  last30: 3,
+  live: true,
+};
+
+function heatmapWindow(key, label, total) {
+  return {
+    key,
+    label,
+    start: '2026-01-01',
+    end: '2026-01-31',
+    columns: Array.from({ length: 7 }, (_, column) =>
+      Array.from({ length: 7 }, (_, row) => ({
+        date: `2026-01-${String(column * 7 + row + 1).padStart(2, '0')}`,
+        // 首列前两格落在统计窗口之外，用来验证补齐格不画
+        count: column === 0 && row < 2 ? null : (column + row) % 5,
+      })),
+    ),
+    monthLabels: [{ column: 0, label: '1 月' }],
+    total,
+    activeDays: 20,
+    bestDay: { date: '2026-01-08', count: 5 },
+    bestWeek: { date: '2026-01-05', count: 12 },
+    longestStreakWeeks: 3,
+    max: 8,
+  };
+}
+
+test('activity charts never draw without live data and keep their accessibility contract', () => {
+  const { StarTrendChart } = loadTs('components/activity/star-trend-chart.tsx');
+  const { CommitHeatmapChart } = loadTs('components/activity/commit-heatmap.tsx');
+  const { CommitActivity } = loadTs('components/activity/commit-activity.tsx');
+
+  // 拿不到数据 → 整块不渲染。绝不画一条编出来的曲线，也不留一个空白框
+  assert.equal(render(StarTrendChart, { trend: { ...starTrendFixture, live: false } }), '');
+  assert.equal(render(CommitHeatmapChart, { heatmap: null }), '');
+  assert.equal(render(CommitActivity, { windows: [] }), '');
+  // 只有一个点也构不成趋势，同样不渲染
+  assert.equal(
+    render(StarTrendChart, { trend: { ...starTrendFixture, points: [starTrendFixture.points[0]] } }),
+    '',
+  );
+
+  const trendHtml = render(StarTrendChart, { trend: starTrendFixture });
+  openingTag(trendHtml, 'figure', 'data-cn-chart="star-trend"');
+  assert.ok(
+    attribute(openingTag(trendHtml, 'svg', 'role="img"'), 'aria-label'),
+    'Star trend chart needs an accessible name',
+  );
+  assert.match(trendHtml, /<figcaption/, 'Star trend chart needs a text caption for no-JS readers');
+
+  // 曲线从年末起时，首个年份刻度与次年几乎重合，必须丢掉前一个而不是叠成乱码
+  const crampedTrend = render(StarTrendChart, {
+    trend: {
+      ...starTrendFixture,
+      points: [
+        { date: '2022-12-07', count: 1 },
+        { date: '2023-01-02', count: 3 },
+        { date: '2026-01-01', count: 40 },
+      ],
+    },
+  });
+  const yearLabels = [...crampedTrend.matchAll(/>(\d{4})</g)].map((match) => match[1]);
+  assert.deepEqual(yearLabels, ['2023', '2026'], 'Crowded year ticks must be dropped, not overlapped');
+
+  const heatHtml = render(CommitHeatmapChart, { heatmap: heatmapWindow('recent', '近一年', 40) });
+  openingTag(heatHtml, 'div', 'data-cn-chart="commit-heatmap"');
+  // 色阶只表达强度、读数由文字给出：整张图对读屏隐藏，且不该成为可聚焦的空洞区域
+  assert.equal(attribute(openingTag(heatHtml, 'svg', 'aria-hidden'), 'aria-hidden'), 'true');
+  assert.ok(!/tabindex/i.test(heatHtml), 'Aria-hidden heatmap must not be focusable');
+  // 窗口之外的补齐格不画：7×7 减去首列那两格
+  assert.equal((heatHtml.match(/<rect/g) ?? []).length, 47);
+
+  // 年份切换器：每个窗口一个 aria-pressed 按钮，默认选中第一个
+  const switcherHtml = render(CommitActivity, {
+    windows: [heatmapWindow('recent', '近一年', 40), heatmapWindow('2025', '2025 年', 733)],
+  });
+  openingTag(switcherHtml, 'div', 'data-cn-chart="commit-activity"');
+  const chips = switcherHtml.match(/<button\b[^>]*data-cn-control="filter"[^>]*>/g) ?? [];
+  assert.equal(chips.length, 2, 'Each window needs one switcher chip');
+  assert.equal(attribute(chips[0], 'aria-pressed'), 'true', 'The first window is selected by default');
+  assert.equal(attribute(chips[1], 'aria-pressed'), 'false');
+  // 切换后读数整组变化，读屏用户需要被念出新数字，否则点完按钮「什么都没发生」
+  assert.match(switcherHtml, /aria-live="polite"/);
+  // 默认渲染的是第一个窗口的读数，而不是全部窗口的数字
+  assert.ok(switcherHtml.includes('提交次数'));
+  assert.ok(switcherHtml.includes('>40<'));
+  assert.ok(!switcherHtml.includes('>733<'));
+
+  // DESIGN_SYSTEM：几何值走 SVG 属性，不写内联样式
+  assert.ok(!trendHtml.includes('style="'), 'Star trend chart must not use inline styles');
+  assert.ok(!heatHtml.includes('style="'), 'Commit heatmap must not use inline styles');
+  assert.ok(!switcherHtml.includes('style="'), 'Window switcher must not use inline styles');
 });

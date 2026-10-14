@@ -37,7 +37,12 @@ jobs:
       - name: 类型检查
         run: pnpm types:check
 
+      # /timeline 的 Star 趋势与提交热力图在构建期读 GitHub 接口，而 stargazers
+      # 接口要求认证（未认证 401），认证后限流也才够用。CI 用 Actions 自动生成的
+      # 仓库级只读令牌即可，不需要额外配置 secret。
       - name: 构建
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm build
 
       - name: UI 契约检查

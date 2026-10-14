@@ -2,7 +2,13 @@ import type { Metadata } from 'next';
 import { GitCommitHorizontal } from 'lucide-react';
 import { TimelineContent } from '@/components/timeline/timeline-content';
 import { PageContainer, PageNextLinks } from '@/components/site-primitives';
+import {
+  getActiveContributors,
+  getCommitActivity,
+  getGithubStarTrend,
+} from '@/lib/repo-activity';
 import { getStarSummary } from '@/lib/site-stats';
+import { getRecentRegisteredCount } from '@/lib/users';
 import { getTimeline, getTimelineByYear, maintenanceStartDate, type TimelineItem } from '@/lib/timeline';
 
 export const metadata: Metadata = {
@@ -26,13 +32,36 @@ const honorCount = all.filter((item) => isHonor(item.type)).length;
 
 export default async function TimelinePage() {
   const groups = getTimelineByYear();
-  const stars = await getStarSummary();
+
+  /*
+   * 四份数据并发拉取，都在构建期执行（静态导出）。
+   *
+   * 热力图（按年切片）与活跃贡献者底层是**同一批提交记录**——一次全历史拉取
+   * （32 页）同时喂给两者，lib/repo-activity.ts 里缓存了 Promise，所以这里写了
+   * 四个入口，请求数并不叠加。GitHub 接口有限流，这些重复必须省掉。
+   *
+   * 任一失败都有各自的降级：Star 走快照、两张图不渲染、活跃贡献者那项不显示，
+   * 页面不会因为有接口不通就缺一大块。
+   */
+  const [stars, trend, activity, active] = await Promise.all([
+    getStarSummary(),
+    getGithubStarTrend(),
+    getCommitActivity(),
+    getActiveContributors(),
+  ]);
+  // 登记用一年窗口，与页面上的 30 / 90 天指标不同：近 90 天新增为 0（最近一次登记在
+  // 2025-12-19），而那个 0 会与旁边活跃的提交数字形成误导性对比
+  const recentRegistered = getRecentRegisteredCount(365);
 
   return (
     <PageContainer className="overflow-x-clip">
       <TimelineContent
         groups={groups}
         stars={stars}
+        trend={trend}
+        activity={activity}
+        active={active}
+        recentRegistered={recentRegistered}
         totalDays={totalDays}
         honorCount={honorCount}
         startYear={maintenanceStartDate.slice(0, 4)}
