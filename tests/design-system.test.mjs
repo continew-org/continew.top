@@ -186,10 +186,16 @@ test('exported CSS preserves the reduced-motion and keyboard marquee contracts',
   }
   hasDeclaration('.cn-marquee-copy', 'reduce', 'display', 'none');
   hasDeclaration('.cn-marquee-viewport', 'reduce', 'overflow-x', 'auto');
-  hasDeclaration('.cn-marquee-host:focus-within .cn-marquee', null, 'animation', 'none');
-  hasDeclaration('.cn-marquee-host:focus-within .cn-marquee-copy', null, 'display', 'none');
-  hasDeclaration('.cn-marquee-host:focus-within .cn-marquee-viewport', null, 'overflow-x', 'auto');
+  hasDeclaration('.cn-marquee-host:has(:focus-visible) .cn-marquee', null, 'animation', 'none');
+  hasDeclaration('.cn-marquee-host:has(:focus-visible) .cn-marquee-copy', null, 'display', 'none');
+  hasDeclaration('.cn-marquee-host:has(:focus-visible) .cn-marquee-viewport', null, 'overflow-x', 'auto');
   hasDeclaration('.cn-marquee-host:hover .cn-marquee', null, 'animation-play-state', 'paused');
+  // 指针用户点击跑马灯必须毫无反应：静态可浏览态只能由键盘焦点（:focus-visible）触发。
+  const pointerFocusMarqueeRules = [];
+  for (const sheet of sheets) sheet.walkRules((rule) => {
+    if (rule.selector.includes(':focus-within') && rule.selector.includes('cn-marquee')) pointerFocusMarqueeRules.push(rule.selector);
+  });
+  assert.deepEqual(pointerFocusMarqueeRules, [], 'Marquee must not react to a plain pointer focus');
   // Tailwind 4 的 preflight 不再为按钮补手形光标，导出的样式必须自己补回来。
   const pointerRules = [];
   for (const sheet of sheets) sheet.walkRules((rule) => {

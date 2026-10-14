@@ -58,8 +58,9 @@ export function MessagesMarquee({
   return (
     <div className={cn('cn-marquee-host space-y-3', className)}>
       <section
-        aria-label="社区留言，聚焦后可用左右方向键横向浏览"
+        aria-label="社区留言，键盘聚焦后可用左右方向键横向浏览"
         // 横向滚动区必须可聚焦：键盘才能用方向键浏览、并让动画停住（WCAG 2.2.2 的暂停机制）。
+        // 指针点击不进入静态浏览态，见 app/global.css 的 :has(:focus-visible) 规则。
         tabIndex={0} // NOSONAR: 非交互元素带 tabIndex 在此属有意为之
         className={cn('cn-marquee-viewport cn-marquee-fade rounded-lg p-1', focusRing)}
       >

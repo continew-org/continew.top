@@ -194,11 +194,21 @@ button:not(:disabled),
   min-width: 0;
 }
 
-/* 静态可读是默认态。聚焦的原生滚动区可用方向键浏览，无客户端脚本依赖。 */
+/*
+ * 静态可读是默认态。聚焦的原生滚动区可用方向键浏览，无客户端脚本依赖。
+ *
+ * 滚动条一律隐藏：它只在聚焦瞬间凭空出现，既撑高 16px 让整块内容跳动，
+ * 又把「标签带 / 卡片带」画成表单控件。滚动与方向键遍历能力不受影响。
+ */
 .cn-marquee-viewport {
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scroll-behavior: auto;
+  scrollbar-width: none;
+}
+
+.cn-marquee-viewport::-webkit-scrollbar {
+  display: none;
 }
 
 .cn-marquee-copy {
@@ -239,23 +249,29 @@ button:not(:disabled),
   }
 }
 
-/* 悬停只暂停当前画面；键盘焦点进入时回到第一份，开放完整的静态横向遍历。 */
+/*
+ * 悬停只暂停当前画面；键盘焦点进入时回到第一份，开放完整的静态横向遍历。
+ *
+ * 判定用 :has(:focus-visible) 而不是 :focus-within：跑马灯对指针用户只有一个交互
+ * （悬停暂停），鼠标点击不该让内容跳回起点，也不该凭空长出滚动条。
+ * :focus-visible 只在键盘聚焦时匹配，键盘用户的暂停能力不受影响。
+ */
 .cn-marquee-host:hover .cn-marquee,
-.cn-marquee-host:focus-within .cn-marquee {
+.cn-marquee-host:has(:focus-visible) .cn-marquee {
   animation-play-state: paused;
 }
 
-.cn-marquee-host:focus-within .cn-marquee {
+.cn-marquee-host:has(:focus-visible) .cn-marquee {
   animation: none;
   transform: none;
 }
 
-.cn-marquee-host:focus-within .cn-marquee-viewport {
+.cn-marquee-host:has(:focus-visible) .cn-marquee-viewport {
   overflow-x: auto;
   mask-image: none;
 }
 
-.cn-marquee-host:focus-within .cn-marquee-copy {
+.cn-marquee-host:has(:focus-visible) .cn-marquee-copy {
   display: none;
 }
 
