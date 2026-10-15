@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import type { LucideIcon } from 'lucide-react';
 import { Award, Star, Trophy } from 'lucide-react';
-import { ActivityStats } from '@/components/activity/activity-stats';
 import { CommitActivity } from '@/components/activity/commit-activity';
 import { StarTrendChart } from '@/components/activity/star-trend-chart';
 import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
@@ -9,7 +8,7 @@ import { cn } from '@/lib/cn';
 import { PageIntro } from '@/components/site-primitives';
 import { ActionLink } from '@/components/site-actions';
 import { focusRing, siteType } from '@/lib/site-design';
-import type { ActiveContributors, CommitActivityData, StarTrend } from '@/lib/repo-activity';
+import type { CommitActivityData, StarTrend } from '@/lib/repo-activity';
 import type { PlatformStar, StarSummary } from '@/lib/site-stats';
 import type { TimelineItem } from '@/lib/timeline';
 import { TimelineGallery } from './timeline-gallery';
@@ -26,8 +25,6 @@ interface TimelineContentProps {
   stars: StarSummary;
   trend: StarTrend;
   activity: CommitActivityData;
-  active: ActiveContributors;
-  recentRegistered: number;
   totalDays: number;
   honorCount: number;
   startYear: string;
@@ -294,20 +291,13 @@ function TimelineYear({ year, items }: Readonly<TimelineYearGroup>) {
 }
 
 /**
- * 社区活跃度：提交热力图 + 读数。
+ * 社区活跃度：提交热力图 + 该窗口自己的读数。
  *
  * 位置在 Hero 与年份导航之间——先总后分：这一块回答「这段历程现在走到哪了」，
  * 下面的年份列表才是逐条细节。年份导航是 sticky 的，把这一块放到它后面，
  * 它会跟着导航一起黏在顶部，和 Hero 的呼应就断了。
  */
-function CommunityActivity({
-  trend,
-  activity,
-  active,
-  recentRegistered,
-}: Readonly<
-  Pick<TimelineContentProps, 'trend' | 'activity' | 'active' | 'recentRegistered'>
->) {
+function CommunityActivity({ activity }: Readonly<Pick<TimelineContentProps, 'activity'>>) {
   /*
    * 区块间距统一由本节的 `mt` 提供，本节不画分隔线：Hero 的边线已去掉（见 TimelineHero
    * 的注释），这里再加一条就会在同一个位置出现第二条线。年份导航与各个年份区块各自带
@@ -326,15 +316,6 @@ function CommunityActivity({
           <CommitActivity windows={activity.windows} />
         </div>
       )}
-
-      <div className="mt-10">
-        <ActivityStats
-          last30Commits={activity.live ? activity.last30 : null}
-          starTrend={trend}
-          active={active}
-          recentRegistered={recentRegistered}
-        />
-      </div>
     </section>
   );
 }
@@ -344,8 +325,6 @@ export function TimelineContent({
   stars,
   trend,
   activity,
-  active,
-  recentRegistered,
   totalDays,
   honorCount,
   startYear,
@@ -359,12 +338,7 @@ export function TimelineContent({
         honorCount={honorCount}
         startYear={startYear}
       />
-      <CommunityActivity
-        trend={trend}
-        activity={activity}
-        active={active}
-        recentRegistered={recentRegistered}
-      />
+      <CommunityActivity activity={activity} />
       <YearNavigation groups={groups} />
       <div className="mt-14 space-y-16 sm:mt-16 sm:space-y-20">
         {groups.map((group) => (
