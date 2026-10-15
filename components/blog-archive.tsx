@@ -81,23 +81,23 @@ export function BlogArchive({ posts }: Readonly<{ posts: BlogPost[] }>) {
               <h3 id={`blog-year-${year}`} className={cn('tabular-nums', siteType.sectionTitle)}>
                 {year}
               </h3>
-              <p className={cn('mt-1 text-fd-muted-foreground', siteType.meta)}>{yearPosts.length} 篇</p>
+              <p className="mt-1 text-fd-muted-foreground leading-5">{yearPosts.length} 篇</p>
             </div>
             <ol className="min-w-0">
               {yearPosts.map((post) => (
                 <li key={post.url}>
                   <Link
                     href={post.url}
-                    className={cn('group grid min-w-0 rounded-md border-b border-fd-border/70 py-5 first:pt-0 sm:grid-cols-[5.5rem_1rem_minmax(0,1fr)] sm:gap-x-5', cardHover, focusRing)}
+                    className={cn('group grid min-w-0 rounded-md border-b border-fd-border/70 py-5 first:pt-0 sm:grid-cols-[5.5rem_1rem_minmax(0,1fr)] sm:gap-x-5', focusRing)}
                   >
-                    <time dateTime={post.date} className={cn('tabular-nums text-fd-muted-foreground sm:pt-1', siteType.meta)}>
+                    <time dateTime={post.date} className="tabular-nums text-fd-muted-foreground sm:pt-1 ">
                       {post.date.slice(5).replace('-', '.')}
                     </time>
                     <span aria-hidden className="relative hidden sm:block">
                       <span className="absolute -top-5 -bottom-5 left-1/2 w-px bg-fd-border/70" />
                       <span className="absolute left-1/2 top-1.5 size-2 -translate-x-1/2 rounded-full bg-[var(--cn-brand)] ring-4 ring-fd-background" />
                     </span>
-                    <span className="min-w-0">
+                    <span className="min-w-0 p-2">
                       <span className="mt-2 block sm:mt-0"><CategoryLabel category={post.category} />{post.original === false && <span className={cn('ml-2 text-fd-muted-foreground', siteType.meta)}>转载</span>}</span>
                       <span className={cn('mt-1.5 block group-hover:text-[var(--cn-brand)] group-focus-visible:text-[var(--cn-brand)]', siteType.cardTitle, siteMotion.feedback)}>
                         {post.title}
