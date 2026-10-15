@@ -37,12 +37,15 @@ jobs:
       - name: 类型检查
         run: pnpm types:check
 
-      # /timeline 的 Star 趋势与提交热力图在构建期读 GitHub 接口，而 stargazers
-      # 接口要求认证（未认证 401），认证后限流也才够用。CI 用 Actions 自动生成的
-      # 仓库级只读令牌即可，不需要额外配置 secret。
+      # /timeline 的 Star 趋势在构建期读 GitHub 的 stargazers 接口，而该接口已被 GitHub
+      # 收紧为「仅仓库的 admin / collaborator 可读」：Actions 自动生成的 GITHUB_TOKEN 是
+      # 安装令牌，会稳定 403。真正生效的是 ACTIVITY_TOKEN（维护者的细粒度 PAT，仅「公开
+      # 仓库只读」）。未配置时构建照常通过，只是趋势图不渲染——绝不画一条不完整的曲线。
+      # 提交热力图、活跃贡献者与 Star 当前值读的接口不要求该权限，用 GITHUB_TOKEN 即可。
       - name: 构建
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTIVITY_TOKEN: ${{ secrets.ACTIVITY_TOKEN }}
         run: pnpm build
 
       - name: UI 契约检查

@@ -293,7 +293,6 @@ const starTrendFixture = {
     { date: '2026-01-01', count: 40 },
   ],
   total: 40,
-  last30: 3,
   live: true,
 };
 

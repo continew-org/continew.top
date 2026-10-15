@@ -116,6 +116,26 @@ function isRetryableError(error: unknown): boolean {
 /** 一次请求的间隔基数，重试时按次数线性退避。 */
 const RETRY_DELAY_MS = 400;
 
+/**
+ * GitHub 接口用的令牌。
+ *
+ * **`stargazers` 不能只靠 Actions 自动生成的 `GITHUB_TOKEN`。** GitHub 已把该接口收紧为
+ * 「仅仓库的 admin / collaborator 可读」，而 `GITHUB_TOKEN` 是安装令牌（`ghs_` 前缀），
+ * 既不是 admin 也不是 collaborator，会稳定返回 403 `Resource not accessible by integration`
+ * ——连本仓库自己的 stargazers 都读不到，换 Accept 头、降到串行均无效（2026-10-15 实测）。
+ *
+ * 所以优先取 `ACTIVITY_TOKEN`：属于组织维护者、仅勾选「公开仓库只读」的细粒度 PAT。
+ * 未配置时退回 `GITHUB_TOKEN`，此时 Star 趋势图不渲染（见 repo-activity 的完整性校验），
+ * 其余数据（Star 当前值、提交热力图）不受影响——它们读的接口不要求该权限。
+ */
+const GITHUB_TOKEN = process.env.ACTIVITY_TOKEN || process.env.GITHUB_TOKEN;
+
+/**
+ * 已报过错的 URL。一个 URL 失败会重试数次，逐次打印只会把同一条信息刷成三行；
+ * 构建日志里「哪个接口、什么状态码」看一遍就够。
+ */
+const reportedFailures = new Set<string>();
+
 export interface FetchJsonOptions {
   /**
    * 请求的 Accept。部分接口靠它切换响应形态（stargazers 要 `...star+json` 才有 `starred_at`），
@@ -165,8 +185,8 @@ async function attemptJson(url: string, accept: string): Promise<unknown | typeo
       Accept: accept,
       'User-Agent': 'continew.top',
     };
-    if (url.includes('api.github.com') && process.env.GITHUB_TOKEN) {
-      headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+    if (url.includes('api.github.com') && GITHUB_TOKEN) {
+      headers.Authorization = `Bearer ${GITHUB_TOKEN}`;
     }
 
     const res = await fetch(url, {
@@ -174,11 +194,30 @@ async function attemptJson(url: string, accept: string): Promise<unknown | typeo
       signal: AbortSignal.timeout(10_000),
       next: { revalidate: 86_400 },
     });
-    if (!res.ok) return isRetryableStatus(res.status) ? RETRYABLE : null;
+    if (!res.ok) {
+      reportFailure(url, res.status);
+      return isRetryableStatus(res.status) ? RETRYABLE : null;
+    }
     return await res.json();
   } catch (error) {
     return isRetryableError(error) ? RETRYABLE : null;
   }
+}
+
+/**
+ * 记一笔失败。
+ *
+ * 失败本身由调用方降级处理，但**必须留下痕迹**：`stargazers` 的 403 在页面上表现为
+ * 「趋势图整块消失」，不查构建日志根本无从判断是限流、网络还是权限。
+ */
+function reportFailure(url: string, status: number): void {
+  if (reportedFailures.has(url)) return;
+  reportedFailures.add(url);
+  const hint =
+    status === 403 && url.includes('/stargazers')
+      ? '（stargazers 仅对仓库 admin / collaborator 开放，需配置 ACTIVITY_TOKEN，见 data/README.md）'
+      : '';
+  console.warn(`[platform-api] ${status} ${url}${hint}`);
 }
 
 /**
@@ -211,6 +250,13 @@ export interface OrgRepoMeta {
    * 误报成「拉取失败」。
    */
   size: number;
+  /**
+   * 当前 Star 总数。
+   *
+   * 它的用途不是展示（导航栏的数字就是它），而是**给 stargazers 列表当对照物**：
+   * 逐条累加出来的总数必须不小于它，否则说明列表被截断了，宁可不画图也不能画半条。
+   */
+  stargazersCount: number;
 }
 
 /**
@@ -218,14 +264,27 @@ export interface OrgRepoMeta {
  *
  * 与 Star 统计、贡献者统计共用同一次请求（fetchJson 按 URL 去重），
  * 所以「仓库概览」这类新指标不产生额外调用。
+ *
+ * 接口字段是下划线命名（`stargazers_count`），这里统一收敛成驼峰：调用方读的是
+ * 本项目自己的类型，不该记得住上游的拼写。
  */
 export async function getGithubRepos(): Promise<OrgRepoMeta[] | null> {
   const repos = await getOrgRepos(github);
   if (!repos) return null;
-  return repos.filter(
-    (repo): repo is OrgRepoMeta =>
-      typeof repo === 'object' && repo !== null && typeof (repo as OrgRepoMeta).name === 'string',
-  );
+  return repos.flatMap((repo) => {
+    if (typeof repo !== 'object' || repo === null) return [];
+    const raw = repo as Record<string, unknown>;
+    if (typeof raw.name !== 'string') return [];
+    return [
+      {
+        name: raw.name,
+        archived: raw.archived === true,
+        fork: raw.fork === true,
+        size: typeof raw.size === 'number' ? raw.size : 0,
+        stargazersCount: typeof raw.stargazers_count === 'number' ? raw.stargazers_count : 0,
+      },
+    ];
+  });
 }
 
 /**

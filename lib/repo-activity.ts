@@ -1,10 +1,10 @@
 import { fetchJson, getGithubRepos, githubPlatform, mapLimit } from './platform-api';
 
 /**
- * 社区活动统计：GitHub Star 累计趋势、提交热力图、活跃贡献者。
+ * 社区活动统计：GitHub Star 累计趋势与提交热力图。
  *
  * 与 lib/site-stats.ts 的分工：那里管「有多少」（Star 总数、贡献者总数），
- * 这里管「动得多快」（增长曲线、提交节奏、还在提交的人）。
+ * 这里管「动得多快」（增长曲线、提交节奏）。
  *
  * 全部在构建期拉取，结果固化进 HTML。任一数据拿不到就标记 live: false，
  * 由页面决定不渲染——**绝不画一条假曲线、也不显示错误信息给访问者**。
@@ -12,11 +12,8 @@ import { fetchJson, getGithubRepos, githubPlatform, mapLimit } from './platform-
 
 const DAY_MS = 86_400_000;
 
-/** 活动窗口：过去一年。热力图与「近一年贡献者」取自同一批提交记录。 */
+/** 活动窗口：过去一年。热力图的默认窗口与「近一年」那一格都取自同一批提交记录。 */
 const ACTIVITY_WINDOW_DAYS = 365;
-
-/** 「活跃贡献者」的判定窗口。 */
-const ACTIVE_WINDOW_DAYS = 90;
 
 /** 提交列表每页条数（GitHub 上限 100）。 */
 const COMMITS_PER_PAGE = 100;
@@ -86,8 +83,6 @@ export interface StarTrend {
   points: StarTrendPoint[];
   /** 当前累计（应与导航栏的 GitHub 数字一致）。 */
   total: number;
-  /** 近 30 天新增。 */
-  last30: number;
   live: boolean;
 }
 
@@ -112,7 +107,7 @@ export interface StarTrend {
  *   这是 star-history 类工具的通行口径，不是本项目的缺陷，页面图注里要讲清楚。
  */
 export async function getGithubStarTrend(): Promise<StarTrend> {
-  const empty: StarTrend = { points: [], total: 0, last30: 0, live: false };
+  const empty: StarTrend = { points: [], total: 0, live: false };
 
   const repos = await getGithubRepos();
   if (!repos || repos.length === 0) return empty;
@@ -121,16 +116,25 @@ export async function getGithubStarTrend(): Promise<StarTrend> {
   // 再多也不会更快（吞吐由链路决定），只会更接近 GitHub 的次级限流。
   const perRepo = await mapLimit(repos, 5, async (repo) => fetchStargazerDays(repo.name));
 
-  if (perRepo.every((days) => days === null)) {
-    console.warn('[repo-activity] Star 历史拉取失败：全部仓库都没拿到 stargazers。');
-    return empty;
-  }
-
   const failed = perRepo.filter((days) => days === null).length;
-  if (failed > 0) {
+  const fetched = perRepo.reduce((sum, days) => sum + (days?.length ?? 0), 0);
+
+  /*
+   * 完整性校验：逐条累加出来的总数必须不少于仓库元数据里的 Star 合计。
+   *
+   * 少了就说明列表被截断——可能是某个仓库整条拉取失败，也可能是某一页失败后
+   * 后面的页没能接上。**此时画出来的是一条远低于实际的假曲线**：2026-10-15 线上
+   * 就出现过「导航栏 2,782、图上 56」——`stargazers` 仅对仓库 admin / collaborator
+   * 开放，Actions 的安装令牌读不到，9 个仓库里只有 1 个碰巧成功。
+   *
+   * 用 `<` 而不是 `!==`：构建期间新来的 Star 会让实际值略大于元数据快照，那是正常的。
+   */
+  const expected = repos.reduce((sum, repo) => sum + repo.stargazersCount, 0);
+  if (fetched < expected) {
     console.warn(
-      `[repo-activity] Star 历史有 ${failed} 个仓库拉取失败；曲线会略低于实际值。`,
+      `[repo-activity] Star 历史不完整（拉到 ${fetched}，仓库元数据合计 ${expected}，${failed} 个仓库失败），已放弃绘制趋势图。`,
     );
+    return empty;
   }
 
   const starredPerDay = new Map<string, number>();
@@ -154,30 +158,37 @@ export async function getGithubStarTrend(): Promise<StarTrend> {
     points.push({ date: day, count: running });
   }
 
-  const cutoff = daysBefore(end, 30);
-  const atCutoff = points.find((point) => point.date >= cutoff)?.count ?? running;
-
-  return { points, total: running, last30: running - atCutoff, live: true };
+  return { points, total: running, live: true };
 }
 
-/** 单个仓库的全部 Star 日期（含重复，一天可被多人 Star）。全失败返回 null。 */
+/** 收一页数据的结果：`fail` 是这一页没拿到，`end` 是列表到底了，`more` 是还有下一页。 */
+type PageState = 'fail' | 'end' | 'more';
+
+/** 单个仓库的全部 Star 日期（含重复，一天可被多人 Star）。任一处失败返回 null。 */
 async function fetchStargazerDays(repo: string): Promise<string[] | null> {
   const days: string[] = [];
   const pageUrl = (page: number) =>
     `https://api.github.com/repos/${githubPlatform.org}/${repo}/stargazers?per_page=100&page=${page}`;
 
-  /** 收一页数据；返回 true 表示这页不满、后面没有了。 */
-  const collect = (data: unknown): boolean => {
-    if (!Array.isArray(data)) return true;
+  /*
+   * 收一页数据。
+   *
+   * 「这一页失败」与「列表到底了」必须分开：早先把两者都当成「到底了」，
+   * 于是第 2 页一失败就带着只有第 1 页的数据返回，调用方还以为这个仓库拉全了——
+   * 静默少掉几百个 Star。失败就得让整个仓库作废，由上层校验兜住。
+   */
+  const collect = (data: unknown): PageState => {
+    if (!Array.isArray(data)) return 'fail';
     for (const item of data as Array<{ starred_at?: string }>) {
       if (item?.starred_at) days.push(item.starred_at.slice(0, 10));
     }
-    return data.length < 100;
+    return data.length < 100 ? 'end' : 'more';
   };
 
   const first = await fetchJson(pageUrl(1), { accept: STAR_MEDIA_TYPE, retries: 2 });
-  if (!Array.isArray(first)) return null;
-  if (collect(first)) return days;
+  const firstState = collect(first);
+  if (firstState === 'fail') return null;
+  if (firstState === 'end') return days;
 
   for (let base = 2; ; base += PAGE_BATCH) {
     const batch = await Promise.all(
@@ -187,7 +198,9 @@ async function fetchStargazerDays(repo: string): Promise<string[] | null> {
     );
     // 必须按页序处理：某一页失败或不满就得停下，否则会把后面的页错位拼进来
     for (const data of batch) {
-      if (collect(data)) return days;
+      const state = collect(data);
+      if (state === 'fail') return null;
+      if (state === 'end') return days;
     }
   }
 }
@@ -233,13 +246,6 @@ export interface HeatmapWindow {
 export interface CommitActivityData {
   /** 窗口列表，**第一个是默认展示的**（近一年），其后按年份由新到旧。 */
   windows: HeatmapWindow[];
-  /**
-   * 近 30 天提交数。
-   *
-   * 它是**相对今天**的指标，不属于任何一个窗口——放进某个窗口里，
-   * 切到 2024 年就会变成「2024 年 12 月那 30 天」，与「最近的势头」完全是两回事。
-   */
-  last30: number;
   live: boolean;
 }
 
@@ -252,8 +258,8 @@ interface CommitRecord {
 /**
  * 提交记录缓存。
  *
- * 热力图与活跃贡献者取自**同一批请求**，一个页面常常两处都要。
- * 不缓存 Promise 就会把同一年的提交列表翻两遍——那是几十次请求的浪费。
+ * 热力图的多个统计窗口取自**同一批请求**：近一年那一格与各个年份格子用的是同一份
+ * 全历史提交列表。不缓存 Promise 就会把同一批提交翻好几遍——那是几十次请求的浪费。
  */
 let commitLogCache: Promise<CommitRecord[] | null> | null = null;
 
@@ -305,7 +311,7 @@ async function fetchCommitLog(): Promise<CommitRecord[] | null> {
   if (failed > 0) {
     // 留痕：部分仓库失败只会表现为「热力图偏淡」，不查日志根本看不出来
     console.warn(
-      `[repo-activity] 提交记录有 ${failed} 个仓库拉取失败；热力图与活跃贡献者会低于实际值。`,
+      `[repo-activity] 提交记录有 ${failed} 个仓库拉取失败；热力图会低于实际值。`,
     );
   }
 
@@ -346,20 +352,15 @@ async function fetchRepoCommits(repo: string, since: string): Promise<CommitReco
  */
 export async function getCommitActivity(): Promise<CommitActivityData> {
   const log = await getCommitLog();
-  if (!log) return { windows: [], last30: 0, live: false };
+  if (!log) return { windows: [], live: false };
 
   const perDay = new Map<string, number>();
   for (const record of log) {
     perDay.set(record.date, (perDay.get(record.date) ?? 0) + 1);
   }
-  if (perDay.size === 0) return { windows: [], last30: 0, live: false };
+  if (perDay.size === 0) return { windows: [], live: false };
 
   const end = today();
-  const last30Cutoff = daysBefore(end, 30);
-  let last30 = 0;
-  for (const [date, count] of perDay) {
-    if (date >= last30Cutoff) last30 += count;
-  }
 
   const windows: HeatmapWindow[] = [
     buildWindow('recent', '近一年', daysBefore(end, ACTIVITY_WINDOW_DAYS - 1), end, perDay),
@@ -390,7 +391,7 @@ export async function getCommitActivity(): Promise<CommitActivityData> {
     windows.push(buildWindow(String(year), `${year} 年`, start, `${year}-12-31`, perDay));
   }
 
-  return { windows, last30, live: true };
+  return { windows, live: true };
 }
 
 /**
@@ -502,47 +503,4 @@ function longestStreak(totals: number[]): number {
     if (current > best) best = current;
   }
   return best;
-}
-
-/* -------------------------------- 活跃贡献者 -------------------------------- */
-
-export interface ActiveContributors {
-  /** 近 90 天提交过代码的去重人数。 */
-  recent: number;
-  /** 近一年出现过的人数，与 recent 并列才说明「人还在不在」。 */
-  yearly: number;
-  live: boolean;
-}
-
-/**
- * 活跃贡献者。
- *
- * 与 `getContributorSummary` 的差别：那个给的是**历史累计**贡献者数（79 人），
- * 是「有多少人来过」；这里给的是**最近还在提交的人**，是「现在有多少人在做」。
- * 两个数字必须一起看——只放累计数，一个已经沉寂的项目也会显得很热闹。
- *
- * 判定依据是提交作者（`author.login`），所以只算在 GitHub 提交过代码的人：
- * 只报 Issue、参与讨论、写文档的人不在其中，这与项目一贯的「代码贡献者」口径一致。
- */
-export async function getActiveContributors(): Promise<ActiveContributors> {
-  const log = await getCommitLog();
-  if (!log) return { recent: 0, yearly: 0, live: false };
-
-  const yearlyCutoff = daysBefore(today(), ACTIVITY_WINDOW_DAYS);
-  const recentCutoff = daysBefore(today(), ACTIVE_WINDOW_DAYS);
-  const recent = new Set<string>();
-  const yearly = new Set<string>();
-  for (const record of log) {
-    if (!record.login) continue;
-    /*
-     * 先按年窗口过滤，再判断 90 天。少了这一步 `yearly` 数的是**全部记录**的去重作者数：
-     * 过去日志只有一年，两个口径碰巧相等，所以一直没暴露；改成拉全历史之后，
-     * 它立刻变成「近一年 67 人」——67 是四年的累计人数，读者读到的却是最近一年。
-     */
-    if (record.date < yearlyCutoff) continue;
-    yearly.add(record.login);
-    if (record.date >= recentCutoff) recent.add(record.login);
-  }
-
-  return { recent: recent.size, yearly: yearly.size, live: true };
 }
