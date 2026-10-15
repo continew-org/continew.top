@@ -43,7 +43,7 @@ function loadTs(relativePath) {
 }
 
 const { Button, ActionLink, FilterChip } = loadTs('components/site-actions.tsx');
-const { siteLayout, siteType } = loadTs('lib/site-design.ts');
+const { siteGrid, siteLayout, siteType } = loadTs('lib/site-design.ts');
 const render = (component, props, children) => renderToStaticMarkup(React.createElement(component, props, children));
 const exported = (path) => readFileSync(join(root, 'out', path), 'utf8');
 
@@ -66,6 +66,26 @@ test('standard and reading shells keep explicit width and padding contracts', ()
   assert.match(siteLayout.home, /max-w-6xl/);
   assert.match(siteType.pageTitle, /sm:text-5xl/);
   assert.match(siteType.cardTitle, /text-base/);
+});
+
+test('directory density is declared once instead of per page', () => {
+  assert.match(siteGrid.directory, /lg:grid-cols-3/);
+  assert.match(siteGrid.grouped, /lg:grid-cols-\[19rem_1fr\]/);
+  assert.match(siteGrid.pair, /lg:max-w-3xl/);
+});
+
+test('member grids take their columns from the density contract', () => {
+  const { MemberGrid } = loadTs('components/team/member-grid.tsx');
+  const members = [{ name: '占位成员', avatarPic: '/logo.svg', title: '占位职称' }];
+  const pair = render(MemberGrid, { members, kind: 'core', columns: 2 });
+  const directory = render(MemberGrid, { members, kind: 'resonator' });
+  // 固定 2 列而不管可用宽度，正是核心成员卡被拉到 544px 的原因：2 人小组必须限宽
+  assert.ok(pair.includes('lg:max-w-3xl'), 'A two-card group must cap its width');
+  assert.ok(!pair.includes('lg:grid-cols-3'));
+  assert.ok(directory.includes('lg:grid-cols-3'));
+  assert.ok(!directory.includes('lg:max-w-3xl'));
+  // 卡片内距与名录页其余卡片一致
+  assert.ok(pair.includes('bg-fd-card p-4'), 'Member cards must keep the 16px padding');
 });
 
 test('buttons preserve operation semantics, focus, accessible names and disabled state', () => {

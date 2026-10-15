@@ -13,6 +13,8 @@ import { ActionLink } from '@/components/site-actions';
 import { ContributionPaths } from '@/components/team/contribution-paths';
 import { MemberGrid } from '@/components/team/member-grid';
 import { TeamNetworkVisual } from '@/components/team/team-network-visual';
+import { siteGrid, siteType } from '@/lib/site-design';
+import { cn } from '@/lib/cn';
 
 export const metadata: Metadata = {
   title: '社区团队',
@@ -90,17 +92,23 @@ export default async function TeamPage() {
           </span>
         }
       >
-        <div className="space-y-10">
+        <div className="divide-y divide-fd-border/70">
           {coreGroups.map((group) => (
-            <section key={group.key} aria-labelledby={`core-${group.key}`}>
-              <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-fd-border/70 pb-3">
-                <div>
-                  <h3 id={`core-${group.key}`} className="font-semibold">
-                    {group.label}
-                  </h3>
-                  <p className="mt-1 text-sm leading-6 text-fd-muted-foreground">{group.description}</p>
-                </div>
-                <span className="text-xs text-fd-muted-foreground">{group.members.length} 位</span>
+            <section
+              key={group.key}
+              aria-labelledby={`core-${group.key}`}
+              className={cn(siteGrid.grouped, 'py-8 first:pt-0 last:pb-0')}
+            >
+              <div>
+                <h3 id={`core-${group.key}`} className="font-semibold">
+                  {group.label}
+                </h3>
+                <p className={cn('mt-1.5 text-fd-muted-foreground', siteType.compact)}>
+                  {group.description}
+                </p>
+                <p className={cn('mt-2 text-fd-muted-foreground', siteType.meta)}>
+                  {group.members.length} 位
+                </p>
               </div>
               <MemberGrid members={group.members} kind="core" columns={2} />
             </section>
@@ -122,7 +130,7 @@ export default async function TeamPage() {
           description="他们曾深度参与项目维护并留下重要贡献，目前不承担日常核心维护责任。我们在这里保留这段共同建设的历史。"
           action={<span className="text-sm text-fd-muted-foreground">{emeriti.length} 位</span>}
         >
-          <MemberGrid members={emeriti} kind="emeritus" columns={2} className="lg:max-w-3xl" />
+          <MemberGrid members={emeriti} kind="emeritus" columns={2} />
         </Section>
       )}
 

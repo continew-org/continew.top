@@ -102,14 +102,14 @@ export function TeamMemberCard({ member, kind }: Readonly<{ member: TeamMember; 
   const hasActions = Boolean(socials || member.sponsor || member.afdian);
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-fd-border bg-fd-card p-5">
-      <div className="flex items-start gap-4">
+    <div className="flex h-full flex-col rounded-xl border border-fd-border bg-fd-card p-4">
+      <div className="flex items-start gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={member.avatarPic}
           alt={member.name}
           loading="lazy"
-          className="size-14 shrink-0 rounded-full border border-fd-border object-cover"
+          className="size-12 shrink-0 rounded-full border border-fd-border object-cover"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -120,15 +120,15 @@ export function TeamMemberCard({ member, kind }: Readonly<{ member: TeamMember; 
               </span>
             )}
           </div>
-          <p className="mt-1 text-sm leading-6 text-fd-foreground/75">{kindLabel[kind]}</p>
-          {!member.featured && <p className="mt-1 text-sm leading-6 text-fd-muted-foreground">{member.title}</p>}
+          <p className="mt-0.5 text-sm leading-6 text-fd-foreground/75">{kindLabel[kind]}</p>
+          {!member.featured && <p className="mt-0.5 text-sm leading-6 text-fd-muted-foreground">{member.title}</p>}
           {member.motto && (
-            <p className="mt-2 line-clamp-2 text-sm leading-6 text-fd-muted-foreground">{member.motto}</p>
+            <p className="mt-1.5 line-clamp-2 text-sm leading-6 text-fd-muted-foreground">{member.motto}</p>
           )}
         </div>
       </div>
 
-      <div className="mt-4 flex flex-1 flex-col gap-3 text-sm leading-6 text-fd-muted-foreground">
+      <div className="mt-3 flex flex-1 flex-col gap-2 text-sm leading-6 text-fd-muted-foreground">
         {member.projects && member.projects.length > 0 && (
           <div>
             <p className="font-medium text-fd-foreground/70">参与范围</p>
@@ -146,7 +146,7 @@ export function TeamMemberCard({ member, kind }: Readonly<{ member: TeamMember; 
       </div>
 
       {hasActions && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-fd-border pt-3">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-fd-border pt-3">
           {socials}
           <div className="flex flex-wrap items-center gap-2">
             {member.sponsor && (

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { ActionLink, Button, FilterChip } from '@/components/site-actions';
-import { focusRing, siteType } from '@/lib/site-design';
+import { focusRing, siteGrid, siteType } from '@/lib/site-design';
 import { cn } from '@/lib/cn';
 import {
   continewProjectLabels,
@@ -145,7 +145,7 @@ export function UserDirectory({
       </p>
 
       {filtered.length > 0 ? (
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className={cn('mt-6', siteGrid.directory)}>
           {filtered.map((user) => {
             const regions = publicRegions(user);
             const useCase = user.useCases?.[0];

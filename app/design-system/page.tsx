@@ -3,7 +3,17 @@ import Link from 'next/link';
 import { PageContainer, PageHeader, Section, cardHover } from '@/components/site-primitives';
 import { DesignSystemExamples } from '@/components/design-system-examples';
 import { cn } from '@/lib/cn';
-import { focusRing, siteType } from '@/lib/site-design';
+import { focusRing, siteGrid, siteType } from '@/lib/site-design';
+
+/** 名录密度的占位卡：只承载版式，不引真实成员数据，避免样例随数据变化而失效。 */
+function SampleDirectoryCard({ name }: Readonly<{ name: string }>) {
+  return (
+    <div className="rounded-xl border border-fd-border p-4">
+      <h4 className={siteType.cardTitle}>{name}</h4>
+      <p className={cn('mt-0.5 text-fd-muted-foreground', siteType.compact)}>身份说明</p>
+    </div>
+  );
+}
 
 export const metadata: Metadata = {
   title: '设计系统样例',
@@ -39,6 +49,28 @@ export default function DesignSystemPage() {
           <div className="rounded-xl border border-fd-border p-6">
             <h3 className={siteType.cardTitle}>持续维护</h3>
             <p className={cn('mt-2 text-fd-muted-foreground', siteType.compact)}>纯信息卡，不暗示整卡可以点击。</p>
+          </div>
+        </div>
+      </Section>
+      <Section
+        title="名录密度"
+        description="名录卡保持 360–380px 同一口径：平铺名录用三列，分组型名录把组名放进左栏、卡片排右栏。"
+      >
+        <div className={siteGrid.directory}>
+          {['占位成员一', '占位成员二', '占位成员三'].map((name) => (
+            <SampleDirectoryCard key={name} name={name} />
+          ))}
+        </div>
+        <div className={cn(siteGrid.grouped, 'mt-6 rounded-xl border border-fd-border p-4')}>
+          <div>
+            <h3 className={siteType.cardTitle}>分组名称</h3>
+            <p className={cn('mt-1.5 text-fd-muted-foreground', siteType.compact)}>一句话说明这个分组。</p>
+            <p className={cn('mt-2 text-fd-muted-foreground', siteType.meta)}>2 位</p>
+          </div>
+          <div className={siteGrid.pair}>
+            {['占位成员四', '占位成员五'].map((name) => (
+              <SampleDirectoryCard key={name} name={name} />
+            ))}
           </div>
         </div>
       </Section>

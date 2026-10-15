@@ -10,7 +10,7 @@ import {
   Section,
 } from '@/components/site-primitives';
 import { cn } from '@/lib/cn';
-import { siteType } from '@/lib/site-design';
+import { siteGrid, siteType } from '@/lib/site-design';
 
 export const metadata: Metadata = {
   title: '在线演示',
@@ -83,7 +83,8 @@ export default function DemoPage() {
         title="演示地址与账号"
         description="演示环境基于 dev 分支构建，展示的是最新开发中的功能。"
       >
-        <div className="grid gap-4 sm:grid-cols-2">
+        {/* 两条都是一行内容，满宽铺开会变成两张空卡；限宽到与名录卡同一口径。 */}
+        <div className={siteGrid.pair}>
           <div className="rounded-xl border border-fd-border p-5">
             <h3 className={cn('font-medium text-fd-muted-foreground', siteType.compact)}>地址</h3>
             <ActionLink href={demoUrl} variant="text" className="mt-2 max-w-full">
