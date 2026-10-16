@@ -145,7 +145,7 @@ export async function getGithubStarTrend(): Promise<StarTrend> {
   }
   if (starredPerDay.size === 0) return empty;
 
-  const firstDay = [...starredPerDay.keys()].sort()[0];
+  const firstDay = [...starredPerDay.keys()].sort((a, b) => a.localeCompare(b))[0];
   const end = today();
 
   const points: StarTrendPoint[] = [
@@ -366,7 +366,7 @@ export async function getCommitActivity(): Promise<CommitActivityData> {
     buildWindow('recent', '近一年', daysBefore(end, ACTIVITY_WINDOW_DAYS - 1), end, perDay),
   ];
 
-  const firstDay = [...perDay.keys()].sort()[0];
+  const firstDay = [...perDay.keys()].sort((a, b) => a.localeCompare(b))[0];
   const firstYear = Number(firstDay.slice(0, 4));
   const currentYear = Number(end.slice(0, 4));
 

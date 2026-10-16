@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button, FilterChip } from '@/components/site-actions';
-import { cardHover } from '@/components/site-primitives';
 import { BLOG_CATEGORIES, type BlogCategory } from '@/lib/blog-meta';
 import type { BlogPost } from '@/lib/blog-source';
 import { cn } from '@/lib/cn';

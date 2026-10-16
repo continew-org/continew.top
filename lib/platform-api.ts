@@ -170,16 +170,27 @@ export async function fetchJson(url: string, options: FetchJsonOptions = {}): Pr
   return pending;
 }
 
-async function requestJson(url: string, accept: string, retries: number): Promise<unknown> {
-  for (let attempt = 0; ; attempt++) {
-    const result = await attemptJson(url, accept);
-    if (result !== RETRYABLE) return result;
-    if (attempt >= retries) return null;
-    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)));
-  }
+/**
+ * 带退避的重试：第 n 次重试前等 n×400ms（见 RETRY_DELAY_MS）。
+ *
+ * 重试必须串行——发不发下一次取决于上一次的结果，等待也只能一次一次来，
+ * 所以这里用递归推进，而不是把 await 写进循环里。
+ */
+async function requestJson(
+  url: string,
+  accept: string,
+  retries: number,
+  attempt = 0,
+): Promise<unknown> {
+  const result = await attemptJson(url, accept);
+  if (result !== RETRYABLE) return result;
+  if (attempt >= retries) return null;
+  await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * (attempt + 1)));
+  return requestJson(url, accept, retries, attempt + 1);
 }
 
-async function attemptJson(url: string, accept: string): Promise<unknown | typeof RETRYABLE> {
+/** 发一次请求。瞬时故障返回内部哨兵 `RETRYABLE`，由调用方决定是否重试。 */
+async function attemptJson(url: string, accept: string): Promise<unknown> {
   try {
     const headers: Record<string, string> = {
       Accept: accept,

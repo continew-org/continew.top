@@ -43,8 +43,9 @@ export function CommitActivity({ windows }: Readonly<{ windows: HeatmapWindow[] 
       {/*
        * 年份切换器用 FilterChip：它自带 `aria-pressed` 与选中态，正是「筛选」语义。
        * 热力图本身是 aria-hidden 的，所以这个切换器就是读屏用户唯一的操作入口。
+       * 容器用原生 fieldset 而不是 div[role="group"]：一组选项本就该由字段组承载。
        */}
-      <div role="group" aria-label="选择统计窗口" className="flex flex-wrap items-center gap-2">
+      <fieldset aria-label="选择统计窗口" className="flex flex-wrap items-center gap-2">
         {windows.map((item) => (
           <FilterChip
             key={item.key}
@@ -54,7 +55,7 @@ export function CommitActivity({ windows }: Readonly<{ windows: HeatmapWindow[] 
             {item.label}
           </FilterChip>
         ))}
-      </div>
+      </fieldset>
 
       <div className="mt-6">
         <CommitHeatmapChart heatmap={active} />
