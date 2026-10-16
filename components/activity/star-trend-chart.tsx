@@ -55,8 +55,8 @@ function samplePoints(points: StarTrendPoint[]): StarTrendPoint[] {
   const step = Math.ceil(points.length / MAX_POINTS);
   const sampled = points.filter((_, index) => index % step === 0);
   // 末点必须保留：它既是曲线的终点，也是「累计 = 导航栏那个数」的凭据
-  const last = points[points.length - 1];
-  if (sampled[sampled.length - 1] !== last) sampled.push(last);
+  const last = points.at(-1);
+  if (last !== undefined && sampled.at(-1) !== last) sampled.push(last);
   return sampled;
 }
 
@@ -66,7 +66,9 @@ export function StarTrendChart({ trend }: Readonly<{ trend: StarTrend }>) {
 
   const points = samplePoints(trend.points);
   const first = points[0];
-  const last = points[points.length - 1];
+  const last = points.at(-1);
+  // 采样保留首尾点，这里判空只是把「两端一定在」交给类型系统
+  if (!first || !last) return null;
 
   const t0 = Date.parse(`${first.date}T00:00:00Z`);
   const span = Math.max(Date.parse(`${last.date}T00:00:00Z`) - t0, 1);

@@ -18,9 +18,19 @@ html {
   scrollbar-gutter: stable;
 }
 
+/*
+ * 弹窗 / 抽屉打开时，react-remove-scroll-bar 会往 <head> 末尾注入一段样式，把 body 的
+ * margin-right 与 --removed-body-scroll-bar-size 设成滚动条宽度，而且带 !important。
+ * 本站的 html 已用 scrollbar-gutter: stable 常驻预留了滚动条位置，这份补偿是重复的：
+ * 不清零，每次打开手机菜单或搜索框页面都会横向跳一下。
+ *
+ * 要压过这份注入的 !important，本地规则只能同样声明 !important（重要性先于特异性比较）；
+ * 选择器多一层 `html >` 是为了在「同样重要」时赢在特异性上——对方的注入规则是
+ * `body[data-scroll-locked]`，且由脚本挂在我们的样式表之后。
+ */
 html > body[data-scroll-locked] {
-  margin-right: 0px !important;
-  --removed-body-scroll-bar-size: 0px !important;
+  margin-right: 0px !important; /* NOSONAR: 覆盖第三方注入的 !important 声明，理由见上 */
+  --removed-body-scroll-bar-size: 0px !important; /* NOSONAR: 同上 */
 }
 
 /* 品牌蓝与 neutral 主题分工：强调动作使用品牌色，正文和底色仍使用 fd-*。 */
@@ -392,14 +402,30 @@ button:not(:disabled),
     mask-image: none;
   }
 
-  /* Tailwind 4 的位移/缩放使用独立属性；只清理 hover 动效，不改结构性居中位移。 */
+  /*
+   * Tailwind 4 的位移/缩放使用独立属性；只清理 hover 动效，不改结构性居中位移。
+   *
+   * transform 不跟 translate / scale 写在同一条规则里：产物压缩器（lightningcss）
+   * 会把同一规则里跟 `transform: none` 并排的 `translate: none`、`scale: 1` 当成
+   * 冗余声明删掉，三条分开写才留得进产物。
+   *
+   * 也不需要 !important：位移/缩放的工具类都落在 @layer utilities 里，
+   * 而未分层（unlayered）的规则在层叠上本就压过分层规则。
+   */
   :is([class*='hover:translate-'], [class*='hover:-translate-']) {
-    translate: none !important;
-    transform: none !important;
+    translate: none;
   }
 
   :is([class*='hover:scale-'], [class*='hover:-scale-']) {
-    scale: 1 !important;
-    transform: none !important;
+    scale: 1;
+  }
+
+  :is(
+    [class*='hover:translate-'],
+    [class*='hover:-translate-'],
+    [class*='hover:scale-'],
+    [class*='hover:-scale-']
+  ) {
+    transform: none;
   }
 }
