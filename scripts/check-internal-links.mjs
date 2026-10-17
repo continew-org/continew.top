@@ -9,11 +9,18 @@ const root = resolve(process.argv[2] ?? 'out');
 if (root !== workingDir && !root.startsWith(`${workingDir}${sep}`)) {
   throw new Error(`Refusing to operate outside the working directory: ${process.argv[2]}`);
 }
-const htmlFiles = (await readdir(root, { recursive: true, withFileTypes: true }))
-  .filter((entry) => entry.isFile() && extname(entry.name) === '.html')
+const files = (await readdir(root, { recursive: true, withFileTypes: true })).filter((entry) =>
+  entry.isFile(),
+);
+const htmlFiles = files
+  .filter((entry) => extname(entry.name) === '.html')
   .map((entry) => join(entry.parentPath, entry.name));
 
 const toPosix = (value) => value.split(sep).join('/');
+// 站内静态文件（如 /llms.txt、/atomgit.svg）不是页面路由，产物中存在即视为可达。
+const staticFiles = new Set(
+  files.map((entry) => toPosix(relative(root, join(entry.parentPath, entry.name)))),
+);
 const routeOf = (file) => {
   const rel = toPosix(relative(root, file));
   if (rel === 'index.html') return '/';
@@ -67,6 +74,7 @@ for (const { source, href } of links) {
 
   const path = decodeURIComponent(url.pathname).replace(/\/$/, '') || '/';
   if (!routeFiles.has(path)) {
+    if (path !== '/' && staticFiles.has(path.slice(1))) continue;
     errors.push(`${source}: ${JSON.stringify(href)} resolves to missing route ${path}`);
     continue;
   }
