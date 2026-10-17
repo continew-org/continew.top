@@ -109,7 +109,7 @@ export default async function BlogPostPage(props: Readonly<PageProps<'/blog/[...
                   <ul className="mt-4 divide-y divide-fd-border/70">
                     {related.map((post) => (
                       <li key={post.url}>
-                        <Link href={post.url} className={cn('group block rounded-sm py-4', cardHover, focusRing)}>
+                        <Link href={post.url} className={cn('group -mx-3 block rounded-md px-3 py-4', cardHover, focusRing)}>
                           <span className={cn('tabular-nums text-fd-muted-foreground', siteType.meta)}>{post.date}</span>
                           <span className={cn('mt-1 block font-medium group-hover:text-[var(--cn-brand)] group-focus-visible:text-[var(--cn-brand)]', siteType.compact)}>{post.title}</span>
                           {post.description && <span className={cn('mt-1 line-clamp-2 block text-fd-muted-foreground', siteType.compact)}>{post.description}</span>}

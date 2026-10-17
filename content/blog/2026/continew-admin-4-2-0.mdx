@@ -1,0 +1,92 @@
+---
+title: ContiNew Admin v4.2.0 | Vibe Coding 基座的起点
+author: Charles7c
+datetime: 2026-10-11 22:00
+category: 版本更新
+---
+
+近2个月，Vibe Coding 疯魔半年的我终于腾出点空，以 AI for All 的主理人视角，把 ContiNew 系列**集中梳理了一遍**，也借这个机会和各位大佬聊聊我个人视角**脚手架可预见的未来**。
+
+## Vibe Coding 基座建设
+
+Vibe Coding 范式今年强势来袭。不过短短半年，AI Agent 的开发效率和质量就已令人工难以望其项背。为了守住最终交付质量，也为了保住我们最后的“尊严”和“价值”，人工评审不约而同地成了最后的“底线”。
+
+可这时候，人工反而成了 AI Agent 交付的瓶颈。于是，除了优化 `AGENTS.md` 这类规则约束、增加 AI 交叉评审，传统软件工程里的质量门禁和工程规范也重新“焕发新生”。
+
+得了“空闲”的程序员，开始更加重视交付质量。毕竟，**“我写得再烂也能验收通过，AI Agent 写得再快再好，验收不过也不行”**。
+
+ContiNew 本就是把质量和最佳实践当作追求之一。有了 AI 辅助之后，基于 ContiNew 系列项目开发，应该能更优雅、更舒适。
+
+> ContiNew（Continue New）系列项目 slogan：持续迭代优化，持续提供开箱即用，舒适的开发体验。依托开源协作模式，提升技术透明度、放大集体智慧、共创优秀实践。
+>
+> **Vibe Coding 时代，好的基座要同时满足两种使用方式：让人写得优雅、用得舒服、改得轻松；让 Agent 读得懂、干得明白、写得规范。**
+
+ContiNew Admin 后端和 ContiNew Starter 目前均接入了 Enforcer、Spotless、Checkstyle、SpotBugs 四道工程门禁并清零存量问题；单元测试也重新纳入构建检查，接入 JaCoCo 覆盖率采集；还新增 OCN-CodeStyle 配置，引入 Maven Wrapper 并锁定 Maven 3.9.16。ContiNew Admin 前端清零 ESLint 存量问题，并将 SCSS 从 `@import` 迁移到 `@use`。
+
+文档方面，ContiNew Admin、ContiNew Starter 仓库新增了正式的 `docs/` 目录，文档跟随源码一起维护，再由官网汇聚展示。无论自己查阅，还是让 AI 理解项目，都可以先从仓库里的文档开始。
+
+我们还让官网对 AI 更友好了些：新增 [llms.txt](https://continew.top/llms.txt)，让 AI Agent 更懂“ContiNew”。
+
+**这一次，我希望你重新考虑一下现在、以及即将全面升级后的 ContiNew。毕竟你是专业开发者，不是拿 Vibe Coding 作乐的“领导”：靠一句“不需要，AI 分分钟”击碎你的道心。**
+
+**甚至这一次，有 AI 加持的你，也可以试试参与进来一起开源：我们一起提前多花点 Token，下一个项目就能少花点 Token 和时间。**
+
+![continew-admin 仓库根目录：AGENTS.md 与 docs/ 等 AI 协作约定](/images/blog/continew-admin-4-2-0/20261011-4-1.webp)
+
+## ContiNew Starter 升级至 v2.17.0
+
+作为 ContiNew Admin 的底层支撑，ContiNew Starter 在此期间迭代了 6 个版本，从 v2.14.0 升级到了 v2.17.0，Spring Boot 已升级至 3.5.16。ContiNew Admin 已跟进完成适配，感谢维护成员 Q 佬（@liquor）为文件上传接入了 Starter 存储模块，基础上传与分片上传的实现进一步统一。
+
+**好多大佬比较关心的：Spring Boot 4.x 还会远吗？**
+
+**我们的回答：升级 Spring Boot 4.x 不会太远，JDK 也将从 17 升级至 25。**但这个过程需要“软着陆”：部分第三方组件没有跟进 Spring Boot 4.x，或在近一年内已经停更，我们得在移除、替换、最小化自维护之间找平衡。这属于持续迭代里正常的一段，只不过 Spring Boot 4.x 成了“快速催化剂”。
+
+详细更新请查阅 [ContiNew Starter 更新日志](https://github.com/continew-org/continew-starter/blob/dev/CHANGELOG.md)。
+
+![ContiNew Starter v2.17.0 更新日志](/images/blog/continew-admin-4-2-0/20261011-1-1.webp)
+
+## Refresh Token 登录续期
+
+感谢维护成员老罗（@luoqiz）在本版本引入了 Refresh Token 会话体系，采用 Access Token（内存持有）+ Refresh Token（默认 HttpOnly Cookie）双令牌轮换：Access Token 过期后，前端可以在刷新会话仍有效时自动获取新凭证并继续请求，并协调多个并发请求只刷新一次。
+
+客户端管理页新增了长期令牌与并发登录配置，支持按端管理：刷新会话的有效期、Refresh Token 通过 Cookie 还是响应体返回（适配浏览器与 App、小程序）、是否允许多地同时登录、会话数量上限，以及超限时采用注销、踢人还是顶人。
+
+![客户端配置表单：长期令牌与并发登录设置](/images/blog/continew-admin-4-2-0/20261011-2-2.webp)
+
+## 文件上传策略完善
+
+4.1.0 已经上线了第一版分片上传，本版本在存储配置中补齐了上传策略：分片阈值、每片大小，以及本地存储的分片临时目录。前端按配置自动选择——文件大于阈值走分片，否则走普通上传，小文件不必一律拆分。
+
+同时新增上传前重复文件检测，减少同一目录下重复上传相同文件；后端增加了文件名冲突检测与自动重命名能力。
+
+![存储配置：分片阈值、分片大小与分片临时目录](/images/blog/continew-admin-4-2-0/20261011-3-1.webp)
+
+## 关于 5.x：前端仓库要不要合并？
+
+准备 5.x 的过程中，我们想请各位大佬一起参与一个决定：目前后端在 `continew-admin`、前端在 `continew-admin-ui`，接下来是继续分仓维护，还是把前端放进 `continew-admin` 的独立目录统一管理？
+
+**我个人倾向于合并。** 原因：在 ContiNew Admin 1.x 的时候，前后端都在一个仓库，但当时我的追求是重点维护后端，前端则为可选项或可插拔，因为我是个后端，我的需求也是纯后端，所以在 2.x 的时候我把前端拆到了独立仓库。
+
+但由此也带来了后面持续的开源维护难题：项目一个功能经常同时涉及接口、页面、权限和文档，放在同一个仓库里可以在一个 PR 中查看完整改动，拆开后则要分两个项目分别管理；版本对应、问题追踪和 Fork 后同步也更难集中。尤其是现在有了 AI 辅助开发之后，不再区分什么前后端，统一都是 Agent 开发工程师，Monorepo 那套也越来越吃香，让 AI 不用跨仓寻找另一半实现，获得连贯的开发体验。
+
+需要说明的是：**仓库合并不等于取消前后端分离。** 这里讨论的是代码放在哪里、怎么协作，不是把前后端打包成一个服务；合并方案的设想，是保留各自独立的开发、构建和部署方式。
+
+当然，继续独立也有它的好处：前后端有各自清晰的 Git 历史、仓库权限和发布节奏，只使用其中一端的同学也更方便。
+
+投票就三个选项：
+
+① **合并仓库**：前端合入 `continew-admin`，在独立目录维护。
+
+② **保持独立**：继续由 `continew-admin-ui` 单独维护。
+
+③ **暂不确定**：想先看具体的目录结构与迁移方案。
+
+也欢迎在评论区聊聊你的实际使用习惯，你的选择会是我们评估的重要参考。
+
+## 5.x 前端剧透
+
+ContiNew Admin 5.x 前端已在初步开发中，维护成员番茄大佬欢迎各位大佬的意见评价，不玻璃心。内部演示地址：[ppxb.github.io/continew-ui-next](https://ppxb.github.io/continew-ui-next)
+
+---
+
+如需查看 v4.2.0 中优化和特性的完整列表，请参阅 [更新日志](https://github.com/continew-org/continew-admin/releases/tag/v4.2.0)。
