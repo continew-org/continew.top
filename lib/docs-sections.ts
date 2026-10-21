@@ -4,9 +4,10 @@
  * 目录形态与 URL 严格对应（`/docs/<分区>/<版本>/<页面>`）：
  *
  * ```
- * content/docs/admin/5.x/…  →  /docs/admin/5.x/…
- * content/docs/admin/4.x/…  →  /docs/admin/4.x/…
- * content/docs/starter/…    →  /docs/starter/…
+ * content/docs/admin/5.x/…    →  /docs/admin/5.x/…
+ * content/docs/admin/4.x/…    →  /docs/admin/4.x/…
+ * content/docs/starter/3.x/…  →  /docs/starter/3.x/…
+ * content/docs/starter/2.x/…  →  /docs/starter/2.x/…
  * ```
  *
  * ## 版本段怎么命名：key 是「线」，发布号是上游事实
@@ -99,9 +100,10 @@ export interface DocSection {
   /**
    * 分区说明，仅供人读注册表用。
    *
-   * **不是展示文案的来源**：非版本分区（starter / app）的名称、描述与图标由各自仓库的
-   * `docs/meta.json` 决定，版本分区（admin）的版本行文案由下方 `versions` 决定。
-   * 官网不覆盖分区层文案——上游改一句就该在站点生效，两处各写一份必然漂移。
+   * **不是展示文案的来源**：未启用版本的分区（app）名称、描述与图标由各自仓库的
+   * `docs/meta.json` 决定；启用版本的分区（admin / starter）由本仓库提交的
+   * `content/docs/<分区>/meta.json` 承载这些字段（上游 `docs/meta.json` 只保留 `pages`）。
+   * 版本行文案由下方 `versions` 决定，两处各写一份必然漂移。
    */
   description: string;
   /** 顶部项目切换器使用的 Lucide 图标名，同时决定其在 lib/source.ts 中的品牌配色。 */
@@ -161,8 +163,30 @@ export const docSections: readonly DocSection[] = [
     // 侧栏项目下拉里的一行描述：长度按侧栏宽度取（实测 114px 宽约 11 个汉字），按「是什么」写，不用空泛定语
     description: 'Spring Boot Starter 库',
     icon: 'Rocket',
-    repo: 'continew-starter',
-    ref: 'dev',
+    legacyVersion: '2.x',
+    versions: [
+      {
+        key: '3.x',
+        // 显示名约定「版本号（状态）」，开发中的版本号随上游推进手动更新（3.0 → 3.1 …）
+        title: '3.0（开发中）',
+        description: '文档随开发进度更新',
+        repo: 'continew-starter',
+        ref: 'dev',
+      },
+      {
+        key: '2.x',
+        title: '2.x',
+        // 描述行说明「这条线停在哪」：系列名 + 归档时的发布 tag
+        description: '2.x 系列，冻结于 v2.17.0',
+        repo: 'continew-starter',
+        ref: '2.17.x',
+        archived: true,
+        versionLabel: '2.17.x',
+        versionTag: 'v2.17.0',
+        // Starter 2.17.0 与 Admin 4.2.0 配套（见 admin/4.x 的 companions）
+        companions: [{ repo: 'continew-admin', tag: 'v4.2.0' }],
+      },
+    ],
   },
   {
     key: 'app',

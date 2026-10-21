@@ -26,6 +26,7 @@ import { getMessages } from '@/lib/messages';
 import {
   appDescription,
   appName,
+  buildDefaultDocsUrl,
   currentDocsUrl,
   gitConfig,
   messageUrl,
@@ -49,12 +50,9 @@ import { focusRing, siteLayout, siteMotion, siteType } from '@/lib/site-design';
 
 /**
  * 项目图标取自文档侧边栏对应分区的 meta.json `icon` 字段
- * （content/docs/admin/meta.json → LayoutDashboard，content/docs/app/meta.json → Smartphone），
- * 让首页与文档站的视觉指代保持一致——在首页认过的图标，进文档还能认出来。
- *
- * Starter 目前在文档里还没有独立分区（content/docs 下只有 admin / app），
- * 没有现成图标可对应，这里沿用社区里一直用的小火箭（Rocket）——
- * 它对应的是 Starter 的定位：给项目加速的基座，而不是又一组可拼装的方块。
+ * （content/docs/admin/meta.json → LayoutDashboard，content/docs/starter/meta.json → Rocket，
+ * content/docs/app/meta.json → Smartphone），让首页与文档站的视觉指代保持一致——
+ * 在首页认过的图标，进文档还能认出来。
  */
 const projects: Array<{
   name: string;
@@ -79,7 +77,7 @@ const projects: Array<{
     icon: <Rocket className="size-5" aria-hidden />,
     description:
       '基于「约定优于配置」的企业级 Starter 库。封装一系列经过企业实践验证的依赖包，已发布至 Maven 中央仓库，可在任意项目中直接引入。',
-    href: '/docs/starter',
+    href: buildDefaultDocsUrl('starter'),
     repo: 'continew-starter',
   },
   {

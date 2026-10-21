@@ -34,7 +34,8 @@ yarn-error.log*
 .vercel
 next-env.d.ts
 
-# 文档汇聚产物：Admin 仅保留项目 meta.json，版本内容由部署时拉取。
-content/docs/starter/
+# 文档汇聚产物：Admin / Starter 仅保留项目 meta.json，版本内容由部署时拉取。
+content/docs/starter/*
+!content/docs/starter/meta.json
 content/docs/admin/*
 !content/docs/admin/meta.json

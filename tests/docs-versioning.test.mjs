@@ -10,6 +10,9 @@ import { rewriteDocUrl } from '../lib/mdx-plugins/remark-archive-doc-links.ts';
 const admin = docSections.find(({ key }) => key === 'admin');
 const archive = getSourceUnitForFile('/project/content/docs/admin/4.x/index.mdx');
 const current = getSourceUnitForFile('D:\\project\\content\\docs\\admin\\5.x\\index.mdx');
+const starter = docSections.find(({ key }) => key === 'starter');
+const starterArchive = getSourceUnitForFile('/project/content/docs/starter/2.x/index.mdx');
+const starterCurrent = getSourceUnitForFile('/project/content/docs/starter/3.x/index.mdx');
 
 test('source unit matching distinguishes versions and leaves the section landing alone', () => {
   assert.equal(archive?.dir, 'admin/4.x');
@@ -23,6 +26,9 @@ test('only configured version folders become version roots', () => {
   assert.equal(getVersionForFolderPath('admin/5.x/manual'), undefined);
   assert.equal(getVersionForFolderPath('admin/4.x/manual/system'), undefined);
   assert.equal(getVersionForFolderPath('starter'), undefined);
+  assert.equal(getVersionForFolderPath('starter/3.x')?.key, '3.x');
+  assert.equal(getVersionForFolderPath('starter/2.x')?.key, '2.x');
+  assert.equal(getVersionForFolderPath('starter/3.x/modules'), undefined);
 });
 
 test('legacy self links stay within the compiling version and explicit cross-version links stay unchanged', () => {
@@ -36,6 +42,20 @@ test('legacy self links stay within the compiling version and explicit cross-ver
     assert.equal(rewriteDocUrl('/docs/admin/5.x/configuration', unit), '/docs/admin/5.x/configuration');
     assert.equal(rewriteDocUrl('/docs/starter', unit), '/docs/starter');
   }
+});
+
+test('starter legacy links follow its archive and pin only its own dev refs', () => {
+  assert.equal(starter.legacyVersion, '2.x');
+  assert.equal(starterArchive?.version?.archived, true);
+  assert.equal(rewriteDocUrl('/docs/starter', starterArchive), '/docs/starter/2.x');
+  assert.equal(rewriteDocUrl('/docs/starter/modules/core#intro', starterArchive),
+    '/docs/starter/2.x/modules/core#intro');
+  assert.equal(rewriteDocUrl('/docs/starter/3.x/modules/core', starterArchive), '/docs/starter/3.x/modules/core');
+  assert.equal(rewriteDocUrl('/docs/starter', starterCurrent), '/docs/starter/3.x');
+  const link = 'https://github.com/continew-org/continew-starter/blob/dev/README.md';
+  assert.equal(rewriteDocUrl(link, starterArchive),
+    'https://github.com/continew-org/continew-starter/blob/v2.17.0/README.md');
+  assert.equal(rewriteDocUrl(link, starterCurrent), link);
 });
 
 test('archived source links pin only dev refs for their own version', () => {
@@ -64,6 +84,9 @@ test('legacy redirect generator preserves query and anchor and refuses to overwr
     const archiveDir = join(output, 'docs', 'admin', '4.x');
     await mkdir(archiveDir, { recursive: true });
     await writeFile(join(archiveDir, 'configuration.html'), '<html></html>');
+    const starterArchiveDir = join(output, 'docs', 'starter', '2.x');
+    await mkdir(starterArchiveDir, { recursive: true });
+    await writeFile(join(starterArchiveDir, 'configuration.html'), '<html></html>');
     const script = join(process.cwd(), 'scripts', 'gen-legacy-doc-redirects.mjs');
     // 脚本只接受「工作目录内」的输出目录（路径注入防护），
     // 故在临时目录里执行、把输出目录传成当前位置。
@@ -72,6 +95,10 @@ test('legacy redirect generator preserves query and anchor and refuses to overwr
     assert.match(redirect, /location\.replace\("\/docs\/admin\/4\.x\/configuration" \+ location\.search \+ location\.hash\)/);
     const projectRedirect = await readFile(join(output, 'docs', 'admin.html'), 'utf8');
     assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.x" \+ location\.search \+ location\.hash\)/);
+    const starterRedirect = await readFile(join(output, 'docs', 'starter', 'configuration.html'), 'utf8');
+    assert.match(starterRedirect, /location\.replace\("\/docs\/starter\/2\.x\/configuration" \+ location\.search \+ location\.hash\)/);
+    const starterProjectRedirect = await readFile(join(output, 'docs', 'starter.html'), 'utf8');
+    assert.match(starterProjectRedirect, /location\.replace\("\/docs\/starter\/2\.x" \+ location\.search \+ location\.hash\)/);
     assert.throws(() => execFileSync(process.execPath, [script, '.'], { cwd: output, stdio: 'pipe' }));
   } finally {
     await rm(output, { recursive: true, force: true });
@@ -95,4 +122,26 @@ test('export contains both version routes and legacy static redirect when snapsh
   const archivedMarkdown = await readFile(join(process.cwd(), 'out', 'llms.mdx', 'docs', 'admin', '4.x', 'content.md'), 'utf8');
   assert.match(archivedMarkdown, /本文是 4\.x 的归档文档（冻结于 v4\.2\.0）/);
   assert.match(archivedMarkdown, /\/docs\/admin\/5\.x/);
+});
+
+test('export contains both starter versions and its legacy static redirect when snapshots are present', async (t) => {
+  const dir = join(process.cwd(), 'out', 'docs', 'starter');
+  try {
+    await access(join(dir, '2.x.html'));
+  } catch {
+    t.skip('requires an exported build with upstream Starter snapshots');
+    return;
+  }
+  const projectRedirect = await readFile(join(process.cwd(), 'out', 'docs', 'starter.html'), 'utf8');
+  assert.match(projectRedirect, /location\.replace\("\/docs\/starter\/2\.x" \+ location\.search \+ location\.hash\)/);
+  const legacy = await readFile(join(dir, 'modules', 'core.html'), 'utf8');
+  assert.match(legacy, /location\.replace\("\/docs\/starter\/2\.x\/modules\/core" \+ location\.search \+ location\.hash\)/);
+  const latest = await readFile(join(dir, '3.x.html'), 'utf8');
+  assert.match(latest, /href="\/docs\/starter\/3\.x\/modules\/core"/);
+  const archivedMarkdown = await readFile(
+    join(process.cwd(), 'out', 'llms.mdx', 'docs', 'starter', '2.x', 'content.md'),
+    'utf8',
+  );
+  assert.match(archivedMarkdown, /本文是 2\.x 的归档文档（冻结于 v2\.17\.0）/);
+  assert.match(archivedMarkdown, /\/docs\/starter\/3\.x/);
 });

@@ -1,0 +1,7 @@
+{
+  "title": "ContiNew Starter",
+  "description": "Spring Boot Starter 库",
+  "icon": "Rocket",
+  "root": true,
+  "pages": ["3.x", "2.x"]
+}
