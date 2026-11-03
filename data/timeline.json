@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026-11-01",
+    "title": "ContiNew Starter v3.0.0 发布",
+    "desc": "升级至 Spring Boot 4.1.x（JDK 21+）。这是 ContiNew 系列项目中首个以 AI Native 方式开发的版本：我们负责提出需求与评审验收，Spec 设计与代码实现由 AI Agent Teams 主导完成，后续我们将继续探索 AI Native Coding 的最佳实践。",
+    "type": "great"
+  },
+  {
     "date": "2025-12-31",
     "logo": "/images/about/timeline/gitcode.webp",
     "title": "AtomGit - 2025 年度 G-Star 开源组织",
