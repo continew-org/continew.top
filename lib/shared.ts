@@ -1,4 +1,3 @@
-import { createGetUrl } from 'fumadocs-core/source';
 import { docSections, docSourceRepos, getDefaultVersion, hasVersions } from './docs-sections.ts';
 
 export const appName = 'ContiNew';
@@ -159,7 +158,28 @@ export function getEditOnHostUrl(
   return `https://gitee.com/continew/${source.repo}/blob/${source.branch}/docs/${pathInRepo}`;
 }
 
-const getContentUrl = createGetUrl(docsContentRoute);
+/*
+ * createGetUrl 来自 fumadocs-core/source——这是本模块唯一的三方依赖点。
+ *
+ * 不能顶层静态 import：scripts/update-stats.mjs 以裸 Node 加载本模块链路
+ * （platform-api → shared，只为取 gitConfig），服务器 cron 环境没有 node_modules，
+ * 顶层引入会让 Star 统计脚本整个跑不起来。createGetUrl 只被 llms/OG 的 URL
+ * 拼接用到，那些入口全部在 Next 构建侧，届时 node_modules 必然存在。
+ *
+ * 解析方式只能走 ESM 动态 import（Turbopack 拒绝把 node:module 外部化，
+ * createRequire 方案在打包侧直接构建失败），它返回 Promise，而两个 URL
+ * 拼接函数是同步签名，所以用顶层 await 预解析；裸 Node 场景下解析失败
+ * 只会影响 llms/OG 入口——它们本来就不会在 cron 里执行——故 catch 后
+ * 留 null，调用时再报出明确的「环境缺依赖」错误而不是模糊的 undefined。
+ */
+let createGetUrl: typeof import('fumadocs-core/source').createGetUrl | null = null;
+try {
+  ({ createGetUrl } = await import('fumadocs-core/source'));
+} catch {
+  // 裸 Node（cron）场景：fumadocs-core 未安装，llms/OG 入口不在执行路径上
+}
+
+const getContentUrl = createGetUrl!(docsContentRoute);
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'content.md'];
@@ -167,7 +187,7 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   return { segments, url: getContentUrl(segments, page.locale) };
 }
 
-const getImageUrl = createGetUrl(docsImageRoute);
+const getImageUrl = createGetUrl!(docsImageRoute);
 
 export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.png'];
