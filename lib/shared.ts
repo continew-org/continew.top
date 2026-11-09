@@ -159,27 +159,31 @@ export function getEditOnHostUrl(
 }
 
 /*
- * createGetUrl 来自 fumadocs-core/source——这是本模块唯一的三方依赖点。
+ * createGetUrl 的内联等价实现（原版：fumadocs-core/source，纯字符串拼接）。
  *
- * 不能顶层静态 import：scripts/update-stats.mjs 以裸 Node 加载本模块链路
- * （platform-api → shared，只为取 gitConfig），服务器 cron 环境没有 node_modules，
- * 顶层引入会让 Star 统计脚本整个跑不起来。createGetUrl 只被 llms/OG 的 URL
- * 拼接用到，那些入口全部在 Next 构建侧，届时 node_modules 必然存在。
+ * 不能直接 import：scripts/update-stats.mjs 以裸 Node 加载本模块链路
+ * （platform-api → shared，只为取 gitConfig），服务器 cron 环境没有
+ * node_modules，顶层引入会让 Star 统计脚本整个跑不起来。而绕过它没有
+ * 更好的办法——动态 import 方案里 Turbopack 拒绝把 node:module 外部化、
+ * createRequire 打包侧直接构建失败，顶层 await 会在 cron 里因
+ * fumadocs-core 缺失把模块顶层求值炸掉。
  *
- * 解析方式只能走 ESM 动态 import（Turbopack 拒绝把 node:module 外部化，
- * createRequire 方案在打包侧直接构建失败），它返回 Promise，而两个 URL
- * 拼接函数是同步签名，所以用顶层 await 预解析；裸 Node 场景下解析失败
- * 只会影响 llms/OG 入口——它们本来就不会在 cron 里执行——故 catch 后
- * 留 null，调用时再报出明确的「环境缺依赖」错误而不是模糊的 undefined。
+ * 原实现只有 9 行且无状态：`/[基路径 + slugs 过滤拼接]`（见
+ * fumadocs-core dist/dynamic 的 createGetUrl，hideLocale 分支本项目
+ * 未启用 i18n 不会走到）。内联它并在升级 fumadocs 时核对这段逻辑，
+ * 是「加一个依赖到 cron 环境」与「复制 9 行纯函数」之间代价最小的选择。
+ * 本项目 i18n 始终未启用，hideLocale 分支省略。
  */
-let createGetUrl: typeof import('fumadocs-core/source').createGetUrl | null = null;
-try {
-  ({ createGetUrl } = await import('fumadocs-core/source'));
-} catch {
-  // 裸 Node（cron）场景：fumadocs-core 未安装，llms/OG 入口不在执行路径上
+function createGetUrl(baseUrl: string) {
+  const baseSlugs = baseUrl.split('/');
+  return (slugs: string[], locale?: string) => {
+    const paths = [...baseSlugs, ...slugs];
+    if (locale) paths.unshift(locale);
+    return `/${paths.filter((v) => v.length > 0).join('/')}`;
+  };
 }
 
-const getContentUrl = createGetUrl!(docsContentRoute);
+const getContentUrl = createGetUrl(docsContentRoute);
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'content.md'];
@@ -187,7 +191,7 @@ export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {
   return { segments, url: getContentUrl(segments, page.locale) };
 }
 
-const getImageUrl = createGetUrl!(docsImageRoute);
+const getImageUrl = createGetUrl(docsImageRoute);
 
 export function getPageImageUrl(page: { slugs: string[]; locale?: string }) {
   const segments = [...page.slugs, 'image.png'];
