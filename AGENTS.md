@@ -155,8 +155,9 @@ pnpm lint && pnpm types:check && pnpm build && pnpm ui:check
 ## 部署
 
 - 与 continew-admin-ui 同一套模式：**self-hosted runner 与部署机同机**，构建产物经本机 `rsync` 落到 Nginx 站点目录，无跨机 SSH、无密码/密钥；
-- 推送到 `main` 或各项目仓库文档更新（`repository_dispatch`，type `docs-updated`）时，`.github/workflows/deploy.yml` 自动静态导出并同步至站点目录；
-- Secret 两个：`SERVER_PATH`（Nginx 站点根目录）与 `ACTIVITY_TOKEN`（`/timeline` 的 Star 趋势图用，细粒度 PAT、仅「公开仓库只读」）。前提是部署机已注册为本仓库的 self-hosted runner（与 admin / admin-ui 共用即可）。
+- 触发方式四种：推送 `main`、手动 `workflow_dispatch`、每 12 小时定时（`schedule`）、`repository_dispatch`（type `docs-updated`）。**注意：`docs-updated` 只有接收端**——三个项目仓库从未接上触发端（2026-11-09 查证），文档更新的实际保障是定时探测：`deploy.yml` 用 `git ls-remote` 比对各文档源 ref 的 HEAD SHA 与上次成功部署的基线（`~/.cache/continew-docs/upstream-sha.env`，由部署机跨 run 持久），无变化则跳过构建；基线只记录**实际克隆成功**的分区 SHA，故障不会被记成成功；
+- Star 数实时化：部署机 crontab 每小时执行 `scripts/update-stats.mjs`，把三平台 Star 当前值原子写入站点目录 `stats.json`（该文件不在构建产物里，`rsync --delete` 已 `--exclude` 保它）。前端在导航 / 首页 / 时间线用 `lib/live-stats.ts` 静默覆盖构建期数值，文件缺失或拉取失败时回落构建值。浏览器不直连各平台 API——官网读者主要在国内，GitHub API 对部分访客不可达；
+- Secret 两个：`SERVER_PATH`（Nginx 站点根目录）与 `ACTIVITY_TOKEN`（`/timeline` 的 Star 趋势图用，细粒度 PAT、仅「公开仓库只读」）。前提是部署机已注册为本仓库的 self-hosted runner（与 admin / admin-ui 共用即可）。定时任务走 `schedule` 而不是把 Actions 当通用 cron：小时级取数一律用部署机 crontab，避免高频 scheduled workflow 触发滥用审查；
 - 构建容器额外注入两个令牌，是对「容器内不注入 job secrets」的有意例外：Actions 自动生成的 `GITHUB_TOKEN`（只读、仅限本仓库）与 `ACTIVITY_TOKEN`。`GITHUB_TOKEN` 读得到仓库列表、commits、contributors，**但读不到 stargazers**——该接口已被 GitHub 收紧为「仅仓库的 admin / collaborator 可读」，安装令牌会稳定 403，Star 趋势图因此需要 `ACTIVITY_TOKEN`；未配置时该图整块不渲染，其余数据不受影响。理由与边界见 `deploy.yml` 中该步骤的注释与 `data/README.md`。
 
 ## 安全漏洞

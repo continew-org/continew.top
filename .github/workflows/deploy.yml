@@ -4,7 +4,8 @@ name: Deploy
 # 与 continew-admin-ui 同一套部署模式：runner 与部署机同机，无跨机 SSH、无密码/密钥。
 # 流程：拉取各项目仓库 docs/ -> 组装 content/docs -> 容器内静态导出 -> 本机 rsync 到站点目录。
 #
-# 唯一 secret：SERVER_PATH = Nginx 站点根目录（如 /root/continew/nginx/html）。
+# 两个 secret：SERVER_PATH = Nginx 站点根目录（如 /root/continew/nginx/html）；
+# ACTIVITY_TOKEN = /timeline Star 趋势图用的细粒度 PAT（仅「公开仓库只读」，用途见 Build 步骤注释）。
 # 容错约定：克隆成功而源仓库确无 docs/ 时才降级为分区骨架；克隆失败沿用 runner 本机
 # 上次成功同步的文档（::warning 标注可能过期），从未同步过则判定部署失败——
 # 绝不让某个分区的内容凭空消失（2026-10-10 曾因此把线上 admin 文档整区换成骨架）。
@@ -12,7 +13,12 @@ name: Deploy
 on:
   push:
     branches: [main]
-  # 各项目仓库文档更新后可触发 repository_dispatch（type: docs-updated）重建官网
+  # 每 12 小时探测一次上游文档变化（北京时间 06:00 / 18:00），没变化就直接跳过构建。
+  # 这是文档更新的唯一自动通道：下方 repository_dispatch 是预留接口，三仓从未接上
+  # 触发端（2026-11-09 查证）——若将来接通，此处轮询可撤。
+  schedule:
+    - cron: '0 10,22 * * *'
+  # 预留接口，当前无触发端（见上方 schedule 注释）
   repository_dispatch:
     types: [docs-updated]
   workflow_dispatch:
@@ -33,7 +39,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2、拉取并组装各项目文档（docs/ 为文档唯一权威源；公开仓库浅克隆）
+      # 2、生成分区拉取映射（docs/ 为文档唯一权威源；公开仓库浅克隆）
       #
       # 分区 -> 源仓库写在 lib/docs-sections.ts（唯一事实源），deploy.yml 原本手抄一份，
       # 两处会漂移：改了配置忘了改这里，线上就拉不到新分支。故改为构建前由
@@ -43,7 +49,48 @@ jobs:
           docker run --rm -v "$PWD":/ws -w /ws node:22 \
             node scripts/gen-docs-sources.mjs > "$RUNNER_TEMP/docs-sources.env"
 
+      # 3、上游文档变更检测（仅 schedule 触发）
+      #
+      # 定时重建如果每次都走完整流程，等于每天两次赌网络（克隆、Google Fonts、
+      # 平台接口），赌输还占 20 分钟额度。先用 git ls-remote 探每个文档源 ref 的
+      # HEAD SHA（几条命令、几秒钟），与上次成功部署记录的基线比对，没变化就跳过
+      # 后续全部步骤。ls-remote 失败按「有变化」处理——探测故障不该让文档停更。
+      # push / dispatch 不检测：那些触发本来就要构建。
+      - name: 检测上游文档变更
+        id: docs_check
+        if: github.event_name == 'schedule'
+        run: |
+          set -e
+          state_file="$HOME/.cache/continew-docs/upstream-sha.env"
+          changed=true
+          if [ ! -f "$state_file" ]; then
+            echo "ℹ️  没有上游 SHA 基线（改造后首次定时运行），按全量构建处理"
+          else
+            changed=false
+            while IFS='=' read -r proj source; do
+              [ -z "$proj" ] && continue
+              repo="${source%@*}"
+              ref="${source##*@}"
+              sha="$(git ls-remote "https://github.com/continew-org/${repo}.git" "refs/heads/${ref}" "refs/tags/${ref}" | awk 'NR == 1 { print $1 }')" || sha=""
+              if [ -z "$sha" ]; then
+                echo "::warning::无法解析 ${repo}@${ref} 的远端引用（可能是网络抖动），按有变更处理"
+                changed=true
+                continue
+              fi
+              # 基线里没有该分区（新增版本行）时 grep 取空，同样落到「有变更」
+              old="$(grep -F -m1 "${proj}=" "$state_file" | cut -d'=' -f2 || true)"
+              if [ "$old" != "$sha" ]; then
+                echo "📝 ${proj} 文档已更新：${old:-无记录} -> ${sha}"
+                changed=true
+              fi
+            done < "$RUNNER_TEMP/docs-sources.env"
+          fi
+          echo "changed=${changed}" >> "$GITHUB_OUTPUT"
+          [ "$changed" = true ] || echo "✅ 上游文档无变化，跳过本次构建"
+
+      # 4、拉取并组装各项目文档
       - name: 拉取并组装各项目文档
+        if: steps.docs_check.outputs.changed != 'false'
         run: |
           set -e
           # 分区名 -> 源仓库@git引用（分支或 tag），每行一条 `分区=仓库@ref`，
@@ -51,6 +98,11 @@ jobs:
           # 用 while read 逐行读取而非 source 该文件：source 会把 runner 环境变量
           # 一并带入循环命名空间，分区名与之重名时会被静静覆盖。
           sources_file="$RUNNER_TEMP/docs-sources.env"
+          # 新基线在**克隆成功之后**逐分区记录实际同步到的 SHA（而不是探测值）：
+          # 克隆失败沿用缓存时缺这一行，下次检测必然判为「有变更」，故障不会被记成成功。
+          # push / dispatch 触发的构建同样生成它，基线因此对所有成功部署保持新鲜。
+          new_file="$RUNNER_TEMP/upstream-sha.new"
+          : > "$new_file"
           # 上次成功同步的文档在 runner 本机的留存（跨次部署持久）。拉取失败时沿用
           # 它继续部署，而不是把分区静默降级成骨架——克隆失败是基础设施抖动，不是
           # 「没有文档」，二者的后果不该一样。
@@ -65,6 +117,8 @@ jobs:
             cache="$cache_root/$proj"
             if git clone --depth 1 --filter=blob:none --sparse --branch "$ref" \
                  "https://github.com/continew-org/${repo}.git" "$tmp"; then
+              head_sha="$(git -C "$tmp" rev-parse HEAD)"
+              printf '%s=%s\n' "$proj" "$head_sha" >> "$new_file"
               if ! git -C "$tmp" sparse-checkout set docs; then
                 echo "❌ ${proj} 文档稀疏检出失败；停止部署以保留现有站点" >&2
                 exit 1
@@ -92,7 +146,7 @@ jobs:
             rm -rf "$tmp"
           done < "$sources_file"
 
-      # 3、容器内静态导出（pnpm install 会运行依赖与仓库生命周期脚本，容器隔离其触达范围——
+      # 5、容器内静态导出（pnpm install 会运行依赖与仓库生命周期脚本，容器隔离其触达范围——
       #    不挂 docker.sock；pnpm 版本由 packageManager 经 corepack 解析）
       #
       # 这里注入令牌，与「容器内不注入 job secrets」的原则是有意的例外：
@@ -103,6 +157,7 @@ jobs:
       # GITHUB_TOKEN 仍然注入，供不要求该权限的接口（仓库列表、commits、contributors）使用。
       # 两者都用 `-e VAR`（不带值）从 runner 进程环境继承，避免令牌出现在 docker 命令行里被 ps 看到。
       - name: Build
+        if: steps.docs_check.outputs.changed != 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ACTIVITY_TOKEN: ${{ secrets.ACTIVITY_TOKEN }}
@@ -117,13 +172,35 @@ jobs:
           node:22
           bash -c "corepack enable && pnpm i --frozen-lockfile && pnpm build"
 
-      # 4、解析最终静态产物中的 <a href>，按浏览器 URL 语义校验路由与锚点。
+      # 6、解析最终静态产物中的 <a href>，按浏览器 URL 语义校验路由与锚点。
       #    不能用源文件路径代替：MDX 组件属性不会自动改写相对链接，Windows 的反斜杠也会制造假阴性。
       - name: 检查站内链接
+        if: steps.docs_check.outputs.changed != 'false'
         run: node scripts/check-internal-links.mjs out
 
-      # 5、同步部署文件到 Nginx 站点目录（--delete 保证与构建产物一致，清理已下线页面）
+      # 7、同步部署文件到 Nginx 站点目录（--delete 保证与构建产物一致，清理已下线页面）
+      #
+      # stats.json 由部署机 crontab 每小时刷新（scripts/update-stats.mjs），不在构建产物里，
+      # 必须 --exclude 排除出 --delete 的射程，否则每次部署都会把它删掉、实时数字失效一小时。
       - name: Copy
+        if: steps.docs_check.outputs.changed != 'false'
         run: |
-          rsync -a --delete out/ ${{ secrets.SERVER_PATH }}/
+          rsync -a --delete --exclude=stats.json out/ ${{ secrets.SERVER_PATH }}/
           chmod -R 777 ${{ secrets.SERVER_PATH }}
+
+      # 8、记录上游文档 SHA 基线
+      #
+      # 只在 Copy 成功后执行（步骤默认 success() 门）：中途任何失败都不更新基线，
+      # 下次定时运行必然重建。沿用缓存兜底、或克隆中断的分区在 new 文件里缺行，
+      # 下次检测会把它们判为「有变更」再试——故障不会被记成成功。
+      - name: 更新上游 SHA 基线
+        if: steps.docs_check.outputs.changed != 'false'
+        run: |
+          state_dir="$HOME/.cache/continew-docs"
+          if [ -s "$RUNNER_TEMP/upstream-sha.new" ]; then
+            mkdir -p "$state_dir"
+            mv "$RUNNER_TEMP/upstream-sha.new" "$state_dir/upstream-sha.env"
+            echo "✅ 已记录本次构建对应的上游文档 SHA"
+          else
+            echo "ℹ️  所有分区均未克隆成功（或无拉取步骤），本次不更新基线，沿用旧值"
+          fi

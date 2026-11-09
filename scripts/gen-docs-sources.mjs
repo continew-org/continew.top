@@ -6,7 +6,8 @@
  * ```
  * admin/5.x=continew-admin@dev
  * admin/4.x=continew-admin@4.2.x
- * starter=continew-starter@dev
+ * starter/3.x=continew-starter@dev
+ * starter/2.x=continew-starter@2.17.x
  * app=continew-app@dev
  * ```
  *
