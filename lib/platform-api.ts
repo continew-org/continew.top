@@ -1,4 +1,7 @@
-import { gitConfig } from './shared';
+// 显式 .ts 后缀：本模块被 scripts/update-stats.mjs 以裸 Node 加载（类型剥离不做
+// 路径补全）；Next 构建侧走 bundler 解析，两种写法都兼容（tsconfig 已开
+// allowImportingTsExtensions），与 scripts/gen-docs-sources.mjs 同一约定。
+import { gitConfig } from './shared.ts';
 
 /**
  * 各代码托管平台的公共数据层：平台注册表、构建期 JSON 请求、并发控制。

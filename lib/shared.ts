@@ -1,5 +1,5 @@
 import { createGetUrl } from 'fumadocs-core/source';
-import { docSections, docSourceRepos, getDefaultVersion, hasVersions } from './docs-sections';
+import { docSections, docSourceRepos, getDefaultVersion, hasVersions } from './docs-sections.ts';
 
 export const appName = 'ContiNew';
 export const appDescription =
@@ -103,7 +103,7 @@ export const contributePlatforms = [
  * 启用版本的分区按「分区/版本」二级 key 索引：admin/5.x 与 admin/4.x 指向
  * 同一仓库的不同 git 引用，单看分区名无法分辨。
  */
-export { docSourceRepos } from './docs-sections';
+export { docSourceRepos } from './docs-sections.ts';
 
 /**
  * 解析页面所属的源单元与其在源仓库 docs/ 内的相对路径。

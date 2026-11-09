@@ -7,6 +7,7 @@ import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
 import { cn } from '@/lib/cn';
 import { PageIntro } from '@/components/site-primitives';
 import { ActionLink } from '@/components/site-actions';
+import { LiveStarNumber } from '@/components/live-star-number';
 import { focusRing, siteType } from '@/lib/site-design';
 import type { CommitActivityData, StarTrend } from '@/lib/repo-activity';
 import type { PlatformStar, StarSummary } from '@/lib/site-stats';
@@ -91,7 +92,7 @@ function TimelineHero({
   startYear,
 }: Readonly<Pick<TimelineContentProps, 'stars' | 'trend' | 'totalDays' | 'honorCount' | 'startYear'>>) {
   const stats = [
-    { value: `${stars.total.toLocaleString()}+`, label: '累计 Star' },
+    { value: <LiveStarNumber value={stars.total} suffix="+" />, label: '累计 Star' },
     { value: totalDays.toLocaleString(), label: '持续维护（天）' },
     { value: String(honorCount), label: '平台荣誉' },
   ];
@@ -149,7 +150,7 @@ function TimelineHero({
             <ActionLink key={platform.key} href={platform.url} variant="text">
               <PlatformIcon className="size-4" aria-hidden />
               <span className="font-semibold text-fd-foreground tabular-nums">
-                {platform.count.toLocaleString()}
+                <LiveStarNumber value={platform.count} platform={platform.key} />
               </span>
               {platform.name}
             </ActionLink>

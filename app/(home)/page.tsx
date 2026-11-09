@@ -16,6 +16,7 @@ import type { ReactNode } from 'react';
 import { ContributeDialog } from '@/components/contribute-dialog';
 import { ContributorWall } from '@/components/contributor-wall';
 import { AnimatedNumber } from '@/components/home/animated-number';
+import { LiveStarTotal } from '@/components/home/live-star-total';
 import { GitHubIcon } from '@/components/brand-icons';
 import { Faq, type FaqItem } from '@/components/home/faq';
 import { JoinGroupDialog } from '@/components/home/join-group-dialog';
@@ -181,12 +182,16 @@ export default async function HomePage() {
   const homepageCompanions = getHomepageCompanions();
   const hasBackers = homepageCompanions.length > 0;
 
-  // 数值保持数字类型，交给 AnimatedNumber 做「滚进视口从 0 计数」；格式化在组件内做
-  const stats = [
-    { value: stars.total, label: '全平台 Star' },
-    { value: contributorSummary.total, label: '位贡献者' },
-    { value: users.length, label: '家企业登记使用' },
-    { value: projects.length, label: '个开源项目' },
+  /*
+   * 数值交给 AnimatedNumber 做「滚进视口从 0 计数」，格式化在组件内做。
+   * Star 一项换成 LiveStarTotal：构建值直出首帧，挂载后被 stats.json（部署机
+   * 每小时刷新）的实时合计静默覆盖；其余指标仍是纯构建值。
+   */
+  const stats: { value: ReactNode; label: string }[] = [
+    { value: <LiveStarTotal value={stars.total} />, label: '全平台 Star' },
+    { value: <AnimatedNumber value={contributorSummary.total} />, label: '位贡献者' },
+    { value: <AnimatedNumber value={users.length} />, label: '家企业登记使用' },
+    { value: <AnimatedNumber value={projects.length} />, label: '个开源项目' },
   ];
 
   return (
@@ -279,7 +284,7 @@ export default async function HomePage() {
             >
               <dt className="text-sm text-fd-muted-foreground">{stat.label}</dt>
               <dd className="text-2xl font-bold tracking-tight text-[var(--cn-brand)] tabular-nums sm:text-3xl">
-                <AnimatedNumber value={stat.value} />
+                {stat.value}
               </dd>
             </div>
           ))}

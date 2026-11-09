@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Star } from 'lucide-react';
 import { AtomGitIcon, GiteeIcon, GitHubIcon } from '@/components/brand-icons';
+import { useLiveStats } from '@/lib/live-stats';
 import type { PlatformStar } from '@/lib/site-stats';
 import { cn } from '@/lib/cn';
 
@@ -29,14 +30,29 @@ const PLATFORM_ICON = {
  * custom 项不显式声明会落到左侧导航链接区里。
  */
 export function NavStarCount({
-  total,
-  platforms,
+  total: buildTotal,
+  platforms: buildPlatforms,
 }: Readonly<{
   total: number;
   platforms: PlatformStar[];
 }>) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  /*
+   * 实时值覆盖构建值：stats.json 由部署机 cron 每小时刷新（scripts/update-stats.mjs），
+   * 拉不到 / 文件缺失 / 某平台缺键时都静默保留构建期数值——导航栏是全站 layout，
+   * 这里宁可显示昨天的数，也不能显示空白或报错。
+   */
+  const live = useLiveStats();
+  const total = typeof live?.total === 'number' ? live.total : buildTotal;
+  const platforms = buildPlatforms.map((platform) => {
+    const count = live?.platforms[platform.key];
+    return typeof count === 'number' ? { ...platform, count } : platform;
+  });
+  const updatedTitle = live
+    ? `Star 数每小时刷新，数据更新于 ${new Date(live.updatedAt).toLocaleString('zh-CN', { hour12: false })}`
+    : undefined;
 
   useEffect(() => {
     if (!open) return;
@@ -62,6 +78,7 @@ export function NavStarCount({
         aria-expanded={open}
         aria-haspopup="true"
         aria-label={`全平台 ${total} 个 Star，展开查看各平台`}
+        title={updatedTitle}
         className="inline-flex items-center rounded-full border border-fd-border p-1 text-xs transition-colors hover:border-[var(--cn-brand-line)] max-sm:hidden"
       >
         <span className="flex h-6.5 items-center gap-1.5 rounded-full px-2.5 text-fd-muted-foreground">
