@@ -113,7 +113,7 @@ export interface DocSection {
    * 此时文档直接位于分区目录下，URL 不含版本段。
    */
   versions?: readonly DocVersion[];
-  /** 版本化之前的无版本 URL 所对应的固定历史版本，不随最新版本切换。 */
+  /** 版本化之前的无版本 URL 所对应的目标版本。旧地址会跳到该版本的对应页面。 */
   legacyVersion?: string;
   /** 无版本分区的内容源。分区一旦启用版本，此字段即失效以 versions 为准。 */
   repo?: string;
@@ -126,7 +126,7 @@ export const docSections: readonly DocSection[] = [
     title: 'ContiNew Admin',
     description: '多租户中后台管理系统框架',
     icon: 'LayoutDashboard',
-    legacyVersion: '4.x',
+    legacyVersion: '5.x',
     versions: [
       {
         key: '5.x',
@@ -163,7 +163,7 @@ export const docSections: readonly DocSection[] = [
     // 侧栏项目下拉里的一行描述：长度按侧栏宽度取（实测 114px 宽约 11 个汉字），按「是什么」写，不用空泛定语
     description: 'Spring Boot Starter 库',
     icon: 'Rocket',
-    legacyVersion: '2.x',
+    legacyVersion: '3.x',
     versions: [
       {
         key: '3.x',

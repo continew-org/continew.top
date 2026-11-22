@@ -45,7 +45,7 @@ test('legacy self links stay within the compiling version and explicit cross-ver
 });
 
 test('starter legacy links follow its archive and pin only its own dev refs', () => {
-  assert.equal(starter.legacyVersion, '2.x');
+  assert.equal(starter.legacyVersion, '3.x');
   assert.equal(starterArchive?.version?.archived, true);
   assert.equal(rewriteDocUrl('/docs/starter', starterArchive), '/docs/starter/2.x');
   assert.equal(rewriteDocUrl('/docs/starter/modules/core#intro', starterArchive),
@@ -69,36 +69,36 @@ test('archived source links pin only dev refs for their own version', () => {
     'https://github.com/continew-org/continew-admin/blob/dev/CHANGELOG.md');
 });
 
-test('a second archive keeps version-specific tags and does not change legacy owner', () => {
+test('a second archive keeps version-specific tags and does not change the legacy redirect target', () => {
   const another = { ...archive, version: { ...archive.version, key: '5.x', versionTag: 'v5.0.0' } };
   const link = 'https://github.com/continew-org/continew-admin/tree/dev';
   assert.equal(rewriteDocUrl(link, another), link.replace('/dev', '/v5.0.0'));
   assert.equal(rewriteDocUrl(link, archive), link.replace('/dev', '/v4.2.0'));
-  assert.equal(admin.legacyVersion, '4.x');
+  assert.equal(admin.legacyVersion, '5.x');
   assert.equal(getVersionTags(archive.version)['continew-admin-ui'], 'v4.2.0');
 });
 
 test('legacy redirect generator preserves query and anchor and refuses to overwrite routes', async () => {
   const output = await mkdtemp(join(tmpdir(), 'docs-redirects-'));
   try {
-    const archiveDir = join(output, 'docs', 'admin', '4.x');
-    await mkdir(archiveDir, { recursive: true });
-    await writeFile(join(archiveDir, 'configuration.html'), '<html></html>');
-    const starterArchiveDir = join(output, 'docs', 'starter', '2.x');
-    await mkdir(starterArchiveDir, { recursive: true });
-    await writeFile(join(starterArchiveDir, 'configuration.html'), '<html></html>');
+    const versionDir = join(output, 'docs', 'admin', '5.x');
+    await mkdir(versionDir, { recursive: true });
+    await writeFile(join(versionDir, 'configuration.html'), '<html></html>');
+    const starterVersionDir = join(output, 'docs', 'starter', '3.x');
+    await mkdir(starterVersionDir, { recursive: true });
+    await writeFile(join(starterVersionDir, 'configuration.html'), '<html></html>');
     const script = join(process.cwd(), 'scripts', 'gen-legacy-doc-redirects.mjs');
     // 脚本只接受「工作目录内」的输出目录（路径注入防护），
     // 故在临时目录里执行、把输出目录传成当前位置。
     execFileSync(process.execPath, [script, '.'], { cwd: output });
     const redirect = await readFile(join(output, 'docs', 'admin', 'configuration.html'), 'utf8');
-    assert.match(redirect, /location\.replace\("\/docs\/admin\/4\.x\/configuration" \+ location\.search \+ location\.hash\)/);
+    assert.match(redirect, /location\.replace\("\/docs\/admin\/5\.x\/configuration" \+ location\.search \+ location\.hash\)/);
     const projectRedirect = await readFile(join(output, 'docs', 'admin.html'), 'utf8');
-    assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.x" \+ location\.search \+ location\.hash\)/);
+    assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/5\.x" \+ location\.search \+ location\.hash\)/);
     const starterRedirect = await readFile(join(output, 'docs', 'starter', 'configuration.html'), 'utf8');
-    assert.match(starterRedirect, /location\.replace\("\/docs\/starter\/2\.x\/configuration" \+ location\.search \+ location\.hash\)/);
+    assert.match(starterRedirect, /location\.replace\("\/docs\/starter\/3\.x\/configuration" \+ location\.search \+ location\.hash\)/);
     const starterProjectRedirect = await readFile(join(output, 'docs', 'starter.html'), 'utf8');
-    assert.match(starterProjectRedirect, /location\.replace\("\/docs\/starter\/2\.x" \+ location\.search \+ location\.hash\)/);
+    assert.match(starterProjectRedirect, /location\.replace\("\/docs\/starter\/3\.x" \+ location\.search \+ location\.hash\)/);
     assert.throws(() => execFileSync(process.execPath, [script, '.'], { cwd: output, stdio: 'pipe' }));
   } finally {
     await rm(output, { recursive: true, force: true });
@@ -114,9 +114,9 @@ test('export contains both version routes and legacy static redirect when snapsh
     return;
   }
   const projectRedirect = await readFile(join(process.cwd(), 'out', 'docs', 'admin.html'), 'utf8');
-  assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/4\.x" \+ location\.search \+ location\.hash\)/);
+  assert.match(projectRedirect, /location\.replace\("\/docs\/admin\/5\.x" \+ location\.search \+ location\.hash\)/);
   const legacy = await readFile(join(dir, 'reference', 'security.html'), 'utf8');
-  assert.match(legacy, /location\.replace\("\/docs\/admin\/4\.x\/reference\/security" \+ location\.search \+ location\.hash\)/);
+  assert.match(legacy, /location\.replace\("\/docs\/admin\/5\.x\/reference\/security" \+ location\.search \+ location\.hash\)/);
   const latest = await readFile(join(dir, '5.x.html'), 'utf8');
   assert.match(latest, /href="\/docs\/admin\/5\.x\/reference\/faq"/);
   const archivedMarkdown = await readFile(join(process.cwd(), 'out', 'llms.mdx', 'docs', 'admin', '4.x', 'content.md'), 'utf8');
@@ -133,9 +133,9 @@ test('export contains both starter versions and its legacy static redirect when 
     return;
   }
   const projectRedirect = await readFile(join(process.cwd(), 'out', 'docs', 'starter.html'), 'utf8');
-  assert.match(projectRedirect, /location\.replace\("\/docs\/starter\/2\.x" \+ location\.search \+ location\.hash\)/);
+  assert.match(projectRedirect, /location\.replace\("\/docs\/starter\/3\.x" \+ location\.search \+ location\.hash\)/);
   const legacy = await readFile(join(dir, 'modules', 'core.html'), 'utf8');
-  assert.match(legacy, /location\.replace\("\/docs\/starter\/2\.x\/modules\/core" \+ location\.search \+ location\.hash\)/);
+  assert.match(legacy, /location\.replace\("\/docs\/starter\/3\.x\/modules\/core" \+ location\.search \+ location\.hash\)/);
   const latest = await readFile(join(dir, '3.x.html'), 'utf8');
   assert.match(latest, /href="\/docs\/starter\/3\.x\/modules\/core"/);
   const archivedMarkdown = await readFile(
