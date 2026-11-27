@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { docSections, getSourceUnitForFile, getVersionForFolderPath, getVersionTags } from '../lib/docs-sections.ts';
-import { rewriteDocUrl } from '../lib/mdx-plugins/remark-archive-doc-links.ts';
+import { rewriteDocUrl, rewriteCloneCommands } from '../lib/mdx-plugins/remark-archive-doc-links.ts';
 
 const admin = docSections.find(({ key }) => key === 'admin');
 const archive = getSourceUnitForFile('/project/content/docs/admin/4.x/index.mdx');
@@ -76,6 +76,46 @@ test('a second archive keeps version-specific tags and does not change the legac
   assert.equal(rewriteDocUrl(link, archive), link.replace('/dev', '/v4.2.0'));
   assert.equal(admin.legacyVersion, '5.x');
   assert.equal(getVersionTags(archive.version)['continew-admin-ui'], 'v4.2.0');
+});
+
+test('archived git clone commands pin the maintenance ref and companion tags', () => {
+  const block = [
+    'git clone https://github.com/continew-org/continew-admin.git',
+    'cd continew-admin',
+    'git clone https://github.com/continew-org/continew-admin-ui.git',
+    'git clone https://github.com/continew-org/continew-starter.git',
+    'git clone https://github.com/other-org/unrelated.git',
+  ].join('\n');
+  const rewritten = rewriteCloneCommands(block, archive);
+  const lines = rewritten.split('\n');
+  // 主仓库钉维护分支（含发布后修复），配套仓库只有冻结 tag
+  assert.equal(lines[0], 'git clone -b 4.2.x https://github.com/continew-org/continew-admin.git');
+  assert.equal(lines[1], 'cd continew-admin');
+  assert.equal(lines[2], 'git clone -b v4.2.0 https://github.com/continew-org/continew-admin-ui.git');
+  assert.equal(lines[3], 'git clone -b v2.17.0 https://github.com/continew-org/continew-starter.git');
+  // 注册表外的仓库不动
+  assert.equal(lines[4], 'git clone https://github.com/other-org/unrelated.git');
+  // 已显式指定分支的命令、非归档版本、无 URL 的 clone 均不动
+  assert.equal(
+    rewriteCloneCommands('git clone -b dev https://github.com/continew-org/continew-admin.git', archive),
+    'git clone -b dev https://github.com/continew-org/continew-admin.git',
+  );
+  assert.equal(rewriteCloneCommands(block, current), block);
+  assert.equal(rewriteCloneCommands('git clone --depth 1', archive), 'git clone --depth 1');
+  // starter 归档线钉自己的维护 ref；其配套仓库 continew-admin 钉配套 tag v4.2.0
+  assert.equal(
+    rewriteCloneCommands('git clone https://github.com/continew-org/continew-starter.git', starterArchive),
+    'git clone -b 2.17.x https://github.com/continew-org/continew-starter.git',
+  );
+  assert.equal(
+    rewriteCloneCommands('git clone https://github.com/continew-org/continew-admin.git', starterArchive),
+    'git clone -b v4.2.0 https://github.com/continew-org/continew-admin.git',
+  );
+  // 既非主仓库也非配套仓库时不改
+  assert.equal(
+    rewriteCloneCommands('git clone https://github.com/continew-org/continew-app.git', starterArchive),
+    'git clone https://github.com/continew-org/continew-app.git',
+  );
 });
 
 test('legacy redirect generator preserves query and anchor and refuses to overwrite routes', async () => {
