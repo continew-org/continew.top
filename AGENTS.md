@@ -42,7 +42,9 @@
 | `content/docs/admin/4.x/` | `/docs/admin/4.x/*` | `continew-org/continew-admin` 的 `4.2.x` 分支 `docs/`（归档） |
 | `content/docs/app/` | `/docs/app/*` | `continew-org/continew-app` 的 `docs/` |
 
-项目分区的 `meta.json` 标记 `root: true`；Admin / Starter 不单设版本选择页。其下各版本的文档（含 `meta.json` 和 `index.mdx`）由对应项目仓库的 `docs/` 汇聚，不提交。版本段的命名口径是「维护线」：`5.x` 为 Admin 开发中的下一代，`3.x` 为 Starter 当前稳定系列，`4.x` / `2.x` 为已归档系列（发布号 `4.2.x` / `v4.2.0`、`2.17.x` / `v2.17.0` 只出现在 `ref` 与 `versionTag`，不进 URL）；侧栏显示名分两类：开发线用「版本号（开发中）」（如 `5.0（开发中）`），版本号随上游发版手动更新；稳定线与归档线直接用系列名（`3.x` / `4.x` / `2.x`）。`lib/source.ts` 将版本目录的 Root Type 统一设为 `"version"`，Fumadocs 标准 Docs 布局在侧边栏（手机端为侧栏抽屉）自动渲染项目与版本下拉；切换时优先投影到另一版本的对应页面，缺页则回到版本入口。旧 `/docs/admin/<页面>` 与 `/docs/starter/<页面>` 地址由构建后静态跳转页分别指向 5.x、3.x；`/docs/admin`、`/docs/starter` 同样保留为旧地址跳转，不是新增的导航页。
+项目分区的 `meta.json` 标记 `root: true`；Admin / Starter 不单设版本选择页。其下各版本的文档（含 `meta.json` 和 `index.mdx`）由对应项目仓库的 `docs/` 汇聚，不提交。版本段的命名口径是「维护线」：`5.x` 为 Admin 开发中的下一代，`3.x` 为 Starter 当前稳定系列，`4.x` / `2.x` 为已归档系列（发布号 `4.2.x` / `v4.2.0`、`2.17.x` / `v2.17.0` 只出现在 `ref` 与 `versionTag`，不进 URL）；侧栏显示名分两类：开发线用「版本号（开发中）」（如 `5.0（开发中）`），版本号随上游发版手动更新；稳定线与归档线直接用系列名（`3.x` / `4.x` / `2.x`）。`lib/source.ts` 将版本目录的 Root Type 统一设为 `"version"`，Fumadocs 标准 Docs 布局在侧边栏（手机端为侧栏抽屉）自动渲染项目与版本下拉；切换时优先投影到另一版本的对应页面，缺页则回到版本入口。旧 `/docs/admin/<页面>` 与 `/docs/starter/<页面>` 地址由构建后静态跳转页分别指向 5.x、3.x，仅在归档版本存在的页面（最新版已删除）由对应归档版本兜底指向；`/docs/admin`、`/docs/starter` 同样保留为旧地址跳转，不是新增的导航页。
+
+MDX 构建期插件 `lib/mdx-plugins/remark-archive-doc-links.ts` 负责把上游文档写于版本化之前的内容钉到版本线：本分区裸 `/docs/<分区>` 链接插当前版本段、归档页跨分区裸链接按 companions 配套落对方归档版本、GitHub `/dev` 外链钉 versionTag、归档页 `git clone` 命令补 `-b`（主仓库钉维护 ref、companions 钉 tag）。
 
 文档拉取目录、仓库和 git 引用统一注册在 `lib/docs-sections.ts`，`scripts/gen-docs-sources.mjs` 据此生成部署映射；新增版本需在注册表中声明；站点会按注册表把对应版本目录设为 `root: "version"`，不依赖上游 `docs/meta.json` 的取值。
 
