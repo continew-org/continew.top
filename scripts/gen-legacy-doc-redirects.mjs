@@ -39,17 +39,25 @@ const perSection = await Promise.all(
     const archive = section.versions?.find(({ key }) => key === section.legacyVersion);
     if (!archive) return undefined;
 
-    const base = join(root, 'docs', section.key, archive.key);
-    try {
-      if (!(await stat(base)).isDirectory()) return undefined;
-    } catch {
-      return undefined;
-    }
-
-    const entries = await collect(base, section, archive);
+    // 最新版里已删除的页面在旧地址下没有对应路由，会穿过静态导出落到 SPA
+    // 兜底页（假 200）。除 legacyVersion 外再扫描其余版本，把「仅存在于归档」
+    // 的页面也生成跳转页；同名页面保留 legacyVersion 的指向，它放最后写（Map 后写覆盖先写）。
+    const others = (section.versions ?? []).filter(({ key }) => key !== archive.key);
+    const results = await Promise.all(
+      [...others, archive].map(async (version) => {
+        const base = join(root, 'docs', section.key, version.key);
+        try {
+          if (!(await stat(base)).isDirectory()) return [];
+        } catch {
+          return [];
+        }
+        return collect(base, section, version);
+      }),
+    );
+    const entries = new Map(results.flat());
     // 分区根（/docs/<分区>）同样固定指向归档版本
-    entries.push([join(root, 'docs', section.key) + '.html', `/docs/${section.key}/${archive.key}`]);
-    return entries;
+    entries.set(join(root, 'docs', section.key) + '.html', `/docs/${section.key}/${archive.key}`);
+    return [...entries];
   }),
 );
 

@@ -1,18 +1,46 @@
 import { visit } from 'unist-util-visit';
 import type { Root, RootContent } from 'mdast';
 import type { Root as HastRoot, Element } from 'hast';
-import { getSourceUnitForFile, getVersionTags } from '../docs-sections.ts';
-import type { DocVersion } from '../docs-sections.ts';
+import { docSections, getSourceUnitForFile, getVersionTags } from '../docs-sections.ts';
+import type { DocSection, DocVersion, SourceUnit } from '../docs-sections.ts';
 
 const CONTINEW_HOSTS = new Set(['github.com', 'atomgit.com', 'gitee.com']);
 const KEEP_FLOATING_REF = new Set(['CHANGELOG.md']);
 
-type SourceUnit = NonNullable<ReturnType<typeof getSourceUnitForFile>>;
+/**
+ * 归档页里指向其他分区的裸链接（如 4.x 文档中的 `/docs/starter`）按 companion
+ * 配套关系解析到目标分区的归档版本：companions 的 repo→tag 与目标版本的
+ * versionTag 相同即视为配套；没有匹配项时回落该分区最近一条归档线。
+ * 目标分区没有归档版本（或来源页不在归档线）时保持原样。
+ */
+function crossSectionArchivedVersion(section: DocSection, version: DocVersion): DocVersion | undefined {
+  for (const { repo, tag } of version.companions ?? []) {
+    const hit = section.versions?.find((v) => v.repo === repo && v.versionTag === tag);
+    if (hit) return hit;
+  }
+  return section.versions?.find((v) => v.repo === version.repo && v.archived)
+    ?? section.versions?.find((v) => v.archived);
+}
 
 /** 上游文档的自链接早于版本化路径，按当前编译页面所属版本解析。 */
 export function rewriteDocUrl(rawUrl: string, unit: SourceUnit): string {
   const { section, version } = unit;
   const prefix = `/docs/${section.key}`;
+  // 跨分区裸链接：仅归档页参与，按 companion 配套落到对方的归档版本
+  if (version?.archived) {
+    const cross = /^\/docs\/([a-z]+)(?=\/|$)/.exec(rawUrl);
+    if (cross && cross[1] !== section.key) {
+      const target = docSections.find(({ key }) => key === cross[1]);
+      const targetVersion = target ? crossSectionArchivedVersion(target, version) : undefined;
+      if (target?.versions?.length && targetVersion?.archived) {
+        const rest = rawUrl.slice(`/docs/${cross[1]}`.length);
+        const firstSegment = rest.replace(/^\//, '').split(/[/?#]/)[0];
+        if (!target.versions.some(({ key }) => key === firstSegment)) {
+          return `/docs/${cross[1]}/${targetVersion.key}${rest}`;
+        }
+      }
+    }
+  }
   if (version && rawUrl.startsWith(prefix)) {
     const path = rawUrl.split(/[?#]/, 1)[0];
     if (path === prefix || path.startsWith(`${prefix}/`)) {

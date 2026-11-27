@@ -40,7 +40,9 @@ test('legacy self links stay within the compiling version and explicit cross-ver
     assert.equal(rewriteDocUrl('/docs/admin/4.x/configuration', unit), '/docs/admin/4.x/configuration');
     assert.equal(rewriteDocUrl('/docs/admin/5.x?search=roles', unit), '/docs/admin/5.x?search=roles');
     assert.equal(rewriteDocUrl('/docs/admin/5.x/configuration', unit), '/docs/admin/5.x/configuration');
-    assert.equal(rewriteDocUrl('/docs/starter', unit), '/docs/starter');
+    // 跨分区裸链接由 companion 配套规则单独断言（归档页落配套归档线，非归档页不动）
+    const expected = unit === archive ? '/docs/starter/2.x' : '/docs/starter';
+    assert.equal(rewriteDocUrl('/docs/starter', unit), expected);
   }
 });
 
@@ -118,6 +120,28 @@ test('archived git clone commands pin the maintenance ref and companion tags', (
   );
 });
 
+test('cross-section bare links on archived pages resolve to the companion archive', () => {
+  // admin 4.x 配套 starter v2.17.0 → /docs/starter 落到 starter/2.x
+  assert.equal(rewriteDocUrl('/docs/starter', archive), '/docs/starter/2.x');
+  assert.equal(rewriteDocUrl('/docs/starter/modules/extension/crud', archive),
+    '/docs/starter/2.x/modules/extension/crud');
+  assert.equal(rewriteDocUrl('/docs/starter/modules/cache#anchor', archive),
+    '/docs/starter/2.x/modules/cache#anchor');
+  // 反向：starter 2.x 配套 admin v4.2.0 → /docs/admin 落到 admin/4.x
+  assert.equal(rewriteDocUrl('/docs/admin/reference/security', starterArchive),
+    '/docs/admin/4.x/reference/security');
+  // 已显式写版本段的不动
+  assert.equal(rewriteDocUrl('/docs/starter/3.x/modules/cache', archive),
+    '/docs/starter/3.x/modules/cache');
+  assert.equal(rewriteDocUrl('/docs/starter/2.x', archive), '/docs/starter/2.x');
+  // 非归档页不做跨分区改写
+  assert.equal(rewriteDocUrl('/docs/starter', current), '/docs/starter');
+  // 没有版本结构的分区（app）保持原样
+  assert.equal(rewriteDocUrl('/docs/app', archive), '/docs/app');
+  // 本分区裸链接仍归 own-version 规则处理（不重复插版本段）
+  assert.equal(rewriteDocUrl('/docs/admin', archive), '/docs/admin/4.x');
+});
+
 test('legacy redirect generator preserves query and anchor and refuses to overwrite routes', async () => {
   const output = await mkdtemp(join(tmpdir(), 'docs-redirects-'));
   try {
@@ -127,6 +151,9 @@ test('legacy redirect generator preserves query and anchor and refuses to overwr
     const starterVersionDir = join(output, 'docs', 'starter', '3.x');
     await mkdir(starterVersionDir, { recursive: true });
     await writeFile(join(starterVersionDir, 'configuration.html'), '<html></html>');
+    // 仅在归档版本存在的页面（最新版已删除）也要生成旧地址跳转页
+    await mkdir(join(output, 'docs', 'admin', '4.x', 'manual'), { recursive: true });
+    await writeFile(join(output, 'docs', 'admin', '4.x', 'manual', 'generator.html'), '<html></html>');
     const script = join(process.cwd(), 'scripts', 'gen-legacy-doc-redirects.mjs');
     // 脚本只接受「工作目录内」的输出目录（路径注入防护），
     // 故在临时目录里执行、把输出目录传成当前位置。
@@ -139,6 +166,8 @@ test('legacy redirect generator preserves query and anchor and refuses to overwr
     assert.match(starterRedirect, /location\.replace\("\/docs\/starter\/3\.x\/configuration" \+ location\.search \+ location\.hash\)/);
     const starterProjectRedirect = await readFile(join(output, 'docs', 'starter.html'), 'utf8');
     assert.match(starterProjectRedirect, /location\.replace\("\/docs\/starter\/3\.x" \+ location\.search \+ location\.hash\)/);
+    const removedRedirect = await readFile(join(output, 'docs', 'admin', 'manual', 'generator.html'), 'utf8');
+    assert.match(removedRedirect, /location\.replace\("\/docs\/admin\/4\.x\/manual\/generator" \+ location\.search \+ location\.hash\)/);
     assert.throws(() => execFileSync(process.execPath, [script, '.'], { cwd: output, stdio: 'pipe' }));
   } finally {
     await rm(output, { recursive: true, force: true });

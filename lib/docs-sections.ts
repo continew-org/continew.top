@@ -200,7 +200,7 @@ export const docSections: readonly DocSection[] = [
 ];
 
 /** 内部使用：把分区及其版本摊平成源单元（版本分区下按版本展开）。 */
-interface SourceUnit {
+export interface SourceUnit {
   /** `content/docs` 下的相对路径，同时也是 URL 去掉 `/docs/` 后的部分。 */
   dir: string;
   /** URL 上的 slug 段，如 ['admin', '5.x']。 */
